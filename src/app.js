@@ -50,7 +50,7 @@ const middlewares = fs
     .readdirSync(path.join(config.root, 'middlewares/'))
     .filter(f => f.slice(-3) === '.js')
     .sort()
-    .map(f => require(path.join(config.root, 'middlewares/', f)));
+    .map(f => require(path.join(config.root, 'middlewares/', f)).default);
 
 middlewares.forEach(middleware => {
     app.use(middleware);
@@ -61,7 +61,7 @@ const controllers = fs
     .readdirSync(path.join(config.root, 'controllers/'))
     .filter(f => f.slice(-3) === '.js')
     .sort()
-    .map(f => require(path.join(config.root, 'controllers/', f)));
+    .map(f => require(path.join(config.root, 'controllers/', f)).default);
 
 controllers.forEach(controller => {
     controller(app);
@@ -72,7 +72,7 @@ const services = fs
     .readdirSync(path.join(config.root, 'controllers/', 'services/'))
     .filter(f => f.slice(-3) === '.js')
     .sort()
-    .map(f => require(path.join(config.root, 'controllers/', 'services/', f)));
+    .map(f => require(path.join(config.root, 'controllers/', 'services/', f)).default);
 
 services.forEach(service => {
     service(app);
@@ -106,6 +106,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     }
 
     log.error(newErr.message);
+    if (err instanceof APIError) { log.error(newErr.details); }
 
     if (newErr.message === 'Unknown error') {
         console.log(pp(newErr));

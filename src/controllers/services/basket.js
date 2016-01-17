@@ -68,7 +68,7 @@ export default app => {
                     buyerId    : item.buyerId,
                     fundationId: item.fundationId,
                     pointId    : req.pointId,
-                    promotionId: item.promotionId,
+                    promotionId: item.promotionId ? item.promotionId : '',
                     sellerId   : item.sellerId
                 });
 

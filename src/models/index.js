@@ -15,7 +15,7 @@ fs
     .filter(file => file.slice(-3) === '.js')
     .filter(file => file !== 'index.js')
     .forEach(file => {
-        const model = require(`${config.root}/models/${file}`);
+        const model = require(`${config.root}/models/${file}`).default;
         models[model.getTableName()] = model;
     });
 
