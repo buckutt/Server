@@ -1,5 +1,3 @@
 node_modules/
 app/
-.tern-project
 rethinkdb_data/
-npm-debug.log
