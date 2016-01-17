@@ -1,0 +1,10 @@
+{
+    "port" : 3000,
+    "level": "debug",
+    "app"  : {
+        "name": "buckuttServer"
+    },
+    "db"   : {
+        "db": "buckuttServer_development"
+    }
+}

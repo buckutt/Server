@@ -1,0 +1,51 @@
+{
+  "name": "buckutt-server",
+  "version": "1.0.0",
+  "description": "Buckutt API server",
+  "author": "Gabriel Juchault <gabriel.juchault@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/buckutt/Eve-Server.git"
+  },
+  "scripts": {
+    "build": "gulp",
+    "clean": "gulp clean",
+    "test": "gulp && NODE_ENV=test mocha app/tests --sort --bail",
+    "start": "gulp && node app/app",
+    "startdb": "rethinkdb&",
+    "stopdb": "killall rethinkdb -s SIGINT",
+    "cleardb": "gulp cleardb",
+    "lint": "eslint . --ignore-pattern app,gulpfile.js",
+    "lintfix": "eslint . --ignore-pattern app,gulpfile.js --fix"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.3.0",
+    "bluebird": "^3.1.1",
+    "body-parser": "^1.14.2",
+    "compression": "^1.6.0",
+    "console-title": "1.0.1",
+    "cookie-parser": "^1.4.0",
+    "cors": "^2.7.1",
+    "express": "^4.13.3",
+    "gulp-eslint": "^1.1.1",
+    "joi": "^7.1.0",
+    "jsonwebtoken": "^5.5.4",
+    "morgan": "1.6.1",
+    "qs": "^6.0.1",
+    "rethinkdbdash": "^2.2.15",
+    "sync-exec": "^0.6.2",
+    "unirest": "git://github.com/nguyenchr/unirest-nodejs.git#fix-json-array",
+    "winston": "^2.1.1"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.3.13",
+    "gulp": "3.9.0",
+    "gulp-babel": "^6.1.1",
+    "gulp-changed": "^1.3.0",
+    "gulp-eslint": "^2.0.0",
+    "gulp-sourcemaps": "^1.6.0",
+    "jshint-stylish": "^2.1.0",
+    "rimraf": "^2.5.0"
+  }
+}
