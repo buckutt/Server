@@ -13,7 +13,7 @@ install:
   - "sudo apt-get install rethinkdb -y"
   - "npm install -g mocha gulp"
   - "npm install"
-  - "rethinkdb --cache-size 2560 &"
+  - "rethinkdb&"
 
 script:
   - "npm run test"
