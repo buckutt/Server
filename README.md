@@ -1,4 +1,4 @@
-# Buckutt-Server
+# Buckutt-Server [![Build Status](https://travis-ci.org/buckless/Server.svg?branch=master)](https://travis-ci.org/buckless/Server)
 
 ## Installation
 
