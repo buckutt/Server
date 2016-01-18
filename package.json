@@ -33,7 +33,7 @@
     "qs": "^6.0.1",
     "sync-exec": "^0.6.2",
     "thinky": "^2.2.4",
-    "unirest": "^0.4.2",
+    "unirest": "github:mashape/unirest-nodejs",
     "winston": "^2.1.1"
   },
   "devDependencies": {
