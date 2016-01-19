@@ -5,32 +5,32 @@ var sourcemaps = require('gulp-sourcemaps');
 var rimraf     = require('rimraf');
 
 gulp.task('seed', ['default'], function (cb) {
-    var models = require('./app/models');
+    var models = require('./app/models').default;
 
     models.onReady = function () {
-        var buckuttData = require('./app/buckuttData');
+        var buckuttData = require('./app/buckuttData').default;
         var raw         = buckuttData.raw(models);
 
         Promise
             .all(
-                raw.all.map(document => document.save())
+                raw.all.map(function (document) { return document.save(); })
             )
-            .then(() => {
+            .then(function () {
                 console.log('Inserted documents');
 
                 return Promise.all(buckuttData.rels(models, raw.data));
             })
-            .then(() =>
-                models.r.wait()
-            )
-            .then(() =>
-                buckuttData.post(models, raw.data)
-            )
-            .then(() => {
+            .then(function () {
+                return models.r.wait()
+            })
+            .then(function () {
+                return buckuttData.post(models, raw.data)
+            })
+            .then(function () {
                 console.log('Inserted relationships');
                 cb();
             })
-            .catch(err => {
+            .catch(function (err) {
                 console.log(err.stack);
                 cb();
             });
