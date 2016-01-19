@@ -10,8 +10,9 @@ export default class APIError extends Error {
      */
     constructor (status, message, details = '') {
         super();
-        this.message = message;
-        this.status  = status;
-        this.details = details;
+        this.message    = message;
+        this.status     = status;
+        this.details    = details;
+        this.isAPIError = true;
     }
 }
