@@ -87,7 +87,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     let newErr = err;
 
-    if (!(err instanceof APIError)) {
+    if (!(err.isAPIError)) {
         // Classic errors
         if (err instanceof Error) {
             newErr = {
@@ -106,6 +106,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     }
 
     log.error(newErr.message);
+    console.log(newErr.details);
     if (err instanceof APIError) { log.error(newErr.details); }
 
     if (newErr.message === 'Unknown error') {
