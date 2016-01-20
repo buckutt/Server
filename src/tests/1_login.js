@@ -113,7 +113,7 @@ describe('Login', () => {
             });
     });
 
-    it('should not log a user with wrong password', done => {
+    it('should not log a user with wrong mol', done => {
         unirest.post('https://localhost:3006/services/login')
             .type('json')
             .send({
@@ -123,6 +123,21 @@ describe('Login', () => {
             })
             .end(response => {
                 assert.equal(404, response.code);
+
+                done();
+            });
+    });
+
+    it('should not log a user with wrong password', done => {
+        unirest.post('https://localhost:3006/services/login')
+            .type('json')
+            .send({
+                meanOfLogin: 'etuId',
+                data       : '22000000353423',
+                pin        : 1258
+            })
+            .end(response => {
+                assert.equal(401, response.code);
 
                 done();
             });

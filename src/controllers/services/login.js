@@ -108,7 +108,7 @@ export default app => {
                     })
                     .end();
             })
-            .catch(APIError, err => next(err))
+            .catch(Error, err => next(err))
             .catch(thinky.Errors.DocumentNotFound, err =>
                 next(new APIError(404, 'User not found', err))
             );
