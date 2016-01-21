@@ -9,6 +9,8 @@ const Article = thinky.createModel('Article', {
     stock     : Number,
     // Alcohol amount (Alcool unit or just article maximum sells)
     alcohol   : type.number().default(0),
+    // Optional VAT tax
+    vat       : type.number().default(0),
     createdAt : type.date().default(new Date()),
     editedAt  : Date,
     isRemoved : type.boolean().default(false),
