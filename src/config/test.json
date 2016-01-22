@@ -2,9 +2,9 @@
     "level": "debug",
     "port" : 3006,
     "app"  : {
-        "name": "buckuttServer"
+        "name": "bucklessServer"
     },
     "db"   : {
-        "db": "buckuttServer_test"
+        "db": "bucklessServer_test"
     }
 }

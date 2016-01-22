@@ -2,9 +2,9 @@
     "port"             : 3000,
     "level"            : "info",
     "app"              : {
-        "name": "buckuttServer"
+        "name": "bucklessServer"
     },
     "db"               : {
-        "db": "buckuttServer_production"
+        "db": "bucklessServer_production"
     }
 }
