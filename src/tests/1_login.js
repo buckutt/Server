@@ -117,7 +117,7 @@ describe('Login', () => {
         unirest.post('https://localhost:3006/services/login')
             .type('json')
             .send({
-                meanOfLogin: 'etuId',
+                meanOfLogin: 'foo',
                 data       : 35427,
                 pin        : 1258
             })
