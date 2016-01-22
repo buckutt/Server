@@ -16,7 +16,7 @@ import morgan       from 'morgan';
 
 const log = logger(module);
 
-consoleTitle('Buckutt Server **');
+consoleTitle('Buckless Server **');
 
 const app = express();
 
@@ -145,7 +145,7 @@ app.start = () => {
     server.listen(config.port, () => {
         log.info('Server is listening on port %d', config.port);
         log.warn('Please wait for models to be ready...');
-        consoleTitle('Buckutt Server *');
+        consoleTitle('Buckless Server *');
     });
 };
 

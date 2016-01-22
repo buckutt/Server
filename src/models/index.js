@@ -34,9 +34,9 @@ Object.keys(models).forEach((modelName, i, arr) => {
 
         if (modelsLoaded === arr.length - 1) {
             log.info('Models ready');
-            consoleTitle('Buckutt Server - Ready !');
+            consoleTitle('Buckless Server - Ready !');
             setTimeout(() => {
-                consoleTitle('Buckutt Server');
+                consoleTitle('Buckless Server');
             }, 1000);
 
             if (models.onReady) {

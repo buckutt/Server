@@ -1,7 +1,7 @@
 {
   "name": "buckutt-server",
   "version": "1.0.0",
-  "description": "Buckutt API server",
+  "description": "Buckless API server",
   "author": "Gabriel Juchault <gabriel.juchault@gmail.com>",
   "license": "MIT",
   "repository": {

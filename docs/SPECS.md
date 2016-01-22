@@ -1,4 +1,4 @@
-# Buckutt Server Specifications
+# Buckless Server Specifications
 
 * Usage of a NoSQL database (RethinkDB) : speed, node support, reliability.
 * ES6 + Babel to get a clean JS code
@@ -25,7 +25,7 @@
     - Price       : An article price or a promotion price
     - Promotion   : A special offer that can target articles or categories
     - Purchase    : A trace of what users have paid
-    - Reload      : A trace of what users have put on Buckutt
+    - Reload      : A trace of what users have put on Buckless
     - Right       : A user right
     - User        : A student
 * Database : See src/models/ or db.mwb. Some notes here :
