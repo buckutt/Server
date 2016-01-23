@@ -38,7 +38,7 @@ Article.associate = models => {
     // n:n instead of 1:n to allow one set containing multiple times the same article
     models.Article.hasAndBelongsToMany(models.Set, 'sets', 'id', 'id');
     // n:n instead of 1:n to allow one promotion containing multiple times the same article
-    models.Article.hasAndBelongsToMany(models.Promotion, 'promotion', 'id', 'id');
+    models.Article.hasAndBelongsToMany(models.Promotion, 'promotions', 'id', 'id');
     models.Article.hasAndBelongsToMany(models.Purchase, 'purchases', 'id', 'id');
     models.Article.hasAndBelongsToMany(models.Price, 'prices', 'id', 'id');
 };
