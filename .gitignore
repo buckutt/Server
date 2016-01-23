@@ -2,3 +2,4 @@ node_modules/
 app/
 rethinkdb_data/
 coverage/
+npm-debug.log
