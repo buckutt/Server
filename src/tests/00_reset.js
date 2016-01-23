@@ -1,8 +1,6 @@
-'use strict';
-
-const thinky   = require('../app/thinky').default;
-const Promise  = require('bluebird');
-const syncExec = require('sync-exec');
+import thinky   from '../thinky';
+import Promise  from 'bluebird';
+import syncExec from 'sync-exec';
 
 const sslResult = syncExec('openssl x509 -noout -fingerprint -in ssl/test/test.crt').stdout;
 

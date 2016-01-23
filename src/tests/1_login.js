@@ -1,7 +1,6 @@
-'use strict';
+import assert from 'assert';
+import jwt    from 'jsonwebtoken';
 
-const assert = require('assert');
-const jwt    = require('jsonwebtoken');
 /* global unirest */
 
 // Prepare global token (passed to other tests)

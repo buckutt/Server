@@ -11,13 +11,13 @@
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
-    "test": "gulp && NODE_ENV=test mocha --sort --bail",
+    "test": "gulp && NODE_ENV=test mocha app/tests --sort --bail",
     "start": "gulp && node app/app",
     "startdb": "rethinkdb&",
     "stopdb": "killall rethinkdb -s SIGINT",
     "cleardb": "gulp cleardb",
-    "lint": "eslint . --ignore-pattern app,test,gulpfile.js",
-    "lintfix": "eslint . --ignore-pattern app,test,gulpfile.js --fix"
+    "lint": "eslint . --ignore-pattern app,gulpfile.js",
+    "lintfix": "eslint . --ignore-pattern app,gulpfile.js --fix"
   },
   "dependencies": {
     "bcryptjs": "^2.3.0",
@@ -42,7 +42,6 @@
     "gulp-babel": "^6.1.1",
     "gulp-changed": "^1.3.0",
     "gulp-sourcemaps": "^1.6.0",
-    "istanbul": "^0.4.2",
     "jshint-stylish": "^2.1.0",
     "rimraf": "^2.5.0"
   }
