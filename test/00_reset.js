@@ -1,4 +1,4 @@
-import thinky   from '../app/thinky';
+import thinky   from '../src/thinky';
 import Promise  from 'bluebird';
 import syncExec from 'sync-exec';
 

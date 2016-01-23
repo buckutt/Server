@@ -1,4 +1,4 @@
-import app     from '../app/app';
+import app     from '../src/app';
 import fs      from 'fs';
 import unirest from 'unirest';
 
