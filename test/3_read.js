@@ -1,4 +1,4 @@
-import { clone } from '../lib/utils';
+import { clone } from '../app/lib/utils';
 import assert    from 'assert';
 
 /* global unirest, q */

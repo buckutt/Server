@@ -60,9 +60,7 @@ gulp.task('default', ['config'], function () {
     return gulp.src(src)
         .pipe(changed(dst))
         .pipe(sourcemaps.init())
-            .pipe(babel({
-                presets: ['es2015']
-            }))
+        .pipe(babel())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(dst));
 });

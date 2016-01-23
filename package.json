@@ -11,7 +11,7 @@
   "scripts": {
     "build": "gulp",
     "clean": "gulp clean",
-    "test": "gulp && NODE_ENV=test mocha app/tests --sort --bail",
+    "test": "gulp && NODE_ENV=test mocha --compilers js:babel-register --sort --bail",
     "start": "gulp && node app/app",
     "startdb": "rethinkdb&",
     "stopdb": "killall rethinkdb -s SIGINT",
@@ -38,11 +38,15 @@
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.4.3",
     "gulp": "3.9.0",
     "gulp-babel": "^6.1.1",
     "gulp-changed": "^1.3.0",
     "gulp-sourcemaps": "^1.6.0",
     "jshint-stylish": "^2.1.0",
     "rimraf": "^2.5.0"
+  },
+  "babel": {
+    "presets": ["es2015"]
   }
 }
