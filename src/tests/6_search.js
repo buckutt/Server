@@ -63,6 +63,16 @@ describe('Searching', () => {
 
     describe('Incorrect search query', () => {
         it('should refuse when no condition is specified', done => {
+            unirest.get(`https://localhost:3006/articles/search`)
+                .type('json')
+                .end(response => {
+                    assert.equal(400, response.code);
+                    done();
+                });
+        });
+
+        it('should refuse when a wrong condition is specified', done => {
+            // equals is wrong
             const search = {
                 field : 'name',
                 equals: 'Mars'

@@ -150,6 +150,11 @@ export default app => {
     router.get('/:model/search', (req, res, next) => {
         // Support encoded JSON (express doesn't)
         const q         = qs.parse(url.parse(req.url).query).q;
+
+        if (!q) {
+            return next(new APIError(400, 'No search object provided'));
+        }
+
         let searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
 
         if (!searchQuery) {
