@@ -24,7 +24,6 @@ function modelParser (req, res, next, model) {
         promotions    : 'Promotion',
         purchases     : 'Purchase',
         reloads       : 'Reload',
-        reloadTypes   : 'Reloadtype',
         rights        : 'Right',
         sets          : 'Set',
         transfers     : 'Transfer',
