@@ -1,5 +1,7 @@
-import { clone } from '../lib/utils';
-import assert    from 'assert';
+'use strict';
+
+const assert = require('assert');
+const clone  = require('../app/lib/utils').clone;
 
 /* global unirest, q */
 

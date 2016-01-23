@@ -1,6 +1,8 @@
-import app     from '../app';
-import fs      from 'fs';
-import unirest from 'unirest';
+'use strict';
+
+const app     = require('../app/app').default;
+const fs      = require('fs');
+const unirest = require('unirest');
 
 describe('Should start the test application', () => {
     it('should init models', function (done) {
@@ -33,5 +35,7 @@ global.q       = obj => encodeURIComponent(JSON.stringify(obj));
 
 ['get', 'post', 'put', 'delete'].forEach(method => {
     const previous_ = unirest[method];
-    unirest[method] = (...args) => previous_(...args).header('Authorization', `Bearer ${process.env.TOKEN}`);
+    unirest[method] = function() {
+        return previous_.apply(null, arguments).header('Authorization', `Bearer ${process.env.TOKEN}`);
+    };
 });

@@ -1,4 +1,6 @@
-import assert from 'assert';
+'use strict';
+
+const assert = require('assert');
 
 /* global unirest, q */
 
