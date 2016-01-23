@@ -27,7 +27,7 @@ Set_.ensureIndex('editedAt');
 
 Set_.associate = models => {
     // n:n instead of 1:n to allow one promotion containing multiple times the same set
-    models.Set.hasAndBelongsToMany(models.Promotion, 'promotion', 'id', 'id');
+    models.Set.hasAndBelongsToMany(models.Promotion, 'promotions', 'id', 'id');
     models.Set.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
 };
 
