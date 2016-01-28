@@ -12,11 +12,7 @@ const disableAuth = false;
 export default (req, res, next) => {
     const authorize = req.app.locals.config.rightsManagement;
 
-    if (disableAuth) {
-        return next();
-    }
-
-    if (req.url === '/services/login') {
+    if (req.url === '/services/login' || disableAuth) {
         return next();
     }
 
@@ -54,6 +50,6 @@ export default (req, res, next) => {
     });
 
     if (!handled) {
-        return next(new APIError(401, 'Unauthorized'));
+        return next(new APIError(401, 'Unauthorized', 'No right to do that'));
     }
 };

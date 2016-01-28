@@ -45,30 +45,64 @@ describe('Before tests', () => {
 
     it('should create one user', done => {
         let userId;
+        let noRightsUserId;
+        let sellerUserId;
         let pointId;
         let deviceId;
         let periodId;
         let outdatedPeriodId;
 
-        r.table('User').insert({
-            firstname  : 'Buck',
-            lastname   : 'UTT',
-            nickname   : 'buck',
-            pin        : '$2a$12$p/OhqfEVU8tCqo52amm1xeslmqUIBG0xoLgLqLjvRGHAoSrYo5Nbi',
-            password   : '$2a$12$uOChECr6VjPfcmm/em.pnujdVPK46QEr/SJLnUIXWpADLA6wYVVZW',
-            mail       : 'buck@utt.fr',
-            credit     : 120,
-            isTemporary: false,
-            createdAt  : new Date(),
-            editedAt   : new Date(),
-            isRemoved  : false,
-            failedAuth : 0
-        }).then(res => {
-            userId = res.generated_keys[0];
+        r.table('User').insert([
+            {
+                firstname  : 'Buck',
+                lastname   : 'UTT',
+                nickname   : 'buck',
+                pin        : '$2a$12$p/OhqfEVU8tCqo52amm1xeslmqUIBG0xoLgLqLjvRGHAoSrYo5Nbi',
+                password   : '$2a$12$fjlZii3c7OyS75c0DZdaUue.vhSe/ISFQPots2bWnGvr5t5IOUQ7W',
+                mail       : 'buck@buckless.fr',
+                credit     : 120,
+                isTemporary: false,
+                createdAt  : new Date(),
+                editedAt   : new Date(),
+                isRemoved  : false,
+                failedAuth : 0
+            },
+            {
+                firstname  : 'No',
+                lastname   : 'Rights',
+                nickname   : 'NoRights',
+                pin        : '$2a$12$p/OhqfEVU8tCqo52amm1xeslmqUIBG0xoLgLqLjvRGHAoSrYo5Nbi',
+                password   : '$2a$12$fjlZii3c7OyS75c0DZdaUue.vhSe/ISFQPots2bWnGvr5t5IOUQ7W',
+                mail       : 'norights@buckless.fr',
+                credit     : 120,
+                isTemporary: false,
+                createdAt  : new Date(),
+                editedAt   : new Date(),
+                isRemoved  : false,
+                failedAuth : 0
+            },
+            {
+                firstname  : 'Sel',
+                lastname   : 'ler',
+                nickname   : 'Seller',
+                pin        : '$2a$12$p/OhqfEVU8tCqo52amm1xeslmqUIBG0xoLgLqLjvRGHAoSrYo5Nbi',
+                password   : '$2a$12$fjlZii3c7OyS75c0DZdaUue.vhSe/ISFQPots2bWnGvr5t5IOUQ7W',
+                mail       : 'seller@buckless.fr',
+                credit     : 120,
+                isTemporary: false,
+                createdAt  : new Date(),
+                editedAt   : new Date(),
+                isRemoved  : false,
+                failedAuth : 0
+            }
+        ]).then(res => {
+            userId         = res.generated_keys[0];
+            noRightsUserId = res.generated_keys[1];
+            sellerUserId   = res.generated_keys[2];
 
             return r.table('MeanOfLogin').insert([{
                 type     : 'etuMail',
-                data     : 'buck@utt.fr',
+                data     : 'buck@buckless.fr',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
@@ -80,6 +114,20 @@ describe('Before tests', () => {
                 editedAt : new Date(),
                 isRemoved: false,
                 userId
+            }, {
+                type     : 'etuMail',
+                data     : 'norights@buckless.fr',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false,
+                userId   : noRightsUserId
+            }, {
+                type     : 'etuMail',
+                data     : 'seller@buckless.fr',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false,
+                userId   : sellerUserId
             }]);
         }).then(() =>
             r.table('Period').insert([{
@@ -103,18 +151,22 @@ describe('Before tests', () => {
         }).then(() =>
             r.table('Right').insert([{
                 name     : 'admin',
-                isAdmin  : false,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
                 periodId
             }, {
                 name     : 'admin',
-                isAdmin  : true,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
                 periodId : outdatedPeriodId
+            }, {
+                name     : 'seller',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false,
+                periodId
             }])
         ).then(res =>
             r.table('Right_User').insert([{
@@ -123,6 +175,9 @@ describe('Before tests', () => {
             }, {
                 Right_id: res.generated_keys[1],
                 User_id : userId
+            }, {
+                Right_id: res.generated_keys[2],
+                User_id : sellerUserId
             }])
         ).then(() =>
             r.table('Point').insert({
@@ -136,7 +191,7 @@ describe('Before tests', () => {
         }).then(() =>
             r.table('Device').insert({
                 fingerprint,
-                name     : 'buckutt-test',
+                name     : 'buckless-test',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false

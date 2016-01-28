@@ -15,14 +15,10 @@ const disableAuth = false;
  * @return {Function} The next middleware
  */
 export default (req, res, next) => {
-    if (disableAuth) {
-        return next();
-    }
-
     const secret = config.secret;
 
     // Login : no token required
-    if (req.url === '/services/login') {
+    if (req.url === '/services/login' || disableAuth) {
         return next();
     }
 
