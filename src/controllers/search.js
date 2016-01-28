@@ -45,7 +45,7 @@ function objToRethinkDBSearch (obj, onFail) {
     }
 
     if (obj.hasOwnProperty('matches')) {
-        rethinkSearch = rethinkSearch.math(obj.matches.toString());
+        rethinkSearch = rethinkSearch.match(obj.matches.toString());
         outputLog     += `.match("${obj.matches.toString()}")`;
     }
 
