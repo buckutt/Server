@@ -81,7 +81,6 @@ export default (req, res, next) => {
                 })
                 .filter(right => right !== null);
 
-
             return next();
         })
         .catch(jwt.TokenExpiredError, err =>
