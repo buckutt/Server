@@ -155,10 +155,12 @@ export default app => {
             return next(new APIError(400, 'Missing q parameter'));
         }
 
-        let searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
+        let searchQuery;
 
-        if (!searchQuery) {
-            return next(new APIError(400, 'No search object provided'));
+        try {
+            searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
+        } catch (e) {
+            return next(new APIError(400, 'Invalid search object', e));
         }
 
         if (!Array.isArray(searchQuery)) {
@@ -186,7 +188,7 @@ export default app => {
             return next(new APIError(400, 'Invalid search object'));
         }
 
-        let request = req.Model.filter(filterResult);
+        let request = req.Model;
 
         queryLog += ')';
 
@@ -212,6 +214,8 @@ export default app => {
                 });
             }
         }
+
+        request = request.filter(filterResult);
 
         // Limit
         if (req.query.limit) {
