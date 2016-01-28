@@ -87,26 +87,8 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     let newErr = err;
 
-    if (!(err.isAPIError)) {
-        // Classic errors
-        if (err instanceof Error) {
-            newErr = {
-                status : 500,
-                message: err.message,
-                details: err
-            };
-        } else {
-            // Unknown errors
-            newErr = {
-                status : 500,
-                message: err.toString(),
-                details: err
-            };
-        }
-    }
-
     log.error(newErr.message);
-    console.log(newErr.details);
+
     if (err instanceof APIError) { log.error(newErr.details); }
 
     if (newErr.message === 'Unknown error') {
@@ -124,6 +106,7 @@ app.start = () => {
     let cert;
     let ca;
 
+    /* istanbul ignore else */
     if (process.env.NODE_ENV === 'test') {
         key  = `./ssl/test/server.key`;
         cert = `./ssl/test/server.crt`;
@@ -150,6 +133,7 @@ app.start = () => {
 };
 
 // Start the application
+/* istanbul ignore if */
 if (require.main === module) {
     app.start();
 }
