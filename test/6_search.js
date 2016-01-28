@@ -34,7 +34,7 @@ describe('Searching', () => {
 
             [or1, or2, or3, or4].forEach(or => orQ += `&or[]=${q(or)}`);
 
-            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=id`)
+            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
@@ -80,7 +80,7 @@ describe('Searching', () => {
             let orQ = '';
             [or1, or2, or3, or4, or5].forEach(or => orQ += `&or[]=${q(or)}`);
 
-            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=id&sort=dsc`)
+            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name&sort=dsc`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
@@ -112,7 +112,7 @@ describe('Searching', () => {
             });
 
             unirest.get(`https://localhost:3006/articles/search?q=${search}&or[]=${or}&or[]=${or2}` +
-                        `&limit=9&embed=${e}&offset=0&orderBy=id&sort=asc`)
+                        `&limit=9&embed=${e}&offset=0&orderBy=name&sort=asc`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
@@ -121,6 +121,7 @@ describe('Searching', () => {
                         assert.equal(true, reg.test(article.name) || article.name === 'Mars');
                         assert.equal('object', typeof article.purchases);
                     });
+
                     done();
                 });
         });
@@ -132,6 +133,7 @@ describe('Searching', () => {
                 .type('json')
                 .end(response => {
                     assert.equal(400, response.code);
+
                     done();
                 });
         });
@@ -147,6 +149,17 @@ describe('Searching', () => {
                 .type('json')
                 .end(response => {
                     assert.equal(400, response.code);
+
+                    done();
+                });
+        });
+
+        it('should refuse when passing an invalid search object', done => {
+            unirest.get(`https://localhost:3006/articles/search?q=abc`)
+                .type('json')
+                .end(response => {
+                    assert.equal(400, response.code);
+
                     done();
                 });
         });
