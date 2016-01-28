@@ -3,7 +3,7 @@
 
 ## Installation
 
-Required : node/io.js, npm, rethinkdb, mocha, gulp, openssl
+Required : node, npm, rethinkdb, mocha, gulp, openssl
 Optional : chateau
 
 ```sh
