@@ -1,5 +1,5 @@
 # Buckless-Server
-[![Build Status](https://travis-ci.org/buckless/Server.svg?branch=master)](https://travis-ci.org/buckless/Server) [![Coverage Status](https://coveralls.io/repos/github/buckless/Server/badge.svg?branch=unit-tests)](https://coveralls.io/github/buckless/Server?branch=unit-tests)
+[![Build Status](https://travis-ci.org/buckless/Server.svg?branch=master)](https://travis-ci.org/buckless/Server) [![Coverage Status](https://coveralls.io/repos/github/buckless/Server/badge.svg?branch=master)](https://coveralls.io/github/buckless/Server?branch=master)
 
 ## Installation
 
