@@ -1,5 +1,6 @@
 import assert from 'assert';
 import jwt    from 'jsonwebtoken';
+import config from '../src/config';
 
 /* global unirest */
 
@@ -13,6 +14,7 @@ describe('Login', () => {
             .send([])
             .end(response => {
                 assert.equal(401, response.code);
+
                 done();
             });
     });
@@ -33,6 +35,7 @@ describe('Login', () => {
                     .type('json')
                     .end(response2 => {
                         assert.equal(401, response2.code);
+
                         done();
                     });
             });
@@ -56,6 +59,7 @@ describe('Login', () => {
                     .type('json')
                     .end(response2 => {
                         assert.equal(200, response2.code);
+
                         done();
                     });
             });
@@ -68,6 +72,7 @@ describe('Login', () => {
             .end(response => {
                 // No result but allowed
                 assert.equal(404, response.code);
+
                 done();
             });
     });
@@ -79,6 +84,46 @@ describe('Login', () => {
             .end(response => {
                 // Invalid input but allowed
                 assert.equal(400, response.code);
+
+                done();
+            });
+    });
+
+    it('should refuse when no scheme nor token is provided', done => {
+        unirest.get('https://localhost:3006/articles')
+            .header('Authorization', undefined)
+            .type('json')
+            .end(response => {
+                assert.equal(400, response.code);
+                assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]',
+                        response.body.message);
+
+                done();
+            });
+    });
+
+    it('should refuse when only scheme is provided', done => {
+        unirest.get('https://localhost:3006/articles')
+            .header('Authorization', 'Bearer')
+            .type('json')
+            .end(response => {
+                assert.equal(400, response.code);
+                assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]',
+                        response.body.message);
+
+                done();
+            });
+    });
+
+    it('should refuse when a wrong scheme is provided', done => {
+        unirest.get('https://localhost:3006/articles')
+            .header('Authorization', 'foo bar')
+            .type('json')
+            .end(response => {
+                assert.equal(400, response.code);
+                assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]',
+                        response.body.message);
+
                 done();
             });
     });
@@ -130,15 +175,15 @@ describe('Login', () => {
                 assert.equal('string', typeof user.id);
                 assert.equal('string', typeof token);
 
-                const rightsDecoded = jwt.decode(token);
+                const tokenDecoded = jwt.decode(token);
 
-                assert.notEqual(null, rightsDecoded);
+                assert.notEqual(null, tokenDecoded);
 
                 done();
             });
     });
 
-    it('should login with pin', done => {
+    it('should login with pin and refuse any admin right (not allowed with pin)', done => {
         unirest.post('https://localhost:3006/services/login')
             .type('json')
             .send({
@@ -150,15 +195,42 @@ describe('Login', () => {
                 assert.equal(200, response.code);
                 assert.equal(true, response.body.hasOwnProperty('user'));
 
+                console.log(response.body.user);
+
                 const user  = response.body.user;
                 const token = response.body.token;
 
                 assert.equal('string', typeof user.id);
                 assert.equal('string', typeof token);
 
-                const rightsDecoded = jwt.decode(token);
+                const tokenDecoded = jwt.decode(token);
 
-                assert.notEqual(null, rightsDecoded);
+                assert.notEqual(null, tokenDecoded);
+
+                unirest.get('https://localhost:3006/articles')
+                    .header('Authorization', `Bearer ${token}`)
+                    .type('json')
+                    .end(response2 => {
+                        assert.equal(401, response2.code);
+
+                        done();
+                    });
+            });
+    });
+
+    it('should refuse when token is expired', done => {
+        const outdatedToken = require('jsonwebtoken').sign({
+            foo: 'bar',
+            iat: 200,
+            exp: 3000
+        }, config.secret);
+
+        unirest.get('https://localhost:3006/articles')
+            .header('Authorization', `Bearer ${outdatedToken}`)
+            .type('json')
+            .end(response => {
+                assert.equal(401, response.code);
+                assert.equal('Token expired', response.body.message);
 
                 done();
             });
