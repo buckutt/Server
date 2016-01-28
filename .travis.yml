@@ -5,7 +5,7 @@ node_js:
   - '4.1'
   - '4.0'
   - '0.12'
-  
+
 matrix:
   allow_failures:
     - node_js: '4.1'
@@ -25,7 +25,10 @@ install:
   - "rethinkdb&"
 
 script:
-  - "npm run test"
+  - "npm run test:coverage"
+
+after_script:
+  - "npm run coveralls"
 
 compiler: clang-3.6
 env:
