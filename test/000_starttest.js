@@ -1,4 +1,5 @@
 import app     from '../src/app';
+import assert  from 'assert';
 import fs      from 'fs';
 import unirest from 'unirest';
 
@@ -11,6 +12,20 @@ describe('Should start the test application', () => {
         app.locals.models.onReady = () => {
             done();
         };
+    });
+
+    it('should refuse if no ssl certificate is present', done => {
+        unirest.request('https://localhost:3006/', {
+            cert              : null,
+            key               : null,
+            ca                : null,
+            strictSSL         : false,
+            rejectUnauthorized: false
+        }, (error, res, body) => {
+            assert.equal(401, res.statusCode);
+            assert.equal('Unauthorized : missing client HTTPS certificate', res.body);
+            done();
+        });
     });
 });
 
