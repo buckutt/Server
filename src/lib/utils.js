@@ -1,3 +1,5 @@
+import util from 'util';
+
 /**
  * Validates integer
  * @param  {String|Number} n The integer
@@ -5,15 +7,6 @@
  */
 function isInt (n) {
     return !isNaN(n) && parseInt(Number(n)) == n && !isNaN(parseInt(n, 10)); // eslint-disable-line
-}
-
-/**
- * Validates booleans
- * @param  {String|Number|Boolean} b The boolean
- * @return {Boolean} True if b is an integer, false otherwise
- */
-function isBool (b) {
-    return b === '1' || b === 1 || b === 'true' || b === true;
 }
 
 /**
@@ -33,7 +26,7 @@ function pad2 (n) {
  * @return {String} The result colored string
  */
 function pp (obj) {
-    return require('util').inspect(obj, {
+    return util.inspect(obj, {
         showHidden: true,
         colors    : true
     });
@@ -59,4 +52,4 @@ function clone (obj, deep = true) {
     return result;
 }
 
-export { isInt, isBool, pad2, pp, clone };
+export { isInt, pad2, pp, clone };
