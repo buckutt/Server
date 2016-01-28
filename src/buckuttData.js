@@ -226,13 +226,11 @@ export default {
 
         /* Rights */
         const rightGJAdmin = new models.Right({
-            name   : 'admin',
-            isAdmin: true
+            name: 'admin'
         });
 
         const rightGJSeller = new models.Right({
-            name   : 'seller',
-            isAdmin: true
+            name: 'seller'
         });
 
         /* Sets */
