@@ -34,7 +34,7 @@ describe('Searching', () => {
 
             [or1, or2, or3, or4].forEach(or => orQ += `&or[]=${q(or)}`);
 
-            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}`)
+            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=id`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
@@ -72,10 +72,15 @@ describe('Searching', () => {
                 le: 0
             };
 
-            let orQ = '';
-            [or1, or2, or3, or4].forEach(or => orQ += `&or[]=${q(or)}`);
+            const or5 = {
+                field: 'alcohol',
+                ne: 1
+            };
 
-            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}`)
+            let orQ = '';
+            [or1, or2, or3, or4, or5].forEach(or => orQ += `&or[]=${q(or)}`);
+
+            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=id&sort=dsc`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
@@ -87,28 +92,34 @@ describe('Searching', () => {
         });
 
         it('should support limit, embed, etc.', done => {
-            const search = {
+            const search = q({
                 field     : 'name',
                 startsWith: 'Ice Tea'
-            };
+            });
 
-            const or = {
+            const or = q({
                 field: 'name',
                 eq   : 'Mars'
-            };
+            });
 
-            const or2 = {
+            const or2 = q({
                 field: 'name',
                 eq   : 'Mars'
-            };
+            });
 
-            unirest.get(`https://localhost:3006/articles/search?q=${q(search)}&or[]=${q(or)}&or[]=${q(or2)}&limit=1`)
+            const e = q({
+                purchases: true
+            });
+
+            unirest.get(`https://localhost:3006/articles/search?q=${search}&or[]=${or}&or[]=${or2}` +
+                        `&limit=9&embed=${e}&offset=0&orderBy=id&sort=asc`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
                     response.body.forEach(article => {
                         assert.equal(true, reg.test(article.name) || article.name === 'Mars');
+                        assert.equal('object', typeof article.purchases);
                     });
                     done();
                 });
