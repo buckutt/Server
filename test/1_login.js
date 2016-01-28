@@ -179,6 +179,52 @@ describe('Login', () => {
             });
     });
 
+    it('should not log a user without mol, data or pin/password', done => {
+        unirest.post('https://localhost:3006/services/login')
+            .type('json')
+            .send({})
+            .end(response => {
+                assert.equal(401, response.code);
+
+                unirest.post('https://localhost:3006/services/login')
+                    .type('json')
+                    .send({
+                        meanOfLogin: 'etuId'
+                    })
+                    .end(response2 => {
+                        assert.equal(401, response2.code);
+
+                        unirest.post('https://localhost:3006/services/login')
+                            .type('json')
+                            .send({
+                                meanOfLogin: 'etuId',
+                                data       : 35427
+                            })
+                            .end(response3 => {
+                                assert.equal(401, response3.code);
+
+                                done();
+                            });
+                    });
+            });
+    });
+
+    it('should not log a user submitting both pin and password', done => {
+        unirest.post('https://localhost:3006/services/login')
+            .type('json')
+            .send({
+                meanOfLogin: 'etuId',
+                data       : 35427,
+                pin        : 1234,
+                password   : 'buckless'
+            })
+            .end(response => {
+                assert.equal(401, response.code);
+
+                done();
+            });
+    });
+
     it('should not log a user with wrong mol', done => {
         unirest.post('https://localhost:3006/services/login')
             .type('json')

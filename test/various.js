@@ -9,6 +9,7 @@ describe('Various', () => {
             .end(response => {
                 assert.equal(404, response.code);
                 assert.equal('Not Found', response.body.message);
+
                 done();
             });
     });

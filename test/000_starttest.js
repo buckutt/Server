@@ -24,6 +24,7 @@ describe('Should start the test application', () => {
         }, (error, res, body) => {
             assert.equal(401, res.statusCode);
             assert.equal('Unauthorized : missing client HTTPS certificate', res.body);
+
             done();
         });
     });
