@@ -91,6 +91,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
     if (err instanceof APIError) { log.error(newErr.details); }
 
+    /* istanbul ignore if */
     if (newErr.message === 'Unknown error') {
         console.log(pp(newErr));
     }
