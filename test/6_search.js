@@ -112,7 +112,32 @@ describe('Searching', () => {
             });
 
             unirest.get(`https://localhost:3006/articles/search?q=${search}&or[]=${or}&or[]=${or2}` +
-                        `&limit=9&embed=${e}&offset=0&orderBy=name&sort=asc`)
+                        `&limit=9&embed=${e}&offset=1&orderBy=name&sort=asc`)
+                .type('json')
+                .end(response => {
+                    assert.equal(200, response.code);
+                    const reg = /^Ice Tea/;
+                    response.body.forEach(article => {
+                        assert.equal(true, reg.test(article.name) || article.name === 'Mars');
+                        assert.equal('object', typeof article.purchases);
+                    });
+
+                    done();
+                });
+        });
+
+        it('should support an array of queries', done => {
+            const q1 = q({
+                field  : 'name',
+                matches: '^Ice'
+            });
+
+            const q2 = q({
+                field  : 'name',
+                matches: 'Tea$'
+            });
+
+            unirest.get(`https://localhost:3006/articles/search?q[]=${q1}&q[]=${q2}`)
                 .type('json')
                 .end(response => {
                     assert.equal(200, response.code);

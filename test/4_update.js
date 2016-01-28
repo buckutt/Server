@@ -68,6 +68,24 @@ describe('Update', () => {
                 });
         });
 
+        it('should not update if the model is invalid', done => {
+            unirest.get('https://localhost:3006/articles')
+                .type('json')
+                .end(response => {
+                    unirest.put(`https://localhost:3006/articles/${response.body[0].id}/`)
+                        .type('json')
+                        .send({
+                            name: []
+                        })
+                        .end(response2 => {
+                            assert.equal(400, response2.code);
+                            assert.equal('Invalid model', response2.body.message);
+
+                            done();
+                        });
+                });
+        })
+
         it('should not read if the model does not exists', done => {
             unirest.put('https://localhost:3006/foo/00000000-0000-1000-8000-000000000000')
                 .type('json')

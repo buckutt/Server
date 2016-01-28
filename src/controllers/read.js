@@ -47,6 +47,7 @@ export default app => {
                     next(new APIError(404, 'Document not found', err))
                 )
                 .catch(err =>
+                    /* istanbul ignore next */
                     next(new APIError(500, 'Unknown error', err))
                 );
         } else {
@@ -105,9 +106,11 @@ export default app => {
                         .end()
                 )
                 .catch(thinky.Errors.DocumentNotFound, err =>
+                    /* istanbul ignore next */
                     next(new APIError(404, 'Document not found', err))
                 )
                 .catch(err =>
+                    /* istanbul ignore next */
                     next(new APIError(500, 'Unknown error', err))
                 );
         }

@@ -19,7 +19,7 @@ export default app => {
         const submodel = req.params.submodel;
 
         if (!req.Model._joins.hasOwnProperty(submodel)) {
-            return next(new APIError(404, 'Document not found', `Submodel ${submodel} does not exists`));
+            return next(new APIError(404, 'Document not found', `Submodel ${submodel} does not exist`));
         }
 
         const embed = {};
@@ -48,6 +48,7 @@ export default app => {
                 next(new APIError(404, 'Document not found', err))
             )
             .catch(err =>
+                /* istanbul ignore next */
                 next(new APIError(500, 'Unknown error', err))
             );
     });

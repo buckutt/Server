@@ -52,6 +52,18 @@ describe('Relatives', () => {
                 });
         });
 
+        it('should not get any submodel if the submodel doesn\'t exist', done => {
+            unirest.get('https://localhost:3006/purchases/00000000-0000-1000-8000-000000000000/foo')
+                .type('json')
+                .end(response => {
+                    assert.equal(404, response.code);
+                    assert.equal('Document not found', response.body.message);
+                    assert.equal('Submodel foo does not exist', response.body.details);
+
+                    done();
+                });
+        });
+
         it('should not get any submodel if the id is not a guid', done => {
             unirest.get('https://localhost:3006/purchases/foo/promotion')
                 .type('json')

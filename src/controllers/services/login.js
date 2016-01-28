@@ -110,6 +110,7 @@ export default app => {
             })
             .catch(Error, err => next(err))
             .catch(thinky.Errors.DocumentNotFound, err =>
+                /* istanbul ignore next */
                 next(new APIError(404, 'User not found', err))
             );
     });

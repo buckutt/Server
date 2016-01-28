@@ -24,6 +24,7 @@ export default (req, res, next) => {
         })
         .run()
         .then(devices => {
+            /* istanbul ignore if */
             if (devices.length === 0) {
                 return false;
             }
@@ -48,6 +49,7 @@ export default (req, res, next) => {
             return Promise.all(promises);
         })
         .then(ok => {
+            /* istanbul ignore if */
             if (!ok) {
                 return next(new APIError(404, 'Device not found', fingerprint));
             }

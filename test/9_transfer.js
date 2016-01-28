@@ -20,6 +20,18 @@ describe('Transfers', () => {
     });
 
     describe('Incorrect data', () => {
+        it('should not transfer if the reciever is invalid', done => {
+            unirest.post('https://localhost:3006/services/transfer')
+                .type('json')
+                .send({
+                    amount: 150
+                })
+                .end(response => {
+                    assert.equal(400, response.code);
+                    done();
+                });
+        });
+
         it('should not transfer if sender has not enough money', done => {
             unirest.post('https://localhost:3006/services/transfer')
                 .type('json')

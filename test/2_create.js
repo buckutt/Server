@@ -149,6 +149,20 @@ describe('Create', function () {
                 });
         });
 
+        it('should create MeanOfPayment', done => {
+            unirest.post('https://localhost:3006/meansofpayment')
+                .type('json')
+                .send({
+                    name: 'foo',
+                    slug: 'bar'
+                })
+                .end(response => {
+                    assert.equal(200, response.code);
+                    assert.equal('string', typeof response.body.id);
+                    done();
+                });
+        });
+
         it('should create Period', done => {
             unirest.post('https://localhost:3006/periods')
                 .type('json')
@@ -156,6 +170,33 @@ describe('Create', function () {
                     name : 'Just now',
                     start: new Date(),
                     end  : new Date()
+                })
+                .end(response => {
+                    assert.equal(200, response.code);
+                    assert.equal('string', typeof response.body.id);
+                    done();
+                });
+        });
+
+        it('should create PeriodPoint', done => {
+            unirest.post('https://localhost:3006/periodPoints')
+                .type('json')
+                .send({
+                    periodId: '',
+                    pointId: ''
+                })
+                .end(response => {
+                    assert.equal(200, response.code);
+                    assert.equal('string', typeof response.body.id);
+                    done();
+                });
+        });
+
+        it('should create Set', done => {
+            unirest.post('https://localhost:3006/sets')
+                .type('json')
+                .send({
+                    name: 'fooset'
                 })
                 .end(response => {
                     assert.equal(200, response.code);

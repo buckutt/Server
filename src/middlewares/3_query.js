@@ -4,7 +4,6 @@ const queryRules = {
     offset : offset => parseInt(offset, 10),
     orderBy: order => order,
     sort   : sort => sort,
-    count  : () => true,
     embed  : embed => JSON.parse(decodeURIComponent(embed))
 };
 

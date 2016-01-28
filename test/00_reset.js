@@ -43,7 +43,9 @@ describe('Before tests', () => {
         });
     });
 
-    it('should create one user', done => {
+    it('should create one user', function (done) {
+        this.timeout(5000);
+
         let userId;
         let noRightsUserId;
         let sellerUserId;

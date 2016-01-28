@@ -66,12 +66,15 @@ export default app => {
                     .end()
             )
             .catch(thinky.Errors.ValidationError, err =>
+                /* istanbul ignore next */
                 next(new APIError(400, 'Invalid model', err))
             )
             .catch(thinky.Errors.InvalidWrite, err =>
+                /* istanbul ignore next */
                 next(new APIError(500, 'Couldn\'t write to disk', err))
             )
             .catch(err =>
+                /* istanbul ignore next */
                 next(new APIError(500, 'Unknown error', err))
             );
     });

@@ -23,6 +23,7 @@ export default (req, res, next) => {
     }
 
     // Config is invalid
+    /* istanbul ignore if */
     if (!secret) {
         throw new Error('config.secret must be set');
     }
