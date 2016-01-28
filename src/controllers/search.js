@@ -152,13 +152,13 @@ export default app => {
         const q = qs.parse(url.parse(req.url).query).q;
 
         if (!q) {
-            return next(new APIError(400, 'No search object provided'));
+            return next(new APIError(400, 'Missing q parameter'));
         }
 
         let searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
 
         if (!searchQuery) {
-            return next(new APIError(400, 'Missing q paramter'));
+            return next(new APIError(400, 'No search object provided'));
         }
 
         if (!Array.isArray(searchQuery)) {
