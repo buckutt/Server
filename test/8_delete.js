@@ -85,5 +85,15 @@ describe('Delete', () => {
                     done();
                 });
         });
+
+        it('should not delete if the id is not a guid', done => {
+            unirest.delete('https://localhost:3006/foo/00000000-0000-1000-8000-000000000000')
+                .type('json')
+                .end(response => {
+                    assert.equal(404, response.code);
+
+                    done();
+                });
+        });
     });
 });
