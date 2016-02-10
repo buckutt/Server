@@ -21,7 +21,7 @@ describe('Should start the test application', () => {
             ca                : null,
             strictSSL         : false,
             rejectUnauthorized: false
-        }, (error, res, body) => {
+        }, (error, res) => {
             assert.equal(401, res.statusCode);
             assert.equal('Unauthorized : missing client HTTPS certificate', res.body);
 
@@ -49,5 +49,7 @@ global.q       = obj => encodeURIComponent(JSON.stringify(obj));
 
 ['get', 'post', 'put', 'delete'].forEach(method => {
     const previous_ = unirest[method];
-    unirest[method] = (...args) => previous_(...args).header('Authorization', `Bearer ${process.env.TOKEN}`);
+    unirest[method] = (...args) => previous_(...args)
+        .type('json')
+        .header('Authorization', `Bearer ${process.env.TOKEN}`);
 });

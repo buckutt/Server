@@ -4,12 +4,12 @@ import APIError     from './APIError';
 import config       from './config';
 import logger       from './log';
 import { pp }       from './lib/utils';
+import middlewares  from './middlewares';
 import models       from './models';
 import bodyParser   from 'body-parser';
 import compression  from 'compression';
 import consoleTitle from 'console-title';
 import cookieParser from 'cookie-parser';
-import cors         from 'cors';
 import express      from 'express';
 import https        from 'https';
 import morgan       from 'morgan';
@@ -23,10 +23,19 @@ const app = express();
 app.locals.config = config;
 app.locals.models = models;
 
-// Some middlewares
-app.use(cors({
-    exposedHeaders: ['device', 'point']
-}));
+/**
+ * Middlewares
+ */
+
+app.use((req, res, next) => {
+    // CORS
+    res.header('Access-Control-Allow-Headers', 'accept, content-type');
+    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Expose-Headers', 'device,point');
+    next();
+});
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -45,16 +54,7 @@ app.use((req, res, next) => {
     return next();
 });
 
-// Application middlewares
-const middlewares = fs
-    .readdirSync(path.join(config.root, 'middlewares/'))
-    .filter(f => f.slice(-3) === '.js')
-    .sort()
-    .map(f => require(path.join(config.root, 'middlewares/', f)).default);
-
-middlewares.forEach(middleware => {
-    app.use(middleware);
-});
+Object.keys(middlewares).forEach(key => app.use(middlewares[key]));
 
 // Controllers subrouters
 const controllers = fs
@@ -85,7 +85,7 @@ app.use((req, res, next) => {
 
 // Other errors (req is not used, but four arguments must be detected by express to recognize error middleware)
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-    let newErr = err;
+    const newErr = err;
 
     log.error(newErr.message);
 
@@ -131,6 +131,10 @@ app.start = () => {
         log.warn('Please wait for models to be ready...');
         consoleTitle('Buckless Server *');
     });
+
+    if (typeof app.locals.serverReady === 'function') {
+        app.locals.serverReady(server);
+    }
 };
 
 // Start the application

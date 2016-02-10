@@ -5,7 +5,6 @@ import assert from 'assert';
 describe('Basket', () => {
     it('should support payment', done => {
         unirest.post('https://localhost:3006/services/basket')
-            .type('json')
             .send([
                 {
                     buyerId    : process.env.GJId,
@@ -28,7 +27,6 @@ describe('Basket', () => {
 
     it('should support reloads', done => {
         unirest.post('https://localhost:3006/services/basket')
-            .type('json')
             .send([
                 {
                     credit  : 50 * 100,
@@ -47,7 +45,6 @@ describe('Basket', () => {
 
     it('should support promotions', done => {
         unirest.post('https://localhost:3006/services/basket')
-            .type('json')
             .send([
                 {
                     buyerId    : process.env.GJId,
@@ -71,7 +68,6 @@ describe('Basket', () => {
 
     it('should support payment, reloads and promotions', done => {
         unirest.post('https://localhost:3006/services/basket')
-            .type('json')
             .send([
                 {
                     buyerId    : process.env.GJId,
@@ -113,7 +109,6 @@ describe('Basket', () => {
 
     it('should not accept anything else than an array of payments, reloads or promotions', done => {
         unirest.post('https://localhost:3006/services/basket')
-            .type('json')
             .send([
                 {}
             ])
@@ -121,7 +116,6 @@ describe('Basket', () => {
                 assert.equal(400, response.code);
 
                 unirest.post('https://localhost:3006/services/basket')
-                    .type('json')
                     .send({})
                     .end(response2 => {
                         assert.equal(400, response2.code);
@@ -132,7 +126,6 @@ describe('Basket', () => {
 
     it('should not accept if the user does not have enough credit', done => {
         unirest.post('https://localhost:3006/services/basket')
-            .type('json')
             .send([
                 {
                     buyerId    : process.env.GJId,
@@ -163,12 +156,10 @@ describe('Basket', () => {
                 reloads  : true
             };
             unirest.get(`https://localhost:3006/users/${process.env.GJId}?embed=${q(e)}`)
-                .type('json')
                 .end(response => {
                     gj = response.body;
 
                     unirest.get(`https://localhost:3006/articles/${process.env.KinderDeliceId}`)
-                        .type('json')
                         .end(response2 => {
                             kinder = response2.body;
 

@@ -6,7 +6,7 @@ import APIError from '../APIError';
  * @param {Response} res  Express response
  * @param {Function} next Next middleware
  */
-export default (req, res, next) => {
+export default function pointId (req, res, next) {
     const fingerprint = req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
 
     const Device = req.app.locals.models.Device;

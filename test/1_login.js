@@ -10,7 +10,6 @@ process.env.TOKEN = '';
 describe('Login', () => {
     it('should refuse requests before auth', done => {
         unirest.post('https://localhost:3006/articles')
-            .type('json')
             .send([])
             .end(response => {
                 assert.equal(401, response.code);
@@ -21,7 +20,6 @@ describe('Login', () => {
 
     it('should refuse paths when the user does not have the right to', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuMail',
                 data       : 'norights@buckless.fr',
@@ -32,7 +30,6 @@ describe('Login', () => {
 
                 unirest.get('https://localhost:3006/articles')
                     .header('Authorization', `Bearer ${response.body.token}`)
-                    .type('json')
                     .end(response2 => {
                         assert.equal(401, response2.code);
 
@@ -44,7 +41,6 @@ describe('Login', () => {
     let sellerToken;
     it('should allow user when they have specific (not admin) rights', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuMail',
                 data       : 'seller@buckless.fr',
@@ -56,7 +52,6 @@ describe('Login', () => {
 
                 unirest.get('https://localhost:3006/articles')
                     .header('Authorization', `Bearer ${sellerToken}`)
-                    .type('json')
                     .end(response2 => {
                         assert.equal(200, response2.code);
 
@@ -68,7 +63,6 @@ describe('Login', () => {
     it('should also works when requesting an allowed url containing an id', done => {
         unirest.get('https://localhost:3006/articles/3f2504e0-4f89-11d3-9a0c-0305e82c3301')
             .header('Authorization', `Bearer ${sellerToken}`)
-            .type('json')
             .end(response => {
                 // No result but allowed
                 assert.equal(404, response.code);
@@ -80,7 +74,6 @@ describe('Login', () => {
     it('should also works when making an allowed post request', done => {
         unirest.post('https://localhost:3006/services/basket')
             .header('Authorization', `Bearer ${sellerToken}`)
-            .type('json')
             .end(response => {
                 // Invalid input but allowed
                 assert.equal(400, response.code);
@@ -91,8 +84,7 @@ describe('Login', () => {
 
     it('should refuse when no scheme nor token is provided', done => {
         unirest.get('https://localhost:3006/articles')
-            .header('Authorization', undefined)
-            .type('json')
+            .header('Authorization', null)
             .end(response => {
                 assert.equal(400, response.code);
                 assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]',
@@ -105,7 +97,6 @@ describe('Login', () => {
     it('should refuse when only scheme is provided', done => {
         unirest.get('https://localhost:3006/articles')
             .header('Authorization', 'Bearer')
-            .type('json')
             .end(response => {
                 assert.equal(400, response.code);
                 assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]',
@@ -118,7 +109,6 @@ describe('Login', () => {
     it('should refuse when a wrong scheme is provided', done => {
         unirest.get('https://localhost:3006/articles')
             .header('Authorization', 'foo bar')
-            .type('json')
             .end(response => {
                 assert.equal(400, response.code);
                 assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]',
@@ -130,7 +120,6 @@ describe('Login', () => {
 
     it('should login with mail', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuMail',
                 data       : 'buck@buckless.fr',
@@ -159,7 +148,6 @@ describe('Login', () => {
 
     it('should login with another mean of login', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuId',
                 data       : '22000000353423',
@@ -185,7 +173,6 @@ describe('Login', () => {
 
     it('should login with pin and refuse any admin right (not allowed with pin)', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuId',
                 data       : '22000000353423',
@@ -209,7 +196,6 @@ describe('Login', () => {
 
                 unirest.get('https://localhost:3006/articles')
                     .header('Authorization', `Bearer ${token}`)
-                    .type('json')
                     .end(response2 => {
                         assert.equal(401, response2.code);
 
@@ -227,7 +213,6 @@ describe('Login', () => {
 
         unirest.get('https://localhost:3006/articles')
             .header('Authorization', `Bearer ${outdatedToken}`)
-            .type('json')
             .end(response => {
                 assert.equal(401, response.code);
                 assert.equal('Token expired', response.body.message);
@@ -238,7 +223,6 @@ describe('Login', () => {
 
     it('should not log a non-existant user', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuId',
                 data       : 35427,
@@ -253,13 +237,11 @@ describe('Login', () => {
 
     it('should not log a user without mol, data or pin/password', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({})
             .end(response => {
                 assert.equal(401, response.code);
 
                 unirest.post('https://localhost:3006/services/login')
-                    .type('json')
                     .send({
                         meanOfLogin: 'etuId'
                     })
@@ -267,7 +249,6 @@ describe('Login', () => {
                         assert.equal(401, response2.code);
 
                         unirest.post('https://localhost:3006/services/login')
-                            .type('json')
                             .send({
                                 meanOfLogin: 'etuId',
                                 data       : 35427
@@ -283,7 +264,6 @@ describe('Login', () => {
 
     it('should not log a user submitting both pin and password', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuId',
                 data       : 35427,
@@ -299,7 +279,6 @@ describe('Login', () => {
 
     it('should not log a user with wrong mol', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'foo',
                 data       : 35427,
@@ -314,7 +293,6 @@ describe('Login', () => {
 
     it('should not log a user with wrong pin', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuId',
                 data       : '22000000353423',
@@ -329,7 +307,6 @@ describe('Login', () => {
 
     it('should not log a user with wrong password', done => {
         unirest.post('https://localhost:3006/services/login')
-            .type('json')
             .send({
                 meanOfLogin: 'etuId',
                 data       : '22000000353423',

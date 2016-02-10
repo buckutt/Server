@@ -35,7 +35,6 @@ describe('Searching', () => {
             [or1, or2, or3, or4].forEach(or => orQ += `&or[]=${q(or)}`);
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name`)
-                .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
@@ -54,34 +53,33 @@ describe('Searching', () => {
 
             const or1 = {
                 field: 'alcohol',
-                gt: -1
+                gt   : -1
             };
 
             const or2 = {
                 field: 'alcohol',
-                lt: 1
+                lt   : 1
             };
 
             const or3 = {
                 field: 'alcohol',
-                ge: 0
+                ge   : 0
             };
 
             const or4 = {
                 field: 'alcohol',
-                le: 0
+                le   : 0
             };
 
             const or5 = {
                 field: 'alcohol',
-                ne: 1
+                ne   : 1
             };
 
             let orQ = '';
             [or1, or2, or3, or4, or5].forEach(or => orQ += `&or[]=${q(or)}`);
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name&sort=dsc`)
-                .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
                     response.body.forEach(article => {
@@ -113,7 +111,6 @@ describe('Searching', () => {
 
             unirest.get(`https://localhost:3006/articles/search?q=${search}&or[]=${or}&or[]=${or2}` +
                         `&limit=9&embed=${e}&offset=1&orderBy=name&sort=asc`)
-                .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
@@ -138,7 +135,6 @@ describe('Searching', () => {
             });
 
             unirest.get(`https://localhost:3006/articles/search?q[]=${q1}&q[]=${q2}`)
-                .type('json')
                 .end(response => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
@@ -155,7 +151,6 @@ describe('Searching', () => {
     describe('Incorrect search query', () => {
         it('should refuse when no condition is specified', done => {
             unirest.get(`https://localhost:3006/articles/search`)
-                .type('json')
                 .end(response => {
                     assert.equal(400, response.code);
 
@@ -171,7 +166,6 @@ describe('Searching', () => {
             };
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}`)
-                .type('json')
                 .end(response => {
                     assert.equal(400, response.code);
 
@@ -181,7 +175,6 @@ describe('Searching', () => {
 
         it('should refuse when passing an invalid search object', done => {
             unirest.get(`https://localhost:3006/articles/search?q=abc`)
-                .type('json')
                 .end(response => {
                     assert.equal(400, response.code);
 
@@ -195,7 +188,6 @@ describe('Searching', () => {
             };
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}`)
-                .type('json')
                 .end(response => {
                     assert.equal(400, response.code);
                     done();
