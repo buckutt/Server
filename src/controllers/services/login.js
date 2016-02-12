@@ -72,7 +72,7 @@ export default app => {
             })
             .then(mol => {
                 if (mol.length === 0) {
-                    return next(new APIError(404, 'Unknown user'));
+                    return next(new APIError(404, 'User not found'));
                 }
 
                 user = mol[0].user;
