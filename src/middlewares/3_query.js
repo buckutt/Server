@@ -14,7 +14,7 @@ const queryRules = {
  * @param  {Function} next Next middleware
  * @return {Function} The next middleware
  */
-export default (req, res, next) => {
+export default function query (req, res, next) {
     const query = {};
 
     Object.keys(queryRules).forEach(q => {

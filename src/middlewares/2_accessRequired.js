@@ -9,7 +9,7 @@ const disableAuth = false;
  * @param  {Function} next Next middleware
  * @return {Function} The next middleware
  */
-export default (req, res, next) => {
+export default function accessRequired (req, res, next) {
     const authorize = req.app.locals.config.rightsManagement;
 
     if (req.url === '/services/login' || disableAuth) {

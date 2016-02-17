@@ -10,11 +10,13 @@ describe('utils', () => {
         });
 
         it('should not validate anything else', () => {
+            const emptyFunction = function () {};
+
             assert.equal(false, isInt(false));
             assert.equal(false, isInt('foo'));
             assert.equal(false, isInt({}));
             assert.equal(false, isInt([]));
-            assert.equal(false, isInt(new Function()));
+            assert.equal(false, isInt(emptyFunction));
         });
 
         it('should not validate float and irrational numbers', () => {

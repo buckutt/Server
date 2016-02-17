@@ -23,7 +23,6 @@ describe('Create', function () {
     describe('Correct model', () => {
         it('should support multiple entries', done => {
             unirest.post('https://localhost:3006/articles')
-                .type('json')
                 .send([
                     {
                         name : 'Ice Tea Pêche',
@@ -47,7 +46,6 @@ describe('Create', function () {
 
         it('should support one unique entry', done => {
             unirest.post('https://localhost:3006/articles')
-                .type('json')
                 .send({
                     name : 'Ice Tea Mangue',
                     stock: 0
@@ -61,7 +59,6 @@ describe('Create', function () {
 
         it('should create Article', done => {
             unirest.post('https://localhost:3006/articles')
-                .type('json')
                 .send({
                     name : 'Kinder Delice',
                     stock: 0
@@ -79,7 +76,6 @@ describe('Create', function () {
 
         it('should create Category', done => {
             unirest.post('https://localhost:3006/categories')
-                .type('json')
                 .send({
                     name: 'Barres'
                 })
@@ -92,7 +88,6 @@ describe('Create', function () {
 
         it('should create Device', done => {
             unirest.post('https://localhost:3006/devices')
-                .type('json')
                 .send({
                     name       : 'eeetop-1',
                     fingerprint: '43:51:43:a1:b5:fc:8b:b7:0a:3a:a9:b1:0f:66:73:a8'
@@ -106,7 +101,6 @@ describe('Create', function () {
 
         it('should create Fundation', done => {
             unirest.post('https://localhost:3006/fundations')
-                .type('json')
                 .send({
                     name   : 'UNG',
                     website: 'http://ung.utt.fr',
@@ -122,7 +116,6 @@ describe('Create', function () {
 
         it('should create Group', done => {
             unirest.post('https://localhost:3006/groups')
-                .type('json')
                 .send({
                     name    : 'Cotisants A2016',
                     isOpen  : true,
@@ -137,7 +130,6 @@ describe('Create', function () {
 
         it('should create MeanOfLogin', done => {
             unirest.post('https://localhost:3006/meansoflogin')
-                .type('json')
                 .send({
                     type: 'etuMail',
                     data: 'gabriel.juchault@gmail.com'
@@ -151,7 +143,6 @@ describe('Create', function () {
 
         it('should create MeanOfPayment', done => {
             unirest.post('https://localhost:3006/meansofpayment')
-                .type('json')
                 .send({
                     name: 'foo',
                     slug: 'bar'
@@ -165,7 +156,6 @@ describe('Create', function () {
 
         it('should create Period', done => {
             unirest.post('https://localhost:3006/periods')
-                .type('json')
                 .send({
                     name : 'Just now',
                     start: new Date(),
@@ -180,10 +170,9 @@ describe('Create', function () {
 
         it('should create PeriodPoint', done => {
             unirest.post('https://localhost:3006/periodPoints')
-                .type('json')
                 .send({
                     periodId: '',
-                    pointId: ''
+                    pointId : ''
                 })
                 .end(response => {
                     assert.equal(200, response.code);
@@ -194,7 +183,6 @@ describe('Create', function () {
 
         it('should create Set', done => {
             unirest.post('https://localhost:3006/sets')
-                .type('json')
                 .send({
                     name: 'fooset'
                 })
@@ -207,7 +195,6 @@ describe('Create', function () {
 
         it('should create Point', done => {
             unirest.post('https://localhost:3006/points')
-                .type('json')
                 .send({
                     name: 'Foyer'
                 })
@@ -224,7 +211,6 @@ describe('Create', function () {
 
         it('should create Price', done => {
             unirest.post('https://localhost:3006/prices')
-                .type('json')
                 .send({
                     amount: 3.141592654
                 })
@@ -237,7 +223,6 @@ describe('Create', function () {
 
         it('should create Promotions', done => {
             unirest.post('https://localhost:3006/promotions')
-                .type('json')
                 .send({
                     name: 'Formule 1€'
                 })
@@ -254,7 +239,6 @@ describe('Create', function () {
 
         it('should create Reloads', done => {
             unirest.post('https://localhost:3006/reloads')
-                .type('json')
                 .send({
                     trace : 'Ticket caisse n°123',
                     credit: 50
@@ -268,7 +252,6 @@ describe('Create', function () {
 
         it('should create Right', done => {
             unirest.post('https://localhost:3006/rights')
-                .type('json')
                 .send({
                     name   : 'admin',
                     isAdmin: true
@@ -282,7 +265,6 @@ describe('Create', function () {
 
         it('should create User', done => {
             unirest.post('https://localhost:3006/users')
-                .type('json')
                 .send({
                     firstname: 'Gabriel',
                     lastname : 'Juchault',
@@ -300,7 +282,6 @@ describe('Create', function () {
                     process.env.GJId = GJ.id;
 
                     unirest.post('https://localhost:3006/users')
-                        .type('json')
                         .send({
                             firstname: 'Thomas',
                             lastname : 'Chauchefoin',
@@ -325,7 +306,6 @@ describe('Create', function () {
                 promotion: true
             };
             unirest.post(`https://localhost:3006/purchases?embed=${q(e)}`)
-                .type('json')
                 .send({
                     fundationId: UNG.id,
                     pointId    : Foyer.id,
@@ -348,7 +328,6 @@ describe('Create', function () {
 
         it('should cut the additionals fields if they are not part of the model', done => {
             unirest.post('https://localhost:3006/articles')
-                .type('json')
                 .send({
                     name : 'Mars',
                     stock: 0,
@@ -366,7 +345,6 @@ describe('Create', function () {
     describe('Invalid model', () => {
         it('should throw an error if there are missing fields', done => {
             unirest.post('https://localhost:3006/articles')
-                .type('json')
                 .send({})
                 .end(response => {
                     assert.equal(400, response.code);
@@ -376,7 +354,6 @@ describe('Create', function () {
 
         it('should throw an error if the model does not exists', done => {
             unirest.post('https://localhost:3006/foo')
-                .type('json')
                 .send({})
                 .end(response => {
                     assert.equal(404, response.code);
