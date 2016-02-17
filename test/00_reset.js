@@ -10,8 +10,8 @@ if (sslResult.indexOf('=') === -1) {
 }
 
 const fingerprint = sslResult.split('=')[1].replace(/:/g, '').trim();
+const r           = thinky.r;
 
-const r = thinky.r;
 describe('Before tests', () => {
     it('should empty all the databases', function (done) {
         this.timeout(20 * 1000);

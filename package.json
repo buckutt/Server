@@ -9,6 +9,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "test": "npm run test:nocoverage",
     "build": "gulp",
     "clean": "gulp clean",
     "test:nocoverage": "gulp && NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/mocha/bin/_mocha --sort --bail",

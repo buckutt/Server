@@ -34,7 +34,7 @@ const certFile = fs.readFileSync('ssl/test/test.crt');
 const keyFile  = fs.readFileSync('ssl/test/test.key');
 const caFile   = fs.readFileSync('ssl/test/ca.crt');
 
-const options = {
+const options  = {
     cert              : certFile,
     key               : keyFile,
     ca                : caFile,
