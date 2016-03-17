@@ -30,9 +30,15 @@ describe('Searching', () => {
                 matches: '^Mars'
             };
 
+            const or5 = {
+                field: 'createdAt',
+                ge   : (new Date()).toISOString(),
+                date : true
+            };
+
             let orQ = '';
 
-            [or1, or2, or3, or4].forEach(or => orQ += `&or[]=${q(or)}`);
+            [or1, or2, or3, or4, or5].forEach(or => orQ += `&or[]=${q(or)}`);
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name`)
                 .end(response => {

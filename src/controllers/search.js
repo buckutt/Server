@@ -49,6 +49,14 @@ function objToRethinkDBSearch (obj, onFail) {
         outputLog     += `.match("${obj.matches.toString()}")`;
     }
 
+    if (obj.date) {
+        for (let op of ['gt', 'ne', 'lt', 'ge', 'le', 'eq']) {
+            if (obj.hasOwnProperty(op)) {
+                obj[op] = new Date(obj[op]);
+            }
+        }
+    }
+
     if (obj.hasOwnProperty('gt')) {
         rethinkSearch = rethinkSearch.gt(obj.gt);
         outputLog     += `.gt("${obj.gt}")`;
