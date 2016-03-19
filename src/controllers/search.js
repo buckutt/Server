@@ -50,7 +50,7 @@ function objToRethinkDBSearch (obj, onFail) {
     }
 
     if (obj.date) {
-        for (let op of ['gt', 'ne', 'lt', 'ge', 'le', 'eq']) {
+        for (const op of ['gt', 'ne', 'lt', 'ge', 'le', 'eq']) {
             if (obj.hasOwnProperty(op)) {
                 obj[op] = new Date(obj[op]);
             }

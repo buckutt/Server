@@ -25,7 +25,7 @@ Category.ensureIndex('createdAt');
 Category.ensureIndex('editedAt');
 
 Category.associate = models => {
-    models.Category.hasMany(models.Article, 'articles', 'id', 'categoryId');
+    models.Category.hasMany(models.Article, 'articles', 'id', 'Category_id');
 };
 
 export default Category;

@@ -37,13 +37,13 @@ User.ensureIndex('editedAt');
 User.associate = models => {
     models.User.hasAndBelongsToMany(models.Group, 'groups', 'id', 'id');
     models.User.hasAndBelongsToMany(models.Right, 'rights', 'id', 'id');
-    models.User.hasMany(models.MeanOfLogin, 'meansOfLogin', 'id', 'userId');
-    models.User.hasMany(models.Purchase, 'purchases', 'id', 'buyerId');
-    models.User.hasMany(models.Purchase, 'sells', 'id', 'sellerId');
-    models.User.hasMany(models.Reload, 'reloads', 'id', 'buyerId');
-    models.User.hasMany(models.Reload, 'reloadsMade', 'id', 'sellerId');
-    models.User.hasMany(models.Transfer, 'transfers', 'id', 'recieverId');
-    models.User.hasMany(models.Transfer, 'transfersMade', 'id', 'senderId');
+    models.User.hasMany(models.MeanOfLogin, 'meansOfLogin', 'id', 'User_id');
+    models.User.hasMany(models.Purchase, 'purchases', 'id', 'Buyer_id');
+    models.User.hasMany(models.Purchase, 'sells', 'id', 'Seller_id');
+    models.User.hasMany(models.Reload, 'reloads', 'id', 'Buyer_id');
+    models.User.hasMany(models.Reload, 'reloadsMade', 'id', 'Seller_id');
+    models.User.hasMany(models.Transfer, 'transfers', 'id', 'Reciever_id');
+    models.User.hasMany(models.Transfer, 'transfersMade', 'id', 'Sender_id');
 };
 
 export default User;

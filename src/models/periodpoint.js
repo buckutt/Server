@@ -9,8 +9,8 @@ const PeriodPoint = thinky.createModel('PeriodPoint', {
     editedAt : Date,
     isRemoved: type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra
-    periodId : type.string().optional(),
-    pointId  : type.string().optional()
+    Period_id: type.string().optional(),
+    Point_id : type.string().optional()
 }, {
     enforce_missing: true,
     enforce_extra  : 'remove',
@@ -26,8 +26,8 @@ PeriodPoint.ensureIndex('createdAt');
 PeriodPoint.ensureIndex('editedAt');
 
 PeriodPoint.associate = models => {
-    models.PeriodPoint.belongsTo(models.Point, 'point', 'id', 'pointId');
-    models.PeriodPoint.belongsTo(models.Period, 'period', 'id', 'periodId');
+    models.PeriodPoint.belongsTo(models.Point, 'point', 'id', 'Point_id');
+    models.PeriodPoint.belongsTo(models.Period, 'period', 'id', 'Period_id');
     models.PeriodPoint.hasAndBelongsToMany(models.Device, 'devices', 'id', 'id');
 };
 

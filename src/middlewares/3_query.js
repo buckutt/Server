@@ -15,7 +15,7 @@ const queryRules = {
  * @return {Function} The next middleware
  */
 export default function query (req, res, next) {
-    const query = {};
+    const newQuery = {};
 
     Object.keys(queryRules).forEach(q => {
         const value = (req.query.hasOwnProperty(q)) ? req.query[q].toString() : null;
@@ -23,10 +23,10 @@ export default function query (req, res, next) {
         if (!value) {
             return;
         }
-        query[q] = queryRules[q](value);
+        newQuery[q] = queryRules[q](value);
     });
 
-    req.query = query;
+    req.query = newQuery;
 
     return next();
-};
+}
