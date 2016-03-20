@@ -15,7 +15,6 @@ const disableAuth = false;
  * @return {Function} The next middleware
  */
 export default function token (req, res, next) {
-    lol;
     const secret = config.secret;
 
     // Login : no token required
