@@ -171,8 +171,8 @@ describe('Create', function () {
         it('should create PeriodPoint', done => {
             unirest.post('https://localhost:3006/periodPoints')
                 .send({
-                    periodId: '',
-                    pointId : ''
+                    Period_id: '',
+                    Point_id : ''
                 })
                 .end(response => {
                     assert.equal(200, response.code);
@@ -307,12 +307,12 @@ describe('Create', function () {
             };
             unirest.post(`https://localhost:3006/purchases?embed=${q(e)}`)
                 .send({
-                    fundationId: UNG.id,
-                    pointId    : Foyer.id,
-                    buyerId    : GJ.id,
-                    sellerId   : TC.id,
-                    promotionId: Formule1Euro.id,
-                    articles   : [
+                    Fundation_id: UNG.id,
+                    Point_id    : Foyer.id,
+                    Buyer_id    : GJ.id,
+                    Seller_id   : TC.id,
+                    Promotion_id: Formule1Euro.id,
+                    articles    : [
                         IceTeaPeche.id,
                         KinderDelice.id
                     ]

@@ -10,7 +10,7 @@ const Right = thinky.createModel('Right', {
     editedAt : Date,
     isRemoved: type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra
-    periodId : type.string().optional()
+    Period_id: type.string().optional()
 }, {
     enforce_missing: true,
     enforce_extra  : 'remove',
@@ -27,7 +27,7 @@ Right.ensureIndex('createdAt');
 Right.ensureIndex('editedAt');
 
 Right.associate = models => {
-    models.Right.belongsTo(models.Period, 'period', 'periodId', 'id');
+    models.Right.belongsTo(models.Period, 'period', 'Period_id', 'id');
     models.Right.hasAndBelongsToMany(models.User, 'users', 'id', 'id');
 };
 

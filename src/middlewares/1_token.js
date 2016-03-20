@@ -40,7 +40,7 @@ export default function token (req, res, next) {
     }
 
     const scheme = parts[0];
-    const token  = parts[1];
+    const bearer = parts[1];
     // Invalid format (`Bearer Token`)
     if (scheme.toLowerCase() !== 'bearer') {
         return next(new APIError(400, 'Scheme is `Bearer`. Header format is Authorization: Bearer [token]'));
@@ -52,12 +52,12 @@ export default function token (req, res, next) {
     const now               = Date.now();
 
     jwt
-        .verifyAsync(token, secret)
+        .verifyAsync(bearer, secret)
         .then(decoded => {
-            const userId  = decoded.id;
+            const User_id  = decoded.id;
             connectType = decoded.connectType;
 
-            return req.app.locals.models.User.get(userId).getJoin({
+            return req.app.locals.models.User.get(User_id).getJoin({
                 rights: {
                     period: true
                 }
@@ -90,4 +90,4 @@ export default function token (req, res, next) {
         .catch(jwt.JsonWebTokenError, err =>
             next(new APIError(401, 'Invalid token', err))
         );
-};
+}
