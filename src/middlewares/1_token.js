@@ -1,7 +1,7 @@
-import APIError from '../APIError';
-import config   from '../config';
 import jwt      from 'jsonwebtoken';
 import Promise  from 'bluebird';
+import APIError from '../errors/APIError';
+import config   from '../config';
 
 Promise.promisifyAll(jwt);
 

@@ -1,11 +1,6 @@
+import 'source-map-support/register';
 import fs           from 'fs';
 import path         from 'path';
-import APIError     from './APIError';
-import config       from './config';
-import logger       from './log';
-import { pp }       from './lib/utils';
-import middlewares  from './middlewares';
-import models       from './models';
 import bodyParser   from 'body-parser';
 import compression  from 'compression';
 import consoleTitle from 'console-title';
@@ -13,10 +8,16 @@ import cookieParser from 'cookie-parser';
 import express      from 'express';
 import https        from 'https';
 import morgan       from 'morgan';
+import config       from './config';
+import controllers  from './controllers';
+import models       from './models';
+import { startSSE } from './sseServer';
+import logger       from './lib/log';
+import thinky       from './lib/thinky';
+import { pp }       from './lib/utils';
+import APIError     from './errors/APIError';
 
 const log = logger(module);
-
-consoleTitle('Buckless Server **');
 
 const app = express();
 
@@ -27,78 +28,37 @@ app.locals.models = models;
  * Middlewares
  */
 
-app.use((req, res, next) => {
-    // CORS
-    res.header('Access-Control-Allow-Headers', 'accept, content-type');
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Expose-Headers', 'device,point');
-    next();
-});
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
 
-// Set application into the request
-app.use((req, res, next) => {
-    req.app = app;
+/**
+ * Routes
+ */
 
-    if (!req.client.authorized) {
-        return res
-            .status(401)
-            .end('Unauthorized : missing client HTTPS certificate');
-    }
+app.use(controllers);
 
-    return next();
-});
+/**
+ * Error handling
+ */
 
-Object.keys(middlewares).forEach(key => app.use(middlewares[key]));
-
-// Controllers subrouters
-const controllers = fs
-    .readdirSync(path.join(config.root, 'controllers/'))
-    .filter(f => f.slice(-3) === '.js')
-    .sort()
-    .map(f => require(path.join(config.root, 'controllers/', f)).default);
-
-controllers.forEach(controller => {
-    controller(app);
-});
-
-// Service controllers subrouters
-const services = fs
-    .readdirSync(path.join(config.root, 'controllers/', 'services/'))
-    .filter(f => f.slice(-3) === '.js')
-    .sort()
-    .map(f => require(path.join(config.root, 'controllers/', 'services/', f)).default);
-
-services.forEach(service => {
-    service(app);
-});
-
-// 404 Handling
+// 404
 app.use((req, res, next) => {
     next(new APIError(404, 'Not Found'));
 });
 
-// Other errors (req is not used, but four arguments must be detected by express to recognize error middleware)
+// Internal error
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-    const newErr = err;
-
-    log.error(newErr.message);
-
-    if (err instanceof APIError) { log.error(newErr.details); }
-
-    /* istanbul ignore if */
-    if (newErr.message === 'Unknown error') {
-        console.log(pp(newErr));
+    if (!err.isAPIError) {
+        console.log(err.stack);
+    } else {
+        log.error(pp(err));
     }
 
     res
-        .status(newErr.status || 500)
-        .json(newErr)
+        .status(err.status || 500)
+        .json(err)
         .end();
 });
 
@@ -126,15 +86,18 @@ app.start = () => {
         rejectUnauthorized: false
     }, app);
 
-    server.listen(config.port, () => {
-        log.info('Server is listening on port %d', config.port);
-        log.warn('Please wait for models to be ready...');
-        consoleTitle('Buckless Server *');
-    });
 
-    if (typeof app.locals.serverReady === 'function') {
-        app.locals.serverReady(server);
-    }
+    return new Promise((resolve, reject) => {
+        models.loadModels().then(() => {
+            log.info('Models loaded');
+
+            server.listen(config.port, () => {
+                log.info('Server is listening on port %d', config.port);
+                startSSE(server, app);
+                resolve();
+            });
+        });
+    });
 };
 
 // Start the application

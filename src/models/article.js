@@ -1,4 +1,4 @@
-import thinky   from '../thinky';
+import thinky from '../lib/thinky';
 
 const type = thinky.type;
 

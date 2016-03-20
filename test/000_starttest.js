@@ -4,14 +4,10 @@ import fs      from 'fs';
 import unirest from 'unirest';
 
 describe('Should start the test application', () => {
-    it('should init models', function (done) {
-        this.timeout(500 * 1000);
-
-        app.start();
-
-        app.locals.models.onReady = () => {
-            done();
-        };
+    before(function (done) {
+        app
+            .start()
+            .then(done);
     });
 
     it('should refuse if no ssl certificate is present', done => {
@@ -34,7 +30,7 @@ const certFile = fs.readFileSync('ssl/test/test.crt');
 const keyFile  = fs.readFileSync('ssl/test/test.key');
 const caFile   = fs.readFileSync('ssl/test/ca.crt');
 
-const options = {
+const options  = {
     cert              : certFile,
     key               : keyFile,
     ca                : caFile,
