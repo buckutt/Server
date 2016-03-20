@@ -3,7 +3,6 @@ import fs           from 'fs';
 import path         from 'path';
 import bodyParser   from 'body-parser';
 import compression  from 'compression';
-import consoleTitle from 'console-title';
 import cookieParser from 'cookie-parser';
 import express      from 'express';
 import https        from 'https';
