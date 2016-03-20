@@ -32,30 +32,32 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
 
+/**
+ * Routes
+ */
+
 app.use(controllers);
 
-// 404 Handling
+/**
+ * Error handling
+ */
+
+// 404
 app.use((req, res, next) => {
     next(new APIError(404, 'Not Found'));
 });
 
-// Other errors (req is not used, but four arguments must be detected by express to recognize error middleware)
+// Internal error
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-    console.log(err.stack);
-    const newErr = err;
-
-    log.error(newErr.message);
-
-    if (err instanceof APIError) { log.error(newErr.details); }
-
-    /* istanbul ignore if */
-    if (newErr.message === 'Unknown error') {
-        console.log(pp(newErr));
+    if (!err.isAPIError) {
+        console.log(err.stack);
+    } else {
+        log.error(pp(err));
     }
 
     res
-        .status(newErr.status || 500)
-        .json(newErr)
+        .status(err.status || 500)
+        .json(err)
         .end();
 });
 
