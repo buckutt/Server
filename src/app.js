@@ -1,11 +1,5 @@
 import fs           from 'fs';
 import path         from 'path';
-import APIError     from './APIError';
-import config       from './config';
-import logger       from './log';
-import { pp }       from './lib/utils';
-import middlewares  from './middlewares';
-import models       from './models';
 import bodyParser   from 'body-parser';
 import compression  from 'compression';
 import consoleTitle from 'console-title';
@@ -13,12 +7,22 @@ import cookieParser from 'cookie-parser';
 import express      from 'express';
 import https        from 'https';
 import morgan       from 'morgan';
+import APIError     from './APIError';
+import config       from './config';
+import logger       from './log';
+import { pp }       from './lib/utils';
+import middlewares  from './middlewares';
+import controllers  from './controllers';
+import models       from './models';
+import changes      from './changes';
 
 const log = logger(module);
 
-consoleTitle('Buckless Server **');
+consoleTitle('Buckless Server');
 
 const app = express();
+
+changes(app);
 
 app.locals.config = config;
 app.locals.models = models;
@@ -56,27 +60,7 @@ app.use((req, res, next) => {
 
 Object.keys(middlewares).forEach(key => app.use(middlewares[key]));
 
-// Controllers subrouters
-const controllers = fs
-    .readdirSync(path.join(config.root, 'controllers/'))
-    .filter(f => f.slice(-3) === '.js')
-    .sort()
-    .map(f => require(path.join(config.root, 'controllers/', f)).default);
-
-controllers.forEach(controller => {
-    controller(app);
-});
-
-// Service controllers subrouters
-const services = fs
-    .readdirSync(path.join(config.root, 'controllers/', 'services/'))
-    .filter(f => f.slice(-3) === '.js')
-    .sort()
-    .map(f => require(path.join(config.root, 'controllers/', 'services/', f)).default);
-
-services.forEach(service => {
-    service(app);
-});
+app.use(controllers);
 
 // 404 Handling
 app.use((req, res, next) => {
