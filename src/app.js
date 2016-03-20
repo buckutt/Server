@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import fs           from 'fs';
 import path         from 'path';
 import bodyParser   from 'body-parser';
@@ -13,15 +14,11 @@ import logger       from './log';
 import { pp }       from './lib/utils';
 import controllers  from './controllers';
 import models       from './models';
-import changes      from './changes';
+import { startSSE } from './changes';
 
 const log = logger(module);
 
-consoleTitle('Buckless Server');
-
 const app = express();
-
-changes(app);
 
 app.locals.config = config;
 app.locals.models = models;
@@ -88,13 +85,10 @@ app.start = () => {
 
     server.listen(config.port, () => {
         log.info('Server is listening on port %d', config.port);
-        log.warn('Please wait for models to be ready...');
-        consoleTitle('Buckless Server *');
+        log.warn('Loading models...');
     });
 
-    if (typeof app.locals.serverReady === 'function') {
-        app.locals.serverReady(server);
-    }
+    startSSE(server, app);
 };
 
 // Start the application

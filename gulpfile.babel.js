@@ -9,7 +9,7 @@ gulp.task('seed', ['default'], (cb) => {
 
     models.onReady = () => {
         const dataSeeds = require('./app/dataSeeds').default;
-        const raw         = dataSeeds.raw(models);
+        const raw       = dataSeeds.raw(models);
 
         Promise
             .all(raw.all.map(document => document.save()))

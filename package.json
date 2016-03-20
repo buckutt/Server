@@ -9,7 +9,6 @@
   ],
   "license": "MIT",
   "scripts": {
-    "test": "npm run test:nocoverage",
     "build": "gulp",
     "clean": "gulp clean",
     "test:nocoverage": "gulp && NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/mocha/bin/_mocha --sort --bail",
@@ -35,6 +34,7 @@
     "jsonwebtoken": "^5.5.4",
     "morgan": "1.6.1",
     "qs": "^6.1.0",
+    "source-map-support": "^0.4.0",
     "sse": "github:gjuchault/sse.js",
     "sync-exec": "^0.6.2",
     "thinky": "^2.2.4",
