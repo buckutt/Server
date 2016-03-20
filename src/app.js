@@ -8,13 +8,14 @@ import cookieParser from 'cookie-parser';
 import express      from 'express';
 import https        from 'https';
 import morgan       from 'morgan';
-import APIError     from './errors/APIError';
-import logger       from './lib/log';
 import config       from './config';
-import { pp }       from './lib/utils';
 import controllers  from './controllers';
 import models       from './models';
 import { startSSE } from './sseServer';
+import logger       from './lib/log';
+import thinky       from './lib/thinky';
+import { pp }       from './lib/utils';
+import APIError     from './errors/APIError';
 
 const log = logger(module);
 
@@ -85,12 +86,18 @@ app.start = () => {
         rejectUnauthorized: false
     }, app);
 
-    server.listen(config.port, () => {
-        log.info('Server is listening on port %d', config.port);
-        log.warn('Loading models...');
-    });
 
-    startSSE(server, app);
+    return new Promise((resolve, reject) => {
+        models.loadModels().then(() => {
+            log.info('Models loaded');
+
+            server.listen(config.port, () => {
+                log.info('Server is listening on port %d', config.port);
+                startSSE(server, app);
+                resolve();
+            });
+        });
+    });
 };
 
 // Start the application

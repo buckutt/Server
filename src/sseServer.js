@@ -82,4 +82,6 @@ export function startSSE(httpServer, app) {
                 return client.send(`Error: ${err.message}`);
             });
     });
+
+    log.info('SSE server is listening on /changes');
 };

@@ -4,14 +4,10 @@ import fs      from 'fs';
 import unirest from 'unirest';
 
 describe('Should start the test application', () => {
-    it('should init models', function (done) {
-        this.timeout(500 * 1000);
-
-        app.start();
-
-        app.locals.models.onReady = () => {
-            done();
-        };
+    before(function (done) {
+        app
+            .start()
+            .then(done);
     });
 
     it('should refuse if no ssl certificate is present', done => {

@@ -14,7 +14,7 @@
     "test:nocoverage": "gulp && NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/mocha/bin/_mocha --sort --bail",
     "test:coverage": "gulp && NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/mocha/bin/_mocha -- --sort --bail",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
-    "start": "gulp && node app/app",
+    "start": "gulp && node build/app",
     "test": "npm run test:nocoverage",
     "startdb": "rethinkdb&",
     "stopdb": "killall rethinkdb -s SIGINT",

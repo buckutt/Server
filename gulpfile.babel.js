@@ -5,10 +5,10 @@ import sourcemaps from 'gulp-sourcemaps';
 import rimraf     from 'rimraf';
 
 gulp.task('seed', ['default'], (cb) => {
-    const models = require('./app/models').default;
+    const models = require('./src/models').default;
 
     models.onReady = () => {
-        const dataSeeds = require('./app/dataSeeds').default;
+        const dataSeeds = require('./scripts/dataSeeds').default;
         const raw       = dataSeeds.raw(models);
 
         Promise
@@ -40,7 +40,7 @@ gulp.task('cleardb', (cb) => {
 
 gulp.task('config', () => {
     const src = 'src/config/**/*.json';
-    const dst = 'app/config/';
+    const dst = 'build/config/';
 
     return gulp.src(src)
         .pipe(changed(dst))
@@ -49,7 +49,7 @@ gulp.task('config', () => {
 
 gulp.task('default', ['config'], () => {
     const src = 'src/**/*.js';
-    const dst = 'app';
+    const dst = 'build';
 
     return gulp.src(src)
         .pipe(changed(dst))
