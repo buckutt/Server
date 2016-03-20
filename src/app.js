@@ -11,7 +11,6 @@ import APIError     from './APIError';
 import config       from './config';
 import logger       from './log';
 import { pp }       from './lib/utils';
-import middlewares  from './middlewares';
 import controllers  from './controllers';
 import models       from './models';
 import changes      from './changes';
@@ -31,34 +30,10 @@ app.locals.models = models;
  * Middlewares
  */
 
-app.use((req, res, next) => {
-    // CORS
-    res.header('Access-Control-Allow-Headers', 'accept, content-type');
-    res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Expose-Headers', 'device,point');
-    next();
-});
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
-
-// Set application into the request
-app.use((req, res, next) => {
-    req.app = app;
-
-    if (!req.client.authorized) {
-        return res
-            .status(401)
-            .end('Unauthorized : missing client HTTPS certificate');
-    }
-
-    return next();
-});
-
-Object.keys(middlewares).forEach(key => app.use(middlewares[key]));
 
 app.use(controllers);
 
@@ -69,6 +44,7 @@ app.use((req, res, next) => {
 
 // Other errors (req is not used, but four arguments must be detected by express to recognize error middleware)
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    console.log(err.stack);
     const newErr = err;
 
     log.error(newErr.message);

@@ -2,9 +2,18 @@ import fs      from 'fs';
 import path    from 'path';
 import { Router } from 'express';
 import { walkSync } from 'fs-walk';
+import middlewares  from '../middlewares';
 
 const router = new Router('/');
 
+/**
+ * Use every middlewares
+ */
+Object.keys(middlewares).forEach(key => router.use(middlewares[key]));
+
+/**
+ * Recursively use every subrouters
+ */
 walkSync(__dirname, function(basedir, f) {
     if (!(f.slice(0, -3) !== 'index' && f.slice(-3) === '.js')) {
         return;
