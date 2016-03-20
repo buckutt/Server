@@ -20,7 +20,6 @@ const tokenOptions = {
 };
 
 router.post('/services/login', (req, res, next) => {
-    console.log('ICI');
     const secret = req.app.locals.config.secret;
     const models = req.app.locals.models;
 

@@ -10,13 +10,7 @@ walkSync(__dirname, function(basedir, f) {
         return;
     }
 
-	let URI = basedir.split(__dirname)[1] + '/' || '/';
-    URI += f.slice(0, -3);
-
-    console.log(URI);
-    console.log(require(path.join(basedir, f)));
-
-    router.use(URI, require(path.join(basedir, f)).default);
+    router.use(require(path.join(basedir, f)).default);
 });
 
 export default router;
