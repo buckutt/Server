@@ -5,6 +5,7 @@ import unirest from 'unirest';
 
 describe('Should start the test application', () => {
     before(function (done) {
+        this.timeout(0);
         app
             .start()
             .then(done);
