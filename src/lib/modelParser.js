@@ -1,4 +1,4 @@
-import APIError from '../APIError';
+import APIError from '../errors/APIError';
 
 /**
  * Parses the target odel

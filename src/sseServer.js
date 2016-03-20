@@ -1,7 +1,7 @@
 import SSE             from 'sse';
 import qs              from 'qs';
 import { promisify }   from 'bluebird';
-import logger          from './log';
+import logger          from './lib/log';
 import modelParser     from './lib/modelParser';
 import middlewares_    from './middlewares';
 

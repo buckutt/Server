@@ -1,8 +1,7 @@
 import fs           from 'fs';
+import thinky       from '../lib/thinky';
+import logger       from '../lib/log';
 import config       from '../config';
-import thinky       from '../thinky';
-import logger       from '../log';
-import consoleTitle from 'console-title';
 
 const log = logger(module);
 
@@ -34,10 +33,7 @@ Object.keys(models).forEach((modelName, i, arr) => {
 
         if (modelsLoaded === arr.length - 1) {
             log.info('Models ready');
-            consoleTitle('Buckless Server - Ready !');
-            setTimeout(() => {
-                consoleTitle('Buckless Server');
-            }, 1000);
+
 
             if (models.onReady) {
                 models.onReady();

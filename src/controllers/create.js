@@ -1,11 +1,11 @@
-import APIError        from '../APIError';
-import logger          from '../log';
-import modelParser     from '../lib/modelParser';
-import relationsHelper from '../lib/relationsHelper';
-import thinky          from '../thinky';
-import { pp }          from '../lib/utils';
 import express         from 'express';
 import Promise         from 'bluebird';
+import logger          from '../lib/log';
+import modelParser     from '../lib/modelParser';
+import relationsHelper from '../lib/relationsHelper';
+import thinky          from '../lib/thinky';
+import { pp }          from '../lib/utils';
+import APIError        from '../errors/APIError';
 
 const log = logger(module);
 

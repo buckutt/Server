@@ -1,6 +1,6 @@
-import thinky   from '../src/thinky';
 import Promise  from 'bluebird';
 import syncExec from 'sync-exec';
+import thinky   from '../src/lib/thinky';
 
 const sslResult = syncExec('openssl x509 -noout -fingerprint -in ssl/test/test.crt').stdout;
 

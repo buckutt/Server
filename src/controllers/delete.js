@@ -1,10 +1,10 @@
-import APIError    from '../APIError';
-import idParser    from '../lib/idParser';
-import logger      from '../log';
-import modelParser from '../lib/modelParser';
-import thinky      from '../thinky';
-import { pp }      from '../lib/utils';
 import express     from 'express';
+import idParser    from '../lib/idParser';
+import logger      from '../lib/log';
+import modelParser from '../lib/modelParser';
+import thinky      from '../lib/thinky';
+import { pp }      from '../lib/utils';
+import APIError    from '../errors/APIError';
 
 const log = logger(module);
 

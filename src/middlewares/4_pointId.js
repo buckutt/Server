@@ -1,4 +1,4 @@
-import APIError from '../APIError';
+import APIError from '../errors/APIError';
 
 /**
  * Retrieve the point id from the SSL certificate fingerprint

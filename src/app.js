@@ -8,13 +8,13 @@ import cookieParser from 'cookie-parser';
 import express      from 'express';
 import https        from 'https';
 import morgan       from 'morgan';
-import APIError     from './APIError';
+import APIError     from './errors/APIError';
+import logger       from './lib/log';
 import config       from './config';
-import logger       from './log';
 import { pp }       from './lib/utils';
 import controllers  from './controllers';
 import models       from './models';
-import { startSSE } from './changes';
+import { startSSE } from './sseServer';
 
 const log = logger(module);
 

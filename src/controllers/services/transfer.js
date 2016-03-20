@@ -1,7 +1,7 @@
-import APIError from '../../APIError';
-import logger   from '../../log';
-import thinky   from '../../thinky';
 import express  from 'express';
+import logger   from '../../lib/log';
+import thinky   from '../../lib/thinky';
+import APIError from '../../errors/APIError';
 
 const log = logger(module);
 

@@ -1,6 +1,6 @@
-import fs      from 'fs';
-import path    from 'path';
-import { Router } from 'express';
+import fs           from 'fs';
+import path         from 'path';
+import { Router }   from 'express';
 import { walkSync } from 'fs-walk';
 import middlewares  from '../middlewares';
 

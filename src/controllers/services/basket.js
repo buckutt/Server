@@ -1,9 +1,9 @@
-import APIError from '../../APIError';
-import logger   from '../../log';
-import thinky   from '../../thinky';
-import { pp }   from '../../lib/utils';
 import express  from 'express';
 import Promise  from 'bluebird';
+import APIError from '../../errors/APIError';
+import logger   from '../../lib/log';
+import thinky   from '../../lib/thinky';
+import { pp }   from '../../lib/utils';
 
 const log = logger(module);
 
@@ -34,7 +34,7 @@ router.post('/services/basket', (req, res, next) => {
 
 router.post('/services/basket', (req, res, next) => {
     const models = req.app.locals.models;
-    
+
     // Purchases documents
     const purchases = [];
     // Reloads documents
