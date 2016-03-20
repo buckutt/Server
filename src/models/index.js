@@ -1,14 +1,10 @@
 import fs           from 'fs';
 import config       from '../config';
-import logger       from '../lib/log';
 import thinky       from '../lib/thinky';
-
-const log = logger(module);
 
 const models = {
     r: thinky.r
 };
-
 
 fs
     .readdirSync(`${config.root}/models/`)
@@ -21,22 +17,20 @@ fs
 
 const loadPromises = [];
 
-Object.keys(models).forEach((modelName, i, arr) => {
+Object.keys(models).forEach(modelName => {
     if (modelName === 'r') {
         return;
     }
 
     models[modelName].associate(models);
 
-    loadPromises.push(new Promise((resolve, reject) => {
+    loadPromises.push(new Promise(resolve => {
         models[modelName].on('ready', () => {
             resolve();
         });
-    }))
+    }));
 });
 
-models.loadModels = function() {
-    return Promise.all(loadPromises);
-}
+models.loadModels = () => Promise.all(loadPromises);
 
 export default models;

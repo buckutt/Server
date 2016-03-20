@@ -7,7 +7,12 @@ import middlewares_    from './middlewares';
 
 const log = logger(module);
 
-export function startSSE(httpServer, app) {
+/**
+ * Start a SSE server on an express instance
+ * @param {HTTPServer} httpServer The node std http server
+ * @param {Express}    app        The express instance
+ */
+export default (httpServer, app) => {
     const sse = new SSE(httpServer, {
         path: '/changes',
         CORS: true

@@ -61,4 +61,4 @@ export default function pointId (req, res, next) {
 
             return next();
         });
-};
+}

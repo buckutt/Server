@@ -52,4 +52,4 @@ export default function accessRequired (req, res, next) {
     if (!handled) {
         return next(new APIError(401, 'Unauthorized', 'No right to do that'));
     }
-};
+}

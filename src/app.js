@@ -1,6 +1,6 @@
 import 'source-map-support/register';
 import fs           from 'fs';
-import path         from 'path';
+import cors         from 'cors';
 import bodyParser   from 'body-parser';
 import compression  from 'compression';
 import cookieParser from 'cookie-parser';
@@ -10,9 +10,8 @@ import morgan       from 'morgan';
 import config       from './config';
 import controllers  from './controllers';
 import models       from './models';
-import { startSSE } from './sseServer';
+import startSSE     from './sseServer';
 import logger       from './lib/log';
-import thinky       from './lib/thinky';
 import { pp }       from './lib/utils';
 import APIError     from './errors/APIError';
 
@@ -27,6 +26,12 @@ app.locals.models = models;
  * Middlewares
  */
 
+app.use(cors({
+    allowedHeaders: ['content-type', 'Authorization'],
+    credentials   : true,
+    exposedHeaders: ['device', 'point'],
+    origin        : true
+}));
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -85,8 +90,7 @@ app.start = () => {
         rejectUnauthorized: false
     }, app);
 
-
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
         models.loadModels().then(() => {
             log.info('Models loaded');
 

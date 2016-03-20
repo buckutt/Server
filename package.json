@@ -19,7 +19,7 @@
     "startdb": "rethinkdb&",
     "stopdb": "killall rethinkdb -s SIGINT",
     "cleardb": "gulp cleardb",
-    "lint": "eslint . --ignore-pattern app,coverage,gulpfile.js"
+    "lint": "eslint . --ignore-pattern build,coverage,gulpfile.js"
   },
   "dependencies": {
     "bcryptjs": "^2.3.0",

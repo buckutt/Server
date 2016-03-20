@@ -17,16 +17,16 @@ describe('Before tests', () => {
         this.timeout(20 * 1000);
 
         return r.tableList()
-            .then(function(tableList) {
-                var deletePromises = [];
+            .then(tableList => {
+                const deletePromises = [];
 
-                tableList.forEach(function(table) {
+                tableList.forEach(table => {
                     deletePromises.push(r.table(table).delete());
                 });
 
                 return Promise.all(deletePromises);
             })
-            .then(function() {
+            .then(() => {
                 done();
             });
     });
