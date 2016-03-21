@@ -389,92 +389,92 @@ export default {
         const arr = [];
 
         /* Articles - Relationships : cateogry, point, price, sets, promotion */
-        data.articles.articleKinderDelice.prices     = [ data.prices.price50 ];
-        data.articles.articleKinderDelice.sets       = [ data.sets.setBarresf1e ];
-        data.articles.articleKinderDelice.categoryId = data.categories.categoryBarres.id;
+        data.articles.articleKinderDelice.prices      = [ data.prices.price50 ];
+        data.articles.articleKinderDelice.sets        = [ data.sets.setBarresf1e ];
+        data.articles.articleKinderDelice.Category_id = data.categories.categoryBarres.id;
         arr.push(data.articles.articleKinderDelice.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleMars.prices     = [ data.prices.price50 ];
-        data.articles.articleMars.sets       = [ data.sets.setBarresf1e ];
-        data.articles.articleMars.categoryId = data.categories.categoryBarres.id;
+        data.articles.articleMars.prices      = [ data.prices.price50 ];
+        data.articles.articleMars.sets        = [ data.sets.setBarresf1e ];
+        data.articles.articleMars.Category_id = data.categories.categoryBarres.id;
         arr.push(data.articles.articleMars.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleKinderCountry.prices     = [ data.prices.price50 ];
-        data.articles.articleKinderCountry.sets       = [ data.sets.setBarresf1e ];
-        data.articles.articleKinderCountry.categoryId = data.categories.categoryBarres.id;
+        data.articles.articleKinderCountry.prices      = [ data.prices.price50 ];
+        data.articles.articleKinderCountry.sets        = [ data.sets.setBarresf1e ];
+        data.articles.articleKinderCountry.Category_id = data.categories.categoryBarres.id;
         arr.push(data.articles.articleKinderCountry.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleIceTeaPeche.prices     = [ data.prices.price50 ];
-        data.articles.articleIceTeaPeche.sets       = [ data.sets.setCanettesf1e ];
-        data.articles.articleIceTeaPeche.categoryId = data.categories.categoryCanettes.id;
+        data.articles.articleIceTeaPeche.prices      = [ data.prices.price50 ];
+        data.articles.articleIceTeaPeche.sets        = [ data.sets.setCanettesf1e ];
+        data.articles.articleIceTeaPeche.Category_id = data.categories.categoryCanettes.id;
         arr.push(data.articles.articleIceTeaPeche.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleEau.prices     = [ data.prices.price50 ];
-        data.articles.articleEau.categoryId = data.categories.categoryGeneral.id;
+        data.articles.articleEau.prices      = [ data.prices.price50 ];
+        data.articles.articleEau.Category_id = data.categories.categoryGeneral.id;
         arr.push(data.articles.articleEau.saveAll({
             prices: true
         }));
 
-        data.articles.articleIceTeaMangue.prices     = [ data.prices.price50 ];
-        data.articles.articleIceTeaMangue.sets       = [ data.sets.setCanettesf1e ];
-        data.articles.articleIceTeaMangue.categoryId = data.categories.categoryCanettes.id;
+        data.articles.articleIceTeaMangue.prices      = [ data.prices.price50 ];
+        data.articles.articleIceTeaMangue.sets        = [ data.sets.setCanettesf1e ];
+        data.articles.articleIceTeaMangue.Category_id = data.categories.categoryCanettes.id;
         arr.push(data.articles.articleIceTeaMangue.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleLiptonic.prices     = [ data.prices.price50 ];
-        data.articles.articleLiptonic.sets       = [ data.sets.setCanettesf1e ];
-        data.articles.articleLiptonic.categoryId = data.categories.categoryCanettes.id;
+        data.articles.articleLiptonic.prices      = [ data.prices.price50 ];
+        data.articles.articleLiptonic.sets        = [ data.sets.setCanettesf1e ];
+        data.articles.articleLiptonic.Category_id = data.categories.categoryCanettes.id;
         arr.push(data.articles.articleLiptonic.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleSchweppes.prices     = [ data.prices.price50 ];
-        data.articles.articleSchweppes.sets       = [ data.sets.setCanettesf1e ];
-        data.articles.articleSchweppes.categoryId = data.categories.categoryCanettes.id;
+        data.articles.articleSchweppes.prices      = [ data.prices.price50 ];
+        data.articles.articleSchweppes.sets        = [ data.sets.setCanettesf1e ];
+        data.articles.articleSchweppes.Category_id = data.categories.categoryCanettes.id;
         arr.push(data.articles.articleSchweppes.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleSchweppesAgrum.prices     = [ data.prices.price50 ];
-        data.articles.articleSchweppesAgrum.sets       = [ data.sets.setCanettesf1e ];
-        data.articles.articleSchweppesAgrum.categoryId = data.categories.categoryCanettes.id;
+        data.articles.articleSchweppesAgrum.prices      = [ data.prices.price50 ];
+        data.articles.articleSchweppesAgrum.sets        = [ data.sets.setCanettesf1e ];
+        data.articles.articleSchweppesAgrum.Category_id = data.categories.categoryCanettes.id;
         arr.push(data.articles.articleSchweppesAgrum.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleCocaCola.prices     = [ data.prices.price50 ];
-        data.articles.articleCocaCola.sets       = [ data.sets.setCanettesf1e ];
-        data.articles.articleCocaCola.categoryId = data.categories.categoryCanettes.id;
+        data.articles.articleCocaCola.prices      = [ data.prices.price50 ];
+        data.articles.articleCocaCola.sets        = [ data.sets.setCanettesf1e ];
+        data.articles.articleCocaCola.Category_id = data.categories.categoryCanettes.id;
         arr.push(data.articles.articleCocaCola.saveAll({
             prices: true,
             sets  : true
         }));
 
-        data.articles.articleCrepe.prices     = [ data.prices.price50 ];
-        data.articles.articleCrepe.categoryId = data.categories.categoryGeneral.id;
+        data.articles.articleCrepe.prices      = [ data.prices.price50 ];
+        data.articles.articleCrepe.Category_id = data.categories.categoryGeneral.id;
         arr.push(data.articles.articleCrepe.saveAll({
             prices: true
         }));
 
-        data.articles.articleBeer.prices     = [ data.prices.price250 ];
-        data.articles.articleBeer.categoryId = data.categories.categoryGeneral.id;
+        data.articles.articleBeer.prices      = [ data.prices.price250 ];
+        data.articles.articleBeer.Category_id = data.categories.categoryGeneral.id;
         arr.push(data.articles.articleBeer.saveAll({
             prices: true
         }));
@@ -501,21 +501,21 @@ export default {
         }));
 
         /* MeansOfLogin - Relationships : user */
-        data.meansOfLogin.molGJEtuCard.userId = data.users.userGJ.id;
+        data.meansOfLogin.molGJEtuCard.User_id = data.users.userGJ.id;
         arr.push(data.meansOfLogin.molGJEtuCard.save());
 
-        data.meansOfLogin.molGJEtuMail.userId = data.users.userGJ.id;
+        data.meansOfLogin.molGJEtuMail.User_id = data.users.userGJ.id;
         arr.push(data.meansOfLogin.molGJEtuMail.save());
 
         /* Periods - Relationships : periodPoints, prices, rights */
 
         /* PeriodPoints - Relationships : point, period, devices */
-        data.periodPoints.periodPointEternityForEEtop1BDE.periodId = data.periods.periodEternity.id;
-        data.periodPoints.periodPointEternityForEEtop1BDE.pointId  = data.points.pointBde.id;
+        data.periodPoints.periodPointEternityForEEtop1BDE.Period_id = data.periods.periodEternity.id;
+        data.periodPoints.periodPointEternityForEEtop1BDE.Point_id  = data.points.pointBde.id;
         arr.push(data.periodPoints.periodPointEternityForEEtop1BDE.save());
 
-        data.periodPoints.periodPointEternityForEEtop2Foyer.periodId = data.periods.periodEternity.id;
-        data.periodPoints.periodPointEternityForEEtop2Foyer.pointId  = data.points.pointFoyer.id;
+        data.periodPoints.periodPointEternityForEEtop2Foyer.Period_id = data.periods.periodEternity.id;
+        data.periodPoints.periodPointEternityForEEtop2Foyer.Point_id  = data.points.pointFoyer.id;
         arr.push(data.periodPoints.periodPointEternityForEEtop2Foyer.save());
 
         /* Points - Relationships : periodPoints, articles, promotions, purchases, reloads */
@@ -538,9 +538,9 @@ export default {
         }));
 
         /* Prices - Relationships : fundation, group, period, articles, promotion */
-        data.prices.price50.fundationId = data.fundations.fundationFoyer.id;
-        data.prices.price50.groupId     = data.groups.groupCotisants.id;
-        data.prices.price50.periodId    = data.periods.periodEternity.id;
+        data.prices.price50.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50.Period_id    = data.periods.periodEternity.id;
         data.prices.price50.articles = [
             data.articles.articleMars,
             data.articles.articleKinderCountry,
@@ -554,19 +554,19 @@ export default {
             articles: true
         }));
 
-        data.prices.price100F1E.fundationId = data.fundations.fundationFoyer.id;
-        data.prices.price100F1E.groupId     = data.groups.groupCotisants.id;
-        data.prices.price100F1E.periodId    = data.periods.periodEternity.id;
+        data.prices.price100F1E.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price100F1E.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price100F1E.Period_id    = data.periods.periodEternity.id;
         arr.push(data.prices.price100F1E.save());
 
-        data.prices.price1003C.fundationId = data.fundations.fundationFoyer.id;
-        data.prices.price1003C.groupId     = data.groups.groupCotisants.id;
-        data.prices.price1003C.periodId    = data.periods.periodEternity.id;
+        data.prices.price1003C.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price1003C.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price1003C.Period_id    = data.periods.periodEternity.id;
         arr.push(data.prices.price1003C.save());
 
-        data.prices.price250.fundationId = data.fundations.fundationFoyer.id;
-        data.prices.price250.groupId     = data.groups.groupCotisants.id;
-        data.prices.price250.periodId    = data.periods.periodEternity.id;
+        data.prices.price250.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price250.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price250.Period_id    = data.periods.periodEternity.id;
         data.prices.price250.articles    = [ data.articles.articleBeer ];
         arr.push(data.prices.price250.saveAll({
             articles: true
@@ -577,25 +577,25 @@ export default {
             data.sets.setBarresf1e,
             data.sets.setCanettesf1e
         ];
-        data.promotions.promotionF1e.pointId = data.points.pointFoyer.id;
-        data.promotions.promotionF1e.priceId = data.prices.price100F1E.id;
+        data.promotions.promotionF1e.Point_id = data.points.pointFoyer.id;
+        data.promotions.promotionF1e.Price_id = data.prices.price100F1E.id;
         arr.push(data.promotions.promotionF1e.saveAll({
             sets: true
         }));
 
-        data.promotions.promotion3crepes.pointId = data.points.pointFoyer.id;
-        data.promotions.promotion3crepes.priceId = data.prices.price1003C.id;
+        data.promotions.promotion3crepes.Point_id = data.points.pointFoyer.id;
+        data.promotions.promotion3crepes.Price_id = data.prices.price1003C.id;
         arr.push(data.promotions.promotion3crepes.save());
 
         /* Rights - Relationships : period, users */
-        data.rights.rightGJAdmin.periodId = data.periods.periodNow.id;
-        data.rights.rightGJAdmin.users    = [ data.users.userGJ ];
+        data.rights.rightGJAdmin.Period_id = data.periods.periodNow.id;
+        data.rights.rightGJAdmin.users     = [ data.users.userGJ ];
         arr.push(data.rights.rightGJAdmin.saveAll({
             users: true
         }));
 
-        data.rights.rightGJSeller.periodId = data.periods.periodNow.id;
-        data.rights.rightGJSeller.users    = [ data.users.userGJ ];
+        data.rights.rightGJSeller.Period_id = data.periods.periodNow.id;
+        data.rights.rightGJSeller.users     = [ data.users.userGJ ];
         arr.push(data.rights.rightGJSeller.saveAll({
             users: true
         }));

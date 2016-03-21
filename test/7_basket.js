@@ -7,13 +7,13 @@ describe('Basket', () => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
-                    buyerId    : process.env.GJId,
-                    fundationId: process.env.FoyerId,
-                    promotionId: null,
-                    sellerId   : process.env.GJId,
-                    cost       : 50,
-                    type       : 'purchase',
-                    articles   : [
+                    Buyer_id    : process.env.GJId,
+                    Fundation_id: process.env.FoyerId,
+                    Promotion_id: null,
+                    Seller_id   : process.env.GJId,
+                    cost        : 50,
+                    type        : 'purchase',
+                    articles    : [
                         process.env.KinderDeliceId
                     ]
                 }
@@ -29,11 +29,11 @@ describe('Basket', () => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
-                    credit  : 50 * 100,
-                    trace   : 'card',
-                    buyerId : process.env.GJId,
-                    sellerId: process.env.GJId,
-                    type    : 'reload'
+                    credit   : 50 * 100,
+                    trace    : 'card',
+                    Buyer_id : process.env.GJId,
+                    Seller_id: process.env.GJId,
+                    type     : 'reload'
                 }
             ])
             .end(response => {
@@ -47,13 +47,13 @@ describe('Basket', () => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
-                    buyerId    : process.env.GJId,
-                    fundationId: process.env.FoyerId,
-                    promotionId: process.env.Formule1EuroId,
-                    sellerId   : process.env.GJId,
-                    cost       : 100,
-                    type       : 'purchase',
-                    articles   : [
+                    Buyer_id    : process.env.GJId,
+                    Fundation_id: process.env.FoyerId,
+                    Promotion_id: process.env.Formule1EuroId,
+                    Seller_id   : process.env.GJId,
+                    cost        : 100,
+                    type        : 'purchase',
+                    articles    : [
                         process.env.KinderDeliceId,
                         process.env.IceTeaPecheId
                     ]
@@ -70,32 +70,32 @@ describe('Basket', () => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
-                    buyerId    : process.env.GJId,
-                    fundationId: process.env.FoyerId,
-                    promotionId: process.env.Formule1EuroId,
-                    sellerId   : process.env.GJId,
-                    cost       : 100,
-                    type       : 'purchase',
-                    articles   : [
+                    Buyer_id    : process.env.GJId,
+                    Fundation_id: process.env.FoyerId,
+                    Promotion_id: process.env.Formule1EuroId,
+                    Seller_id   : process.env.GJId,
+                    cost        : 100,
+                    type        : 'purchase',
+                    articles    : [
                         process.env.KinderDeliceId,
                         process.env.IceTeaPecheId
                     ]
                 },
                 {
-                    credit  : 50 * 100,
-                    trace   : 'card',
-                    buyerId : process.env.GJId,
-                    sellerId: process.env.GJId,
-                    type    : 'reload'
+                    credit   : 50 * 100,
+                    trace    : 'card',
+                    Buyer_id : process.env.GJId,
+                    Seller_id: process.env.GJId,
+                    type     : 'reload'
                 },
                 {
-                    buyerId    : process.env.GJId,
-                    fundationId: process.env.FoyerId,
-                    promotionId: null,
-                    sellerId   : process.env.GJId,
-                    cost       : 50,
-                    type       : 'purchase',
-                    articles   : [
+                    Buyer_id    : process.env.GJId,
+                    Fundation_id: process.env.FoyerId,
+                    Promotion_id: null,
+                    Seller_id   : process.env.GJId,
+                    cost        : 50,
+                    type        : 'purchase',
+                    articles    : [
                         process.env.KinderDeliceId
                     ]
                 }
@@ -128,13 +128,13 @@ describe('Basket', () => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
-                    buyerId    : process.env.GJId,
-                    fundationId: process.env.FoyerId,
-                    promotionId: null,
-                    sellerId   : process.env.GJId,
-                    cost       : 10000,
-                    type       : 'purchase',
-                    articles   : [
+                    Buyer_id    : process.env.GJId,
+                    Fundation_id: process.env.FoyerId,
+                    Promotion_id: null,
+                    Seller_id   : process.env.GJId,
+                    cost        : 10000,
+                    type        : 'purchase',
+                    articles    : [
                         process.env.KinderDeliceId
                     ]
                 }

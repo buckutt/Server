@@ -12,7 +12,7 @@ const MeanOfLogin = thinky.createModel('MeanOfLogin', {
     editedAt : Date,
     isRemoved: type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra
-    userId   : type.string().optional()
+    User_id  : type.string().optional()
 }, {
     enforce_missing: true,
     enforce_extra  : 'remove',
@@ -29,7 +29,7 @@ MeanOfLogin.ensureIndex('createdAt');
 MeanOfLogin.ensureIndex('editedAt');
 
 MeanOfLogin.associate = models => {
-    models.MeanOfLogin.belongsTo(models.User, 'user', 'userId', 'id');
+    models.MeanOfLogin.belongsTo(models.User, 'user', 'User_id', 'id');
 };
 
 export default MeanOfLogin;

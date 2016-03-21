@@ -28,7 +28,7 @@ Group.ensureIndex('editedAt');
 
 Group.associate = models => {
     models.Group.hasAndBelongsToMany(models.User, 'users', 'id', 'id');
-    models.Group.hasMany(models.Price, 'prices', 'id', 'groupId');
+    models.Group.hasMany(models.Price, 'prices', 'id', 'Group_id');
 };
 
 export default Group;

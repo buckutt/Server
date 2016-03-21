@@ -12,9 +12,9 @@ const Reload = thinky.createModel('Reload', {
     editedAt : Date,
     isRemoved: type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra
-    pointId  : type.string().optional(),
-    buyerId  : type.string().optional(),
-    sellerId : type.string().optional()
+    Point_id : type.string().optional(),
+    Buyer_id : type.string().optional(),
+    Seller_id: type.string().optional()
 }, {
     enforce_missing: true,
     enforce_extra  : 'remove',
@@ -33,9 +33,9 @@ Reload.ensureIndex('createdAt');
 Reload.ensureIndex('editedAt');
 
 Reload.associate = models => {
-    models.Reload.belongsTo(models.Point, 'point', 'pointId', 'id');
-    models.Reload.belongsTo(models.User, 'buyer', 'buyerId', 'id');
-    models.Reload.belongsTo(models.User, 'seller', 'sellerId', 'id');
+    models.Reload.belongsTo(models.Point, 'point', 'Point_id', 'id');
+    models.Reload.belongsTo(models.User, 'buyer', 'Buyer_id', 'id');
+    models.Reload.belongsTo(models.User, 'seller', 'Seller_id', 'id');
 };
 
 export default Reload;

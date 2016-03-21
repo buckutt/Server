@@ -18,14 +18,14 @@ router.post('/services/basket', (req, res, next) => {
         return next(new APIError(400, 'Invalid basket'));
     }
 
-    req.buyerId = req.body[0].buyerId;
+    req.Buyer_id = req.body[0].Buyer_id;
 
-    if (!req.buyerId) {
+    if (!req.Buyer_id) {
         return next(new APIError(400, 'Invalid buyer'));
     }
 
     req.app.locals.models.User
-        .get(req.buyerId)
+        .get(req.Buyer_id)
         .then(user => {
             req.buyer = user;
             next();
@@ -64,11 +64,11 @@ router.post('/services/basket', (req, res, next) => {
         if (item.type === 'purchase') {
             // Purchases
             const purchase = new models.Purchase({
-                buyerId    : item.buyerId,
-                fundationId: item.fundationId,
-                pointId    : req.pointId,
-                promotionId: item.promotionId ? item.promotionId : '',
-                sellerId   : item.sellerId
+                Buyer_id    : item.Buyer_id,
+                Fundation_id: item.Fundation_id,
+                Point_id    : req.Point_id,
+                Promotion_id: item.Promotion_id ? item.Promotion_id : '',
+                Seller_id   : item.Seller_id
             });
 
             queryLog += `buys ${pp(item.articles)} `;
@@ -94,11 +94,11 @@ router.post('/services/basket', (req, res, next) => {
 
             // Reloads
             const reload = new models.Reload({
-                credit  : item.credit,
-                trace   : item.trace,
-                pointId : req.pointId,
-                buyerId : item.buyerId,
-                sellerId: item.sellerId
+                credit   : item.credit,
+                trace    : item.trace,
+                Point_id : req.Point_id,
+                Buyer_id : item.Buyer_id,
+                Seller_id: item.Seller_id
             });
 
             reloads.push(reload);

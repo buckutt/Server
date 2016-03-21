@@ -96,28 +96,28 @@ describe('Before tests', () => {
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                userId
+                User_id  : userId
             }, {
                 type     : 'etuId',
                 data     : '22000000353423',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                userId
+                User_id  : userId
             }, {
                 type     : 'etuMail',
                 data     : 'norights@buckless.fr',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                userId   : noRightsUserId
+                User_id  : noRightsUserId
             }, {
                 type     : 'etuMail',
                 data     : 'seller@buckless.fr',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                userId   : sellerUserId
+                User_id  : sellerUserId
             }]);
         }).then(() =>
             r.table('Period').insert([{
@@ -144,19 +144,19 @@ describe('Before tests', () => {
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                periodId
+                Period_id: periodId
             }, {
                 name     : 'admin',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                periodId : outdatedPeriodId
+                Period_id: outdatedPeriodId
             }, {
                 name     : 'seller',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                periodId
+                Period_id: periodId
             }])
         ).then(res =>
             r.table('Right_User').insert([{
@@ -190,8 +190,8 @@ describe('Before tests', () => {
             deviceId = res.generated_keys[0];
         }).then(() =>
             r.table('PeriodPoint').insert({
-                periodId,
-                pointId
+                Period_id: periodId,
+                Point_id : pointId
             })
         ).then(res =>
             r.table('Device_PeriodPoint').insert({

@@ -27,8 +27,8 @@ Fundation.ensureIndex('createdAt');
 Fundation.ensureIndex('editedAt');
 
 Fundation.associate = models => {
-    models.Fundation.hasMany(models.Price, 'prices', 'id', 'fundationId');
-    models.Fundation.hasMany(models.Purchase, 'purchases', 'id', 'fundationId');
+    models.Fundation.hasMany(models.Price, 'prices', 'id', 'Fundation_id');
+    models.Fundation.hasMany(models.Purchase, 'purchases', 'id', 'Fundation_id');
 };
 
 export default Fundation;

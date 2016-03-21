@@ -12,14 +12,14 @@ const router = new express.Router();
 
 // Get the reciever user
 router.post('/services/transfer', (req, res, next) => {
-    req.recieverId = req.body.recieverId;
+    req.Reciever_id = req.body.Reciever_id;
 
-    if (!req.recieverId) {
+    if (!req.Reciever_id) {
         return next(new APIError(400, 'Invalid reciever'));
     }
 
     req.app.locals.models.User
-        .get(req.recieverId)
+        .get(req.Reciever_id)
         .then(user => {
             req.recieverUser = user;
             next();
@@ -49,8 +49,8 @@ router.post('/services/transfer', (req, res, next) => {
         date
     });
 
-    newTransfer.senderId   = req.user.id;
-    newTransfer.recieverId = req.recieverUser.id;
+    newTransfer.Sender_id   = req.user.id;
+    newTransfer.Reciever_id = req.recieverUser.id;
 
     log.info(queryLog);
 

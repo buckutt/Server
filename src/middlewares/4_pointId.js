@@ -36,11 +36,11 @@ export default function pointId (req, res, next) {
             let minPeriod = Infinity;
 
             const promises = periodPoints.map(periodPoint =>
-                Period.get(periodPoint.periodId).run().then(period => {
+                Period.get(periodPoint.Period_id).run().then(period => {
                     const diff = period.end - period.start;
 
                     if (diff < minPeriod) {
-                        chosenPoint = periodPoint.pointId;
+                        chosenPoint = periodPoint.Point_id;
                         minPeriod   = diff;
                     }
                 })
@@ -54,9 +54,9 @@ export default function pointId (req, res, next) {
                 return next(new APIError(404, 'Device not found', fingerprint));
             }
 
-            req.pointId = chosenPoint;
+            req.Point_id = chosenPoint;
 
-            res.header('point', req.pointId);
+            res.header('point', req.Point_id);
             res.header('device', device.id);
 
             return next();
