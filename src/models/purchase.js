@@ -10,7 +10,7 @@ const Purchase = thinky.createModel('Purchase', {
     isRemoved   : type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra
     Buyer_id    : type.string().optional(),
-    Fundation_id: type.string().optional(),
+    Price_id    : type.string().optional(),
     Point_id    : type.string().optional(),
     Promotion_id: type.string().optional(),
     Seller_id   : type.string().optional()
@@ -31,7 +31,7 @@ Purchase.ensureIndex('createdAt');
 Purchase.ensureIndex('editedAt');
 
 Purchase.associate = models => {
-    models.Purchase.belongsTo(models.Fundation, 'fundation', 'Fundation_id', 'id');
+    models.Purchase.belongsTo(models.Price, 'price', 'Price_id', 'id');
     models.Purchase.belongsTo(models.Point, 'point', 'Point_id', 'id');
     models.Purchase.belongsTo(models.Promotion, 'promotion', 'Promotion_id', 'id');
     models.Purchase.belongsTo(models.User, 'buyer', 'Buyer_id', 'id');

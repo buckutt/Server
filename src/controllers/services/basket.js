@@ -65,7 +65,7 @@ router.post('/services/basket', (req, res, next) => {
             // Purchases
             const purchase = new models.Purchase({
                 Buyer_id    : item.Buyer_id,
-                Fundation_id: item.Fundation_id,
+                Price_id    : item.Price_id,
                 Point_id    : req.Point_id,
                 Promotion_id: item.Promotion_id ? item.Promotion_id : '',
                 Seller_id   : item.Seller_id
