@@ -31,7 +31,7 @@ gulp.task('seed', ['default'], (cb) => {
 });
 
 gulp.task('clean', (cb) => {
-    rimraf('app', cb);
+    rimraf('build', cb);
 });
 
 gulp.task('cleardb', (cb) => {
