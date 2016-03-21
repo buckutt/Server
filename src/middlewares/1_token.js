@@ -1,7 +1,7 @@
-import APIError from '../APIError';
-import config   from '../config';
 import jwt      from 'jsonwebtoken';
 import Promise  from 'bluebird';
+import APIError from '../errors/APIError';
+import config   from '../config';
 
 Promise.promisifyAll(jwt);
 
@@ -54,10 +54,10 @@ export default function token (req, res, next) {
     jwt
         .verifyAsync(bearer, secret)
         .then(decoded => {
-            const User_id  = decoded.id;
-            connectType = decoded.connectType;
+            const userId = decoded.id;
+            connectType  = decoded.connectType;
 
-            return req.app.locals.models.User.get(User_id).getJoin({
+            return req.app.locals.models.User.get(userId).getJoin({
                 rights: {
                     period: true
                 }

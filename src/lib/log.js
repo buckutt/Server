@@ -1,5 +1,5 @@
-import config   from './config';
-import { pad2 } from './lib/utils';
+import config   from '../config';
+import { pad2 } from './utils';
 import winston  from 'winston';
 
 /**

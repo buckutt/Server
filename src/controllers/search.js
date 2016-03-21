@@ -1,11 +1,11 @@
-import APIError    from '../APIError';
-import logger      from '../log';
-import modelParser from '../lib/modelParser';
-import thinky      from '../thinky';
-import { pp }      from '../lib/utils';
 import express     from 'express';
 import qs          from 'qs';
 import url         from 'url';
+import logger      from '../lib/log';
+import modelParser from '../lib/modelParser';
+import thinky      from '../lib/thinky';
+import { pp }      from '../lib/utils';
+import APIError    from '../errors/APIError';
 
 const log = logger(module);
 const r   = thinky.r;
@@ -150,120 +150,117 @@ function arrayOfArrayToRethinkFilters (array, onFail) {
 
 /**
  * Search among all documents of a model.
- * @param {Application} app Express main application
  */
-export default app => {
-    const router = new express.Router();
+const router = new express.Router();
 
-    router.get('/:model/search', (req, res, next) => {
-        // Support encoded JSON (express doesn't)
-        const q = qs.parse(url.parse(req.url).query).q;
+router.get('/:model/search', (req, res, next) => {
+    // Support encoded JSON (express doesn't)
+    const q = qs.parse(url.parse(req.url).query).q;
 
-        if (!q) {
-            return next(new APIError(400, 'Missing q parameter'));
-        }
+    if (!q) {
+        return next(new APIError(400, 'Missing q parameter'));
+    }
 
-        let searchQuery;
+    let searchQuery;
 
-        try {
-            searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
-        } catch (e) {
-            return next(new APIError(400, 'Invalid search object', e));
-        }
+    try {
+        searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
+    } catch (e) {
+        return next(new APIError(400, 'Invalid search object', e));
+    }
 
-        if (!Array.isArray(searchQuery)) {
-            searchQuery = [searchQuery];
-        }
-
-        let orQuery     = qs.parse(url.parse(req.url).query).or || [];
-        orQuery = orQuery.map(orItem => [JSON.parse(orItem)]);
-
+    if (!Array.isArray(searchQuery)) {
         searchQuery = [searchQuery];
-        searchQuery.push(...orQuery);
+    }
 
-        let queryLog = `${req.Model}.filter(`;
+    let orQuery     = qs.parse(url.parse(req.url).query).or || [];
+    orQuery = orQuery.map(orItem => [JSON.parse(orItem)]);
 
-        // Must use a boolean variable because we want to stop the request if failed
-        let failed = false;
+    searchQuery = [searchQuery];
+    searchQuery.push(...orQuery);
 
-        const [logFilter, filterResult] = arrayOfArrayToRethinkFilters(searchQuery, () => {
-            failed = true;
-        });
+    let queryLog = `${req.Model}.filter(`;
 
-        queryLog += logFilter;
+    // Must use a boolean variable because we want to stop the request if failed
+    let failed = false;
 
-        if (failed) {
-            return next(new APIError(400, 'Invalid search object'));
-        }
-
-        let request = req.Model;
-
-        queryLog += ')';
-
-        // Order
-        if (req.query.orderBy) {
-            if (req.query.sort === 'asc') {
-                // Order ASC
-                queryLog += `.orderBy({ index: r.asc(${req.query.orderBy}) })`;
-                request = request.orderBy({
-                    index: r.asc(req.query.orderBy)
-                });
-            } else if (req.query.sort === 'dsc') {
-                // Order DSC
-                queryLog += `.orderBy({ index: r.desc(${req.query.orderBy})})`;
-                request = request.orderBy({
-                    index: r.desc(req.query.orderBy)
-                });
-            } else {
-                // Order Default
-                queryLog += `.orderBy({ index: ${req.query.orderBy} })`;
-                request = request.orderBy({
-                    index: req.query.orderBy
-                });
-            }
-        }
-
-        request = request.filter(filterResult);
-
-        // Limit
-        if (req.query.limit) {
-            queryLog += `.limit(${req.query.limit})`;
-            request = request.limit(req.query.limit);
-        }
-
-        // Skip/Offset
-        if (req.query.offset) {
-            queryLog += `.skip(${req.query.offset})`;
-            request = request.skip(req.query.offset);
-        }
-
-        // Embed multiple relatives
-        if (req.query.embed) {
-            queryLog += `.getJoin(${pp(req.query.embed)})`;
-            request = request.getJoin(req.query.embed);
-        }
-
-        log.info(queryLog);
-
-        request
-            .run()
-            .then(result => {
-                res
-                    .status(200)
-                    .json(result)
-                    .end();
-            })
-            .catch(thinky.Errors.DocumentNotFound, err =>
-                /* istanbul ignore next */
-                next(new APIError(404, 'Document not found', err))
-            )
-            .catch(err =>
-                /* istanbul ignore next */
-                next(new APIError(500, 'Unknown error', err))
-            );
+    const [logFilter, filterResult] = arrayOfArrayToRethinkFilters(searchQuery, () => {
+        failed = true;
     });
 
-    router.param('model', modelParser);
+    queryLog += logFilter;
 
-    app.use(router);
-};
+    if (failed) {
+        return next(new APIError(400, 'Invalid search object'));
+    }
+
+    let request = req.Model;
+
+    queryLog += ')';
+
+    // Order
+    if (req.query.orderBy) {
+        if (req.query.sort === 'asc') {
+            // Order ASC
+            queryLog += `.orderBy({ index: r.asc(${req.query.orderBy}) })`;
+            request = request.orderBy({
+                index: r.asc(req.query.orderBy)
+            });
+        } else if (req.query.sort === 'dsc') {
+            // Order DSC
+            queryLog += `.orderBy({ index: r.desc(${req.query.orderBy})})`;
+            request = request.orderBy({
+                index: r.desc(req.query.orderBy)
+            });
+        } else {
+            // Order Default
+            queryLog += `.orderBy({ index: ${req.query.orderBy} })`;
+            request = request.orderBy({
+                index: req.query.orderBy
+            });
+        }
+    }
+
+    request = request.filter(filterResult);
+
+    // Limit
+    if (req.query.limit) {
+        queryLog += `.limit(${req.query.limit})`;
+        request = request.limit(req.query.limit);
+    }
+
+    // Skip/Offset
+    if (req.query.offset) {
+        queryLog += `.skip(${req.query.offset})`;
+        request = request.skip(req.query.offset);
+    }
+
+    // Embed multiple relatives
+    if (req.query.embed) {
+        queryLog += `.getJoin(${pp(req.query.embed)})`;
+        request = request.getJoin(req.query.embed);
+    }
+
+    log.info(queryLog);
+
+    request
+        .run()
+        .then(result => {
+            res
+                .status(200)
+                .json(result)
+                .end();
+        })
+        .catch(thinky.Errors.DocumentNotFound, err =>
+            /* istanbul ignore next */
+            next(new APIError(404, 'Document not found', err))
+        )
+        .catch(err =>
+            /* istanbul ignore next */
+            next(new APIError(500, 'Unknown error', err))
+        );
+});
+
+router.param('model', modelParser);
+
+export default router;
