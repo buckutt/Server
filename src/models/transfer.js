@@ -28,8 +28,8 @@ Transfer.ensureIndex('createdAt');
 Transfer.ensureIndex('editedAt');
 
 Transfer.associate = models => {
-    models.Purchase.belongsTo(models.User, 'sender', 'Sender_id', 'id');
-    models.Purchase.belongsTo(models.User, 'reciever', 'Reciever_id', 'id');
+    models.Transfer.belongsTo(models.User, 'sender', 'Sender_id', 'id');
+    models.Transfer.belongsTo(models.User, 'reciever', 'Reciever_id', 'id');
 };
 
 export default Transfer;
