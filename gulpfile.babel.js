@@ -7,7 +7,7 @@ import rimraf     from 'rimraf';
 gulp.task('seed', ['default'], (cb) => {
     const models = require('./src/models').default;
 
-    models.onReady = () => {
+    models.loadModels().then(() => {
         const dataSeeds = require('./scripts/dataSeeds').default;
         const raw       = dataSeeds.raw(models);
 
@@ -27,7 +27,7 @@ gulp.task('seed', ['default'], (cb) => {
                 console.log(err.stack);
                 cb();
             });
-    };
+    });
 });
 
 gulp.task('clean', (cb) => {

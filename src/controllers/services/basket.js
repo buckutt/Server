@@ -36,11 +36,13 @@ router.post('/services/basket', (req, res, next) => {
     const models = req.app.locals.models;
 
     // Purchases documents
-    const purchases = [];
+    const purchases     = [];
     // Reloads documents
-    const reloads   = [];
+    const reloads       = [];
     // Stock reduciton queries
-    const stocks    = [];
+    const stocks        = [];
+    // Purchases-Articles queries: prevent thinky from uniqify
+    const purchasesRels = [];
 
     let queryLog  = '';
 
@@ -72,7 +74,7 @@ router.post('/services/basket', (req, res, next) => {
             });
 
             queryLog += `buys ${pp(item.articles)} `;
-            purchase.articles = item.articles;
+            purchasesRels.push(item.articles);
 
             // Stock reduction
             item.articles.forEach(article => {
@@ -86,22 +88,20 @@ router.post('/services/basket', (req, res, next) => {
                 stocks.push(stockReduction);
             });
 
-            purchases.push(purchase.saveAll({
-                articles: true
-            }));
+            purchases.push(purchase.save());
         } else if (item.type === 'reload') {
             queryLog += `reloads ${item.credit} `;
 
             // Reloads
             const reload = new models.Reload({
                 credit   : item.credit,
-                trace    : item.trace,
+                trace    : item.trace || 'Reload',
                 Point_id : req.Point_id,
                 Buyer_id : item.Buyer_id,
                 Seller_id: item.Seller_id
             });
 
-            reloads.push(reload);
+            reloads.push(reload.save());
         }
     });
 
@@ -125,8 +125,22 @@ router.post('/services/basket', (req, res, next) => {
 
     log.info(queryLog);
 
-    const everythingSaving = [updateCredit].concat(purchases).concat(reloads).concat(stocks);
+    const everythingSaving = [updateCredit].concat(reloads).concat(stocks);
+
     Promise
+        .all(purchases)
+        .then(purchases => {
+            const allRels = purchases.map(({ id }, i) =>
+                models.r.table('Article_Purchase').insert(purchasesRels[i].map(articleId =>
+                    ({
+                        Article_id: articleId,
+                        Purchase_id: id
+                    })
+                ))
+            );
+
+            return Promise.all(allRels);
+        })
         .all(everythingSaving)
         .then(() =>
             res
