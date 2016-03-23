@@ -31,8 +31,6 @@ router.post('/services/transfer', (req, res, next) => {
 
     const amount = req.body.amount;
 
-    const date   = new Date();
-
     if (req.recieverUser.credit + amount > 100 * 100) {
         return next(new APIError(400, 'Too much reciever credit'));
     }
@@ -45,8 +43,7 @@ router.post('/services/transfer', (req, res, next) => {
     queryLog    += `${req.recieverUser.firstname} ${req.recieverUser.lastname}`;
 
     const newTransfer = new models.Transfer({
-        amount,
-        date
+        amount
     });
 
     newTransfer.Sender_id   = req.user.id;
