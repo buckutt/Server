@@ -28,6 +28,7 @@ Right.ensureIndex('editedAt');
 
 Right.associate = models => {
     models.Right.belongsTo(models.Period, 'period', 'Period_id', 'id');
+    models.Right.belongsTo(models.Point, 'point', 'Point_id', 'id');
     models.Right.hasAndBelongsToMany(models.User, 'users', 'id', 'id');
 };
 

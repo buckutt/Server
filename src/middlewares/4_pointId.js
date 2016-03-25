@@ -20,13 +20,15 @@ export default function pointId (req, res, next) {
             index: 'fingerprint'
         })
         .getJoin({
-            periodPoints: true
+            periodPoints: {
+                period: true
+            }
         })
         .run()
         .then(devices => {
             /* istanbul ignore if */
             if (devices.length === 0) {
-                return false;
+                return next(new APIError(404, 'Device not found', fingerprint));
             }
 
             device = devices[0];
@@ -35,30 +37,18 @@ export default function pointId (req, res, next) {
 
             let minPeriod = Infinity;
 
-            const promises = periodPoints.map(periodPoint =>
-                Period.get(periodPoint.Period_id).run().then(period => {
-                    const diff = period.end - period.start;
+            periodPoints.forEach(periodPoint => {
+                const diff = periodPoint.period.end - periodPoint.period.start;
 
-                    if (diff < minPeriod) {
-                        chosenPoint = periodPoint.Point_id;
-                        minPeriod   = diff;
-                    }
-                })
-            );
-
-            return Promise.all(promises);
-        })
-        .then(ok => {
-            /* istanbul ignore if */
-            if (!ok) {
-                return next(new APIError(404, 'Device not found', fingerprint));
-            }
-
-            req.Point_id = chosenPoint;
+                if (diff < minPeriod) {
+                    req.Point_id = periodPoint.Point_id;
+                    minPeriod    = diff;
+                }
+            });
 
             res.header('point', req.Point_id);
             res.header('device', device.id);
 
             return next();
-        });
+        })
 }

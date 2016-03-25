@@ -26,9 +26,10 @@ Point.ensureIndex('editedAt');
 
 Point.associate = models => {
     models.Point.hasMany(models.PeriodPoint, 'periodPoints', 'id', 'Point_id');
-    models.Point.hasMany(models.Promotion, 'promotions', 'id', 'Point_id');
-    models.Point.hasMany(models.Purchase, 'purchases', 'id', 'Point_id');
-    models.Point.hasMany(models.Reload, 'reloads', 'id', 'Point_id');
+    models.Point.hasMany(models.Promotion, 'promotions', 'id', 'Promotion_id');
+    models.Point.hasMany(models.Purchase, 'purchases', 'id', 'Purchase_id');
+    models.Point.hasMany(models.Reload, 'reloads', 'id', 'Reload_id');
+    models.Point.hasMany(models.Right, 'rights', 'id', 'Right_id');
     models.Point.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
 };
 

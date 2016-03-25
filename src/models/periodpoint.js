@@ -26,8 +26,8 @@ PeriodPoint.ensureIndex('createdAt');
 PeriodPoint.ensureIndex('editedAt');
 
 PeriodPoint.associate = models => {
-    models.PeriodPoint.belongsTo(models.Point, 'point', 'id', 'Point_id');
-    models.PeriodPoint.belongsTo(models.Period, 'period', 'id', 'Period_id');
+    models.PeriodPoint.belongsTo(models.Point, 'point', 'Point_id', 'id');
+    models.PeriodPoint.belongsTo(models.Period, 'period', 'Period_id', 'id');
     models.PeriodPoint.hasAndBelongsToMany(models.Device, 'devices', 'id', 'id');
 };
 
