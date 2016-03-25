@@ -38,6 +38,7 @@ describe('Before tests', () => {
         let noRightsUserId;
         let sellerUserId;
         let pointId;
+        let unusedPointId;
         let deviceId;
         let periodId;
         let outdatedPeriodId;
@@ -138,25 +139,43 @@ describe('Before tests', () => {
         ).then(res => {
             periodId         = res.generated_keys[0];
             outdatedPeriodId = res.generated_keys[1];
+
+            return r.table('Point').insert([{
+                name     : 'Foyer',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false
+            }, {
+                name     : 'UnusedPoint',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false
+            }]);
+        }).then(res => {
+            pointId       = res.generated_keys[0];
+            unusedPointId = res.generated_keys[1];
         }).then(() =>
             r.table('Right').insert([{
                 name     : 'admin',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                Period_id: periodId
+                Period_id: periodId,
+                Point_id : pointId
             }, {
                 name     : 'admin',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                Period_id: outdatedPeriodId
+                Period_id: outdatedPeriodId,
+                Point_id : pointId
             }, {
                 name     : 'seller',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                Period_id: periodId
+                Period_id: periodId,
+                Point_id : pointId
             }])
         ).then(res =>
             r.table('Right_User').insert([{
@@ -170,15 +189,6 @@ describe('Before tests', () => {
                 User_id : sellerUserId
             }])
         ).then(() =>
-            r.table('Point').insert({
-                name     : 'Foyer',
-                createdAt: new Date(),
-                editedAt : new Date(),
-                isRemoved: false
-            })
-        ).then(res => {
-            pointId = res.generated_keys[0];
-        }).then(() =>
             r.table('Device').insert({
                 fingerprint,
                 name     : 'buckless-test',
@@ -191,7 +201,10 @@ describe('Before tests', () => {
         }).then(() =>
             r.table('PeriodPoint').insert({
                 Period_id: periodId,
-                Point_id : pointId
+                Point_id : pointId,
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false
             })
         ).then(res =>
             r.table('Device_PeriodPoint').insert({
