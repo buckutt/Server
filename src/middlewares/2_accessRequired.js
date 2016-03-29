@@ -1,4 +1,5 @@
 import APIError from '../errors/APIError';
+import config   from '../config';
 
 const disableAuth = false;
 
@@ -10,7 +11,7 @@ const disableAuth = false;
  * @return {Function} The next middleware
  */
 export default function accessRequired (req, res, next) {
-    const authorize = req.app.locals.config.rightsManagement;
+    const authorize = config.rights;
 
     if (req.url === '/services/login' || disableAuth) {
         return next();

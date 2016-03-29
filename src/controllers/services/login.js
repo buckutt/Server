@@ -2,6 +2,7 @@ import bcrypt_  from 'bcryptjs';
 import express  from 'express';
 import jwt      from 'jsonwebtoken';
 import Promise  from 'bluebird';
+import config   from '../../config';
 import logger   from '../../lib/log';
 import thinky   from '../../lib/thinky';
 import { pp }   from '../../lib/utils';
@@ -20,7 +21,7 @@ const tokenOptions = {
 };
 
 router.post('/services/login', (req, res, next) => {
-    const secret = req.app.locals.config.secret;
+    const secret = config.app.secret;
     const models = req.app.locals.models;
 
     if (!req.body.meanOfLogin) {

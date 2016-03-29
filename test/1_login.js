@@ -205,11 +205,11 @@ describe('Login', () => {
     });
 
     it('should refuse when token is expired', done => {
-        const outdatedToken = require('jsonwebtoken').sign({
+        const outdatedToken = jwt.sign({
             foo: 'bar',
             iat: 200,
             exp: 3000
-        }, config.secret);
+        }, config.app.secret);
 
         unirest.get('https://localhost:3006/articles')
             .header('Authorization', `Bearer ${outdatedToken}`)

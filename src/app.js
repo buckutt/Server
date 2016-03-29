@@ -90,12 +90,16 @@ app.start = () => {
         rejectUnauthorized: false
     }, app);
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         models.loadModels().then(() => {
             log.info('Models loaded');
 
-            server.listen(config.port, () => {
-                log.info('Server is listening on port %d', config.port);
+            server.listen(config.http.port, config.http.hostname, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                log.info('Server is listening %s:%d', config.http.host, config.http.port);
                 startSSE(server, app);
                 resolve();
             });
@@ -106,7 +110,9 @@ app.start = () => {
 // Start the application
 /* istanbul ignore if */
 if (require.main === module) {
-    app.start();
+    app
+        .start()
+        .catch(err => log.error(err));
 }
 
 export default app;

@@ -1,7 +1,7 @@
-import app     from '../src/app';
 import assert  from 'assert';
 import fs      from 'fs';
 import unirest from 'unirest';
+import app     from '../src/app';
 
 describe('Should start the test application', () => {
     before(function (done) {
@@ -19,6 +19,7 @@ describe('Should start the test application', () => {
             strictSSL         : false,
             rejectUnauthorized: false
         }, (error, res) => {
+            assert.equal(error, null);
             assert.equal(401, res.statusCode);
             assert.equal('Unauthorized : missing client HTTPS certificate', res.body);
 

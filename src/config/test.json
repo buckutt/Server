@@ -1,10 +1,12 @@
 {
-    "level": "debug",
-    "port" : 3006,
-    "app"  : {
-        "name": "bucklessServer"
+    "log" : {
+        "level" : "debug"
     },
-    "db"   : {
-        "db": "bucklessServer_test"
-    }
+    "http" : {
+        "port" : 3006
+    },
+    "app" : {
+        "name" : "buckless_testServer"
+    },
+    "db" : "bucklessServer_test"
 }
