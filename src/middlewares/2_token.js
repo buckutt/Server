@@ -74,8 +74,6 @@ export default function token (req, res, next) {
                         return null;
                     }
 
-                    console.log(right);
-
                     if (right.period.start <= now && right.period.end > now && right.point.id === req.Point_id) {
                         return right;
                     }
