@@ -16,7 +16,7 @@ config.root  = path.join(__dirname, '..');
 
 if (config.log.level === 'debug') {
     console.log('Config loaded: ');
-    console.log(pp(config) + '\n\n');
+    console.log('%s \n\n', pp(config));
 }
 
 export default config;

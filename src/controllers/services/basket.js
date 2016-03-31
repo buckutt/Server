@@ -129,11 +129,11 @@ router.post('/services/basket', (req, res, next) => {
 
     Promise
         .all(purchases)
-        .then(purchases => {
-            const allRels = purchases.map(({ id }, i) =>
+        .then(purchases_ => {
+            const allRels = purchases_.map(({ id }, i) =>
                 models.r.table('Article_Purchase').insert(purchasesRels[i].map(articleId =>
                     ({
-                        Article_id: articleId,
+                        Article_id : articleId,
                         Purchase_id: id
                     })
                 ))
