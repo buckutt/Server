@@ -15,7 +15,7 @@ export default moduleToUse => {
             new winston.transports.Console({
                 prettyPrint: true,
                 colorize   : true,
-                level      : config.log.level || "debug",
+                level      : config.log.level || 'debug',
                 label      : path,
                 timestamp  : () => {
                     const now = new Date();

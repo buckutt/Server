@@ -54,6 +54,7 @@ app.use((req, res, next) => {
 
 // Internal error
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     if (!err.isAPIError) {
         console.log(err.stack);
     } else {
@@ -95,6 +96,7 @@ app.start = () => {
             log.info('Models loaded');
 
             server.listen(config.http.port, config.http.hostname, (err) => {
+                /* istanbul ignore if */
                 if (err) {
                     return reject(err);
                 }
