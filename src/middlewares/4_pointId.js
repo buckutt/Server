@@ -10,10 +10,8 @@ export default function pointId (req, res, next) {
     const fingerprint = req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
 
     const Device = req.app.locals.models.Device;
-    const Period = req.app.locals.models.Period;
 
     let device;
-    let chosenPoint = null;
 
     Device
         .getAll(fingerprint, {
@@ -50,5 +48,5 @@ export default function pointId (req, res, next) {
             res.header('device', device.id);
 
             return next();
-        })
+        });
 }
