@@ -1,4 +1,4 @@
 import thinky from 'thinky';
 import config from '../config';
 
-export default thinky(config.db);
+export default thinky({ db: config.db });

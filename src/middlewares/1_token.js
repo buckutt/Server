@@ -15,7 +15,7 @@ const disableAuth = false;
  * @return {Function} The next middleware
  */
 export default function token (req, res, next) {
-    const secret = config.secret;
+    const secret = config.app.secret;
 
     // Login : no token required
     if (req.url === '/services/login' || disableAuth) {
@@ -48,7 +48,7 @@ export default function token (req, res, next) {
 
     let connectType;
 
-    const pinLoggingAllowed = req.app.locals.config.pinLoggingAllowed;
+    const pinLoggingAllowed = config.rights.pinLoggingAllowed;
     const now               = Date.now();
 
     jwt

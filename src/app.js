@@ -54,6 +54,7 @@ app.use((req, res, next) => {
 
 // Internal error
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    /* istanbul ignore next */
     if (!err.isAPIError) {
         console.log(err.stack);
     } else {
@@ -90,12 +91,17 @@ app.start = () => {
         rejectUnauthorized: false
     }, app);
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         models.loadModels().then(() => {
             log.info('Models loaded');
 
-            server.listen(config.port, () => {
-                log.info('Server is listening on port %d', config.port);
+            server.listen(config.http.port, config.http.hostname, (err) => {
+                /* istanbul ignore if */
+                if (err) {
+                    return reject(err);
+                }
+
+                log.info('Server is listening %s:%d', config.http.host, config.http.port);
                 startSSE(server, app);
                 resolve();
             });
@@ -106,7 +112,9 @@ app.start = () => {
 // Start the application
 /* istanbul ignore if */
 if (require.main === module) {
-    app.start();
+    app
+        .start()
+        .catch(err => log.error(err));
 }
 
 export default app;

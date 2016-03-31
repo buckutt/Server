@@ -1,0 +1,52 @@
+{
+    "log" : {
+        "level" : "info"
+    },
+    "http" : {
+        "host" : "127.0.0.1",
+        "port" : 3000
+    },
+    "app" : {
+        "name" : "bucklessServer",
+        "secret" : "NgWlfDWCbX4mPuxau1FmG3TPLHm7iglEA3mp1f8nrlT7zKDn8ZZAwWQOqUArvQBFfMEbFSAMnUHzgQW1FkczTiZYjPZWqdseNtk2"
+    },
+    "db" : "bucklessServer_example",
+    "rights" : {
+        "all"     : ["admin"],
+        "seller"  : {
+            "read" : [
+                "/articles",
+                "/articles/search",
+                "/promotions",
+                "/promotions/search",
+                "/sets",
+                "/sets/search",
+                "/meansoflogin",
+                "/meansoflogin/search",
+                "/meansofpayment",
+                "/meansofpayment/search",
+                "/devices",
+                "/devices/search",
+                "/users"
+            ],
+            "write": [
+                "/services/basket"
+            ]
+        },
+        "reloader": {
+            "read" : [
+                "/users",
+                "/usersrights",
+                "/usersgroups",
+                "/devicespoints",
+                "/devices",
+                "/reloadtypes",
+                "/meanofloginsusers"
+            ],
+            "write": [
+                "/services/reload"
+            ]
+        },
+        "pinLoggingAllowed": ["seller"]
+    }
+}
