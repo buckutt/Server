@@ -59,7 +59,8 @@ export default function token (req, res, next) {
 
             return req.app.locals.models.User.get(userId).getJoin({
                 rights: {
-                    period: true
+                    period: true,
+                    point : true 
                 }
             });
         })
@@ -73,7 +74,7 @@ export default function token (req, res, next) {
                         return null;
                     }
 
-                    if (right.period.start <= now && right.period.end > now) {
+                    if (right.period.start <= now && right.period.end > now && right.point.id === req.Point_id) {
                         return right;
                     }
 
