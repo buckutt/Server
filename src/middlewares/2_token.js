@@ -60,7 +60,7 @@ export default function token (req, res, next) {
             return req.app.locals.models.User.get(userId).getJoin({
                 rights: {
                     period: true,
-                    point : true 
+                    point : true
                 }
             });
         })

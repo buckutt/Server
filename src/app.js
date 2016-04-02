@@ -74,13 +74,13 @@ app.start = () => {
 
     /* istanbul ignore else */
     if (process.env.NODE_ENV === 'test') {
-        key  = `./ssl/test/server.key`;
-        cert = `./ssl/test/server.crt`;
-        ca   = `./ssl/test/ca.crt`;
+        key  = './ssl/test/server.key';
+        cert = './ssl/test/server.crt';
+        ca   = './ssl/test/ca.crt';
     } else {
-        key  = `./ssl/server-key.pem`;
-        cert = `./ssl/server-crt.pem`;
-        ca   = `./ssl/ca-crt.pem`;
+        key  = './ssl/server-key.pem';
+        cert = './ssl/server-crt.pem';
+        ca   = './ssl/ca-crt.pem';
     }
 
     const server = https.createServer({

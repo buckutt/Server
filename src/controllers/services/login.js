@@ -89,7 +89,7 @@ router.post('/services/login', (req, res, next) => {
                     return resolve();
                 }
 
-                return reject(new APIError(401, 'Wrong password'));
+                reject(new APIError(401, 'Wrong password'));
             })
         )
         .then(() => {

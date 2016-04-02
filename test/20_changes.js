@@ -69,7 +69,7 @@ describe('Changes', () => {
 
     it('should sends data when the Authorization header is okay', done => {
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
-        const model = `model=purchases`;
+        const model = 'model=purchases';
 
         const query = `${token}&${model}`;
 
@@ -86,7 +86,7 @@ describe('Changes', () => {
         this.timeout(5000);
 
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
-        const model = `model=meansofpayment`;
+        const model = 'model=meansofpayment';
 
         const query = `${token}&${model}`;
 

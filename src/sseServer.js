@@ -38,8 +38,8 @@ export default (httpServer, app) => {
 
         // Execute promises in serie
         middlewares.reduce((p, mw) => p.then(() => mw(req, res)), Promise.resolve())
-            .then(() => {
-                return new Promise((resolve, reject) => {
+            .then(() =>
+                new Promise((resolve, reject) => {
                     modelParser(req, res, err => {
                         if (err instanceof Error) {
                             return reject(err);
@@ -47,8 +47,8 @@ export default (httpServer, app) => {
 
                         resolve();
                     }, model);
-                });
-            })
+                })
+            )
             .then(() => {
                 log.info(`A client has connected to watch for changes in ${model}`);
                 client.send('ok');
@@ -65,14 +65,12 @@ export default (httpServer, app) => {
                                 action: 'create',
                                 doc
                             }));
-                        }
-                        else if (!doc.getOldValue()) {
+                        } else if (!doc.getOldValue()) {
                             client.send(JSON.stringify({
                                 action: 'delete',
                                 doc
                             }));
-                        }
-                        else {
+                        } else {
                             client.send(JSON.stringify({
                                 action: 'update',
                                 from  : doc.getOldValue(),

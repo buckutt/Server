@@ -1,0 +1,5 @@
+ssl
+rethinkdb_data
+node_modules
+coverage
+build

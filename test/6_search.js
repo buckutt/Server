@@ -38,7 +38,7 @@ describe('Searching', () => {
 
             let orQ = '';
 
-            [or1, or2, or3, or4, or5].forEach(or => orQ += `&or[]=${q(or)}`);
+            [or1, or2, or3, or4, or5].forEach(or => { orQ += `&or[]=${q(or)}`; });
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name`)
                 .end(response => {
@@ -83,7 +83,7 @@ describe('Searching', () => {
             };
 
             let orQ = '';
-            [or1, or2, or3, or4, or5].forEach(or => orQ += `&or[]=${q(or)}`);
+            [or1, or2, or3, or4, or5].forEach(or => { orQ += `&or[]=${q(or)}`; });
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name&sort=dsc`)
                 .end(response => {
@@ -156,7 +156,7 @@ describe('Searching', () => {
 
     describe('Incorrect search query', () => {
         it('should refuse when no condition is specified', done => {
-            unirest.get(`https://localhost:3006/articles/search`)
+            unirest.get('https://localhost:3006/articles/search')
                 .end(response => {
                     assert.equal(400, response.code);
 
@@ -180,7 +180,7 @@ describe('Searching', () => {
         });
 
         it('should refuse when passing an invalid search object', done => {
-            unirest.get(`https://localhost:3006/articles/search?q=abc`)
+            unirest.get('https://localhost:3006/articles/search?q=abc')
                 .end(response => {
                     assert.equal(400, response.code);
 
