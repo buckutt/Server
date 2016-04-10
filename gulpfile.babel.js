@@ -17,7 +17,6 @@ gulp.task('seed', ['default'], (cb) => {
                 console.log('Inserted documents');
                 return Promise.all(dataSeeds.rels(models, raw.data));
             })
-            .then(() => models.r.wait())
             .then(() => dataSeeds.post(models, raw.data))
             .then(() => {
                 console.log('Inserted relationships');
