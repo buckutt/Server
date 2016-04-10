@@ -1,10 +1,16 @@
-// Return the parsed query parameter from the raw one
-const queryRules = {
-    limit  : limit => parseInt(limit, 10),
-    offset : offset => parseInt(offset, 10),
-    orderBy: order => order,
-    sort   : sort => sort,
-    embed  : embed => JSON.parse(decodeURIComponent(embed))
+import APIError from '../errors/APIError';
+
+const types = {
+    q     : 'object',
+    or    : 'object',
+    embed : 'object',
+    limit : 'number',
+    offset: 'number'
+};
+
+const interpolate = {
+    object: str => JSON.parse(str),
+    number: str => parseInt(str, 10)
 };
 
 /**
@@ -15,18 +21,19 @@ const queryRules = {
  * @return {Function} The next middleware
  */
 export default function query (req, res, next) {
-    const newQuery = {};
+    for (const q of Object.keys(types)) {
+        if (req.query.hasOwnProperty(q)) {
+            if (typeof req.query[q] !== types[q]) {
+                const interpolater = interpolate[types[q]];
 
-    Object.keys(queryRules).forEach(q => {
-        const value = (req.query.hasOwnProperty(q)) ? req.query[q].toString() : null;
-
-        if (!value) {
-            return;
+                try {
+                    req.query[q] = interpolater(req.query[q]);
+                } catch (e) {
+                    return next(new APIError(400, 'Bad Input', `Invalid query ${q}`));
+                }
+            }
         }
-        newQuery[q] = queryRules[q](value);
-    });
-
-    req.query = newQuery;
+    }
 
     return next();
 }
