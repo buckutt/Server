@@ -8,7 +8,7 @@ Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
 
 // status
-const copy = status('Copy files...');
+const copy = status('Copying files...');
 let generate;
 let write;
 
@@ -34,22 +34,24 @@ inquirer.prompt([
     }
 ])
 .then(answer => {
-    write = status('Update files...');
+    write = status('Updating files...');
 
     try {
-        const server = fs.readFileSync('./ssl/server.cnf', 'utf8');
-        const ca     = fs.readFileSync('./ssl/ca.cnf', 'utf8');
+        const server = fs.readFileSync('./ssl/server.cnf', 'utf8')
+            .replace(/(challengePassword\s*= )(\w*)/, `$1${answer.chalPassword}`);
+        const ca     = fs.readFileSync('./ssl/ca.cnf', 'utf8')
+            .replace(/(challengePassword\s*= )(\w*)/, `$1${answer.chalPassword}`)
+            .replace(/(output_password\s*= )(\w*)/, `$1${answer.outPassword}`);
 
-        fs.writeFileSync('./ssl/server.cnf', server.replace(/(challengePassword\s*= )(\w*)/,
-            `$1${answer.chalPassword}`), 'utf8');
-        fs.writeFileSync('./ssl/ca.cnf', ca.replace(/(output_password\s*= )(\w*)/, `$1${answer.outPassword}`), 'utf8');
+        fs.writeFileSync('./ssl/server.cnf', server, 'utf8');
+        fs.writeFileSync('./ssl/ca.cnf', ca, 'utf8');
         write(true);
     } catch (e) {
         write(false);
         return Promise.reject(new Error(e));
     }
 
-    generate = status('Generate certificates...');
+    generate = status('Generating certificates...');
 
     /* eslint-disable max-len */
     return exec(`cd ssl &&

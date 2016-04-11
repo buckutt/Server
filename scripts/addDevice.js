@@ -42,7 +42,12 @@ models.r.table('Period').pluck('id', 'name').run().then(res => {
             name   : 'period',
             message: 'Default period :',
             choices: periods.map(period => `${period.name} - ${period.id}`)
-        }
+        },
+        {
+            type   : 'password',
+            name   : 'password',
+            message: 'SSL export password :'
+        },
     ]);
 })
 .then(answer => {
@@ -50,27 +55,30 @@ models.r.table('Period').pluck('id', 'name').run().then(res => {
     periodId   = answer.period.split(' - ')[1];
     deviceName = answer.name;
 
-    let outPassword  = '';
+    let client = '';
 
-    const copy = status('Copy files...');
+    let outPassword  = '';
+    let chalPassword = '';
+
+    const copy = status('Copying files...');
 
     try {
         fs.mkdirsSync(`./ssl/${deviceName}`);
-        fs.copySync('./ssl/example/client1.cnf', `./ssl/${deviceName}/${deviceName}.cnf`);
+
+        outPassword  = fs.readFileSync('./ssl/ca.cnf', 'utf8').match(/output_password\s* = (\w*)/)[1];
+        chalPassword = fs.readFileSync('./ssl/server.cnf', 'utf8').match(/challengePassword\s* = (\w*)/)[1];
+        client       = fs.readFileSync('./ssl/example/client1.cnf', 'utf8')
+            .replace(/(challengePassword\s*= )(\w*)/, `$1${chalPassword}`)
+            .replace(/(CN\s*= )(\w*)/, `$1${deviceName}`);
+
+        fs.writeFileSync(`./ssl/${deviceName}/${deviceName}.cnf`, client, 'utf8');
         copy(true);
     } catch (e) {
         copy(false);
         return Promise.reject(new Error(e));
     }
 
-    generate = status('Generate certificates...');
-
-    try {
-        outPassword  = fs.readFileSync('./ssl/ca.cnf', 'utf8').match(/output_password\s* = (\w*)/)[1];
-    } catch (e) {
-        generate(false);
-        return Promise.reject(new Error(e));
-    }
+    generate = status('Generating certificates...');
 
     /* eslint-disable max-len */
     return exec(`cd ./ssl/${deviceName} &&
@@ -80,7 +88,7 @@ models.r.table('Period').pluck('id', 'name').run().then(res => {
 
         openssl verify -CAfile ../ca-crt.pem ${deviceName}-crt.pem &&
 
-        openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12
+        openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"
     `);
     /* eslint-enable max-len */
 })
@@ -94,7 +102,7 @@ models.r.table('Period').pluck('id', 'name').run().then(res => {
 
     generate(true);
 
-    insert = status('Insert into database...');
+    insert = status('Inserting into database...');
 
     let periodPoint;
     const device = new models.Device({ name: deviceName, fingerprint });
