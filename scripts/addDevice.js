@@ -47,7 +47,7 @@ models.r.table('Period').pluck('id', 'name').run().then(res => {
             type   : 'password',
             name   : 'password',
             message: 'SSL export password :'
-        },
+        }
     ]);
 })
 .then(answer => {
