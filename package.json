@@ -55,7 +55,7 @@
     "babel-register": "^6.5.2",
     "coveralls": "^2.11.6",
     "eslint": "^2.5.3",
-    "eslint-config-airbnb": "^6.2.0",
+    "eslint-config-airbnb": "^7.0.0",
     "eventsource": "github:gjuchault/eventsource-node",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
