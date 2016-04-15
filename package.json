@@ -37,7 +37,7 @@
     "fs-walk": "0.0.1",
     "inquirer": "git+https://github.com/SBoudrias/Inquirer.js.git",
     "jsonwebtoken": "^5.5.4",
-    "lodash": "^4.6.1",
+    "lodash": "^4.11.1",
     "morgan": "1.7.0",
     "nconf": "^0.8.4",
     "qs": "^6.1.0",
