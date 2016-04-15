@@ -45,8 +45,9 @@ router.post('/services/login', (req, res, next) => {
 
     const queryLog = `${models.MeanOfLogin}
         .filter({
-            type: ${req.body.meanOfLogin},
-            data: ${req.body.data}
+            type     : ${req.body.meanOfLogin},
+            data     : ${req.body.data},
+            isRemoved: false
         })
         .limit(1).getJoin(${pp({
             user: {
@@ -59,8 +60,9 @@ router.post('/services/login', (req, res, next) => {
 
     models.MeanOfLogin
         .filter({
-            type: req.body.meanOfLogin.toString(),
-            data: req.body.data.toString()
+            type     : req.body.meanOfLogin.toString(),
+            data     : req.body.data.toString(),
+            isRemoved: false
         })
         .limit(1)
         .getJoin({
