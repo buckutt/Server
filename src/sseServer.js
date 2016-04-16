@@ -54,8 +54,8 @@ export default (httpServer, app) => {
                 client.send('ok');
 
                 req.Model.changes().then(feed => {
-                    /* istanbul ignore if */
                     feed.each((err, doc) => {
+                        /* istanbul ignore if */
                         if (err) {
                             return;
                         }
