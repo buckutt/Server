@@ -11,6 +11,7 @@ const Device = thinky.createModel('Device', {
     offlineSupport  : type.boolean().default(false),
     alcohol         : type.boolean().default(false),
     showPicture     : type.boolean().default(false),
+    showCategories  : type.boolean().default(true),
     createdAt       : type.date().default(new Date()),
     editedAt        : Date,
     isRemoved       : type.boolean().default(false)

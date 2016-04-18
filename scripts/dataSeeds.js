@@ -84,7 +84,8 @@ export default {
             name            : 'Eeetop1',
             doubleValidation: true,
             offlineSupport  : true,
-            showPicture     : true
+            showPicture     : true,
+            showCategories  : false
         });
 
         const deviceEeetop2 = new models.Device({
@@ -92,7 +93,8 @@ export default {
             name            : 'Eeetop2',
             doubleValidation: true,
             offlineSupport  : true,
-            showPicture     : true
+            showPicture     : true,
+            showCategories  : false
         });
 
         /* Fundations */
