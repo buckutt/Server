@@ -30,6 +30,7 @@ Point.associate = models => {
     models.Point.hasMany(models.Purchase, 'purchases', 'id', 'Purchase_id');
     models.Point.hasMany(models.Reload, 'reloads', 'id', 'Reload_id');
     models.Point.hasMany(models.Right, 'rights', 'id', 'Right_id');
+    models.Point.hasAndBelongsToMany(models.Category, 'categories', 'id', 'id');
     models.Point.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
 };
 
