@@ -33,7 +33,7 @@
     "elegant-status": "^1.0.0",
     "eslint": "^2.5.3",
     "express": "^4.13.4",
-    "fs-extra": "^0.27.0",
+    "fs-extra": "^0.28.0",
     "fs-walk": "0.0.1",
     "inquirer": "git+https://github.com/SBoudrias/Inquirer.js.git",
     "jsonwebtoken": "^5.5.4",
