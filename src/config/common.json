@@ -1,6 +1,7 @@
 {
     "log" : {
-        "level" : "info"
+        "console" : "debug",
+        "file" : "none"
     },
     "http" : {
         "host" : "127.0.0.1",

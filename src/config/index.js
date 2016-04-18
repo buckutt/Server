@@ -14,7 +14,7 @@ const config = _.merge(common, env);
 
 config.root  = path.join(__dirname, '..');
 
-if (config.log.level === 'debug') {
+if (config.log.console === 'debug') {
     console.log('Config loaded: ');
     console.log('%s \n\n', pp(config));
 }

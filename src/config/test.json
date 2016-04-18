@@ -1,6 +1,7 @@
 {
     "log" : {
-        "level" : "debug"
+        "console" : "debug",
+        "file" : "debug"
     },
     "http" : {
         "port" : 3006
