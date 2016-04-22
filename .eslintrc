@@ -63,6 +63,12 @@
         "array-callback-return": 0,
 
         // Other bracket spaces style
-        "array-bracket-spacing": 0
+        "array-bracket-spacing": 0,
+
+        // Require allowance
+        "global-require": 0,
+
+        // Dangle underscores allowance
+        "no-underscore-dangle": 0
     }
 }
