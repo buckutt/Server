@@ -6,7 +6,7 @@ import { pp } from '../lib/utils';
 nconf
     .argv()
     .env()
-    .file({ file: 'process.env.json' });
+    .file({ file: path.join(__dirname, 'process.env.json') });
 
 const env    = require(path.join(__dirname, nconf.get('NODE_ENV') || 'common'));
 const common = require(path.join(__dirname, 'common'));
