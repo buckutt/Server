@@ -69,14 +69,11 @@ export default function token (req, res, next) {
 
             req.user.rights = req.user.rights
                 .map(right => {
-                    console.log(right);
                     // If pin is not allowed with this right, pass
                     if (connectType === 'pin' && pinLoggingAllowed.indexOf(right.name) === -1) {
-                        console.log('NO BECAUSE OF PIN');
                         return null;
                     }
 
-                    console.log(right.period.start <= now && right.period.end > now, right.point.id, req.Point_id);
                     if (right.period.start <= now && right.period.end > now && right.point.id === req.Point_id) {
                         return right;
                     }
@@ -85,8 +82,6 @@ export default function token (req, res, next) {
                     return null;
                 })
                 .filter(right => right !== null);
-
-            console.log(req.user.rights);
 
             return next();
         })
