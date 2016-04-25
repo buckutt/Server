@@ -114,6 +114,10 @@ router.post('/services/login', (req, res, next) => {
         .catch(thinky.Errors.DocumentNotFound, err =>
             /* istanbul ignore next */
             next(new APIError(404, 'User not found', err))
+        )
+        .catch(err =>
+            /* istanbul ignore next */
+            next(new APIError(500, 'Unknown error', err))
         );
 });
 
