@@ -24,6 +24,11 @@ const User = thinky.createModel('User', {
 
 User.pre('save', function (next) {
     this.editedAt = new Date();
+
+    this.firstname = this.firstname.toLowerCase();
+    this.lastname  = this.lastname.toLowerCase();
+    this.nickname  = this.nickname.toLowerCase();
+
     next();
 });
 
