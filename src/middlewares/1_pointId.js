@@ -25,7 +25,7 @@ export default function pointId (req, res, next) {
         .run()
         .then(devices => {
             /* istanbul ignore if */
-            if (devices.length === 0) {
+            if (devices.length === 0 || devices[0].periodPoints.length === 0) {
                 return next(new APIError(404, 'Device not found', fingerprint));
             }
 
