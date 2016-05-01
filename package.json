@@ -21,7 +21,8 @@
     "cleardb": "gulp cleardb",
     "lint": "eslint .",
     "sslConfig": "babel-node scripts/sslConfig.js",
-    "addDevice": "babel-node scripts/addDevice.js"
+    "addDevice": "babel-node scripts/addDevice.js",
+    "databaseAccess": "node -r ./scripts/databaseAccess.js"
   },
   "dependencies": {
     "bcryptjs": "^2.3.0",

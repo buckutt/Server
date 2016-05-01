@@ -607,13 +607,15 @@ export default {
         data.promotions.promotion3crepes.Price_id = data.prices.price1003C.id;
         arr.push(data.promotions.promotion3crepes.save());
 
-        /* Rights - Relationships : period, users */
+        /* Rights - Relationships : point, period, users */
+        data.rights.rightGJAdmin.Point_id  = data.points.pointFoyer.id;
         data.rights.rightGJAdmin.Period_id = data.periods.periodNow.id;
         data.rights.rightGJAdmin.users     = [ data.users.userGJ ];
         arr.push(data.rights.rightGJAdmin.saveAll({
             users: true
         }));
 
+        data.rights.rightGJSeller.Point_id  = data.points.pointFoyer.id;
         data.rights.rightGJSeller.Period_id = data.periods.periodNow.id;
         data.rights.rightGJSeller.users     = [ data.users.userGJ ];
         arr.push(data.rights.rightGJSeller.saveAll({
