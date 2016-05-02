@@ -8,7 +8,7 @@ const Event = thinky.createModel('Event', {
     name     : String,
     createdAt: type.date().default(new Date()),
     editedAt : Date,
-    isRemoved: type.boolean().default(false),
+    isRemoved: type.boolean().default(false)
 }, {
     enforce_missing: true,
     enforce_extra  : 'remove',
