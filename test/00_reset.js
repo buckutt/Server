@@ -163,8 +163,7 @@ describe('Before tests', () => {
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                Period_id: periodId,
-                Point_id : pointId
+                Period_id: periodId
             }, {
                 name     : 'admin',
                 createdAt: new Date(),

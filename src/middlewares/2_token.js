@@ -74,7 +74,11 @@ export default function token (req, res, next) {
                         return null;
                     }
 
-                    if (right.period.start <= now && right.period.end > now && right.point.id === req.Point_id) {
+                    if (right.period.start <= now && right.period.end > now) {
+                        if (right.point) {
+                            return (right.point.id === req.Point_id) ? right : null;
+                        }
+
                         return right;
                     }
 
