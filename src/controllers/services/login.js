@@ -108,6 +108,21 @@ router.post('/services/login', (req, res, next) => {
             delete user.pin;
             delete user.password;
 
+            user.canSell   = false;
+            user.canReload = false;
+
+            for (const right of user.rights) {
+                const configRight = config.rights[right.name];
+
+                if (configRight && configRight.canSell) {
+                    user.canSell = true;
+                }
+
+                if (configRight && configRight.canReload) {
+                    user.canReload = true;
+                }
+            }
+
             return res
                 .status(200)
                 .json({

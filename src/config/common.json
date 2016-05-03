@@ -15,6 +15,8 @@
     "rights" : {
         "all"     : ["admin"],
         "seller"  : {
+            "canSell": true,
+            "canReload": false,
             "read" : [
                 "/articles",
                 "/articles/search",
@@ -35,6 +37,8 @@
             ]
         },
         "reloader": {
+            "canSell": false,
+            "canReload": true,
             "read" : [
                 "/users",
                 "/usersrights",

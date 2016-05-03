@@ -178,6 +178,13 @@ describe('Before tests', () => {
                 isRemoved: false,
                 Period_id: periodId,
                 Point_id : pointId
+            }, {
+                name     : 'reloader',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false,
+                Period_id: periodId,
+                Point_id : pointId
             }])
         ).
         then(res =>
@@ -189,6 +196,9 @@ describe('Before tests', () => {
                 User_id : userId
             }, {
                 Right_id: res.generated_keys[2],
+                User_id : sellerUserId
+            }, {
+                Right_id: res.generated_keys[3],
                 User_id : sellerUserId
             }])
         )
