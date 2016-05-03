@@ -250,6 +250,13 @@ describe('Before tests', () => {
                 }
             ])
         )
+        .then(() =>
+            r.table('Group').insert({
+                name     : 'Users',
+                createdAt: new Date(),
+                editedAt : new Date()
+            })
+        )
         .then(() => {
             done();
         });
