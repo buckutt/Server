@@ -74,7 +74,12 @@ router.post('/services/login', (req, res, next) => {
         })
         .then(mol => {
             if (mol.length === 0) {
-                return next(new APIError(404, 'User not found'));
+                const errDetails = {
+                    mol  : req.body.meanOfLogin.toString(),
+                    point: req.Point_id
+                };
+
+                return next(new APIError(404, 'User not found', errDetails));
             }
 
             user = mol[0].user;
@@ -91,7 +96,12 @@ router.post('/services/login', (req, res, next) => {
                     return resolve();
                 }
 
-                reject(new APIError(401, 'Wrong password'));
+                const errDetails = {
+                    mol  : req.body.meanOfLogin.toString(),
+                    point: req.Point_id
+                };
+
+                reject(new APIError(401, 'User not found', errDetails));
             })
         )
         .then(() => {
