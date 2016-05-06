@@ -62,12 +62,12 @@ export default (httpServer, app) => {
 
                         if (doc.isSaved() === false) {
                             client.send(JSON.stringify({
-                                action: 'create',
+                                action: 'delete',
                                 doc
                             }));
                         } else if (!doc.getOldValue()) {
                             client.send(JSON.stringify({
-                                action: 'delete',
+                                action: 'create',
                                 doc
                             }));
                         } else {

@@ -159,16 +159,19 @@ describe('Changes', () => {
             if (obj.action === 'create') {
                 assert.equal('object', typeof obj.doc);
                 assert.equal('string', typeof obj.doc.id);
+                assert.equal(2, calls);
             }
 
             if (obj.action === 'update') {
                 assert.equal('object', typeof obj.doc);
                 assert.equal('string', typeof obj.doc.id);
                 assert.equal('string', typeof obj.from.id);
+                assert.equal(3, calls);
             }
 
             if (obj.action === 'delete') {
                 assert.equal('string', typeof obj.doc.id);
+                assert.equal(4, calls);
             }
         };
     });
