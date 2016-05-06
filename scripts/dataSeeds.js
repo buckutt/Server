@@ -159,7 +159,8 @@ export default {
 
         const meanofpaymentGobby = new models.MeanOfPayment({
             slug: 'gobby',
-            name: 'Gobby'
+            name: 'Gobby',
+            step: 1
         });
 
         /* Periods */
