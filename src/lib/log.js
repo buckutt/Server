@@ -22,7 +22,11 @@ function timestamp () {
  * @return {Object} A winston logger
  */
 export default moduleToUse => {
-    const path = moduleToUse.filename.split('/').slice(-2).join('/').split('.js')[0];
+    const path = moduleToUse.filename
+        .split('/')
+        .slice(-2)
+        .join('/')
+        .split('.js')[0];
 
     const logger = new winston.Logger({ transports: [] });
 

@@ -121,7 +121,8 @@ router.post('/services/basket', (req, res, next) => {
         .get(req.buyer.id)
         .update({
             credit: newCredit
-        }).run();
+        })
+        .run();
 
     log.info(queryLog);
 
