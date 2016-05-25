@@ -13,6 +13,7 @@ function modelParser (req, res, next, model) {
         articles      : 'Article',
         categories    : 'Category',
         devices       : 'Device',
+        events        : 'Event',
         fundations    : 'Fundation',
         groups        : 'Group',
         meansoflogin  : 'MeanOfLogin',
