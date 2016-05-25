@@ -599,13 +599,13 @@ export default {
             data.sets.setCanettesf1e
         ];
         data.promotions.promotionF1e.Point_id = data.points.pointFoyer.id;
-        data.promotions.promotionF1e.Price_id = data.prices.price100F1E.id;
+        data.promotions.promotionF1e.prices   = [ data.prices.price100F1E ];
         arr.push(data.promotions.promotionF1e.saveAll({
             sets: true
         }));
 
         data.promotions.promotion3crepes.Point_id = data.points.pointFoyer.id;
-        data.promotions.promotion3crepes.Price_id = data.prices.price1003C.id;
+        data.promotions.promotion3crepes.prices   = [ data.prices.price1003C ];
         arr.push(data.promotions.promotion3crepes.save());
 
         /* Rights - Relationships : point, period, users */

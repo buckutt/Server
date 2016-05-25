@@ -29,7 +29,7 @@ Promotion.ensureIndex('editedAt');
 
 Promotion.associate = models => {
     models.Promotion.belongsTo(models.Point, 'point', 'Point_id', 'id');
-    models.Promotion.belongsTo(models.Price, 'price', 'Price_id', 'id');
+    models.Promotion.hasAndBelongsToMany(models.Price, 'prices', 'id', 'id');
     // n:n instead of 1:n to allow one promotion containing multiple times the same article
     models.Promotion.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
     // n:n instead of 1:n to allow one promotion containing multiple times the same set

@@ -32,8 +32,8 @@ Price.associate = models => {
     models.Price.belongsTo(models.Fundation, 'fundation', 'Fundation_id', 'id');
     models.Price.belongsTo(models.Group, 'group', 'Group_id', 'id');
     models.Price.belongsTo(models.Period, 'period', 'Period_id', 'id');
-    models.Price.hasOne(models.Promotion, 'promotion', 'id', 'Promotion_id');
     models.Price.hasMany(models.Purchase, 'purchases', 'id', 'Purchase_id');
+    models.Price.hasAndBelongsToMany(models.Promotion, 'promotions', 'id', 'id');
     models.Price.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
 };
 
