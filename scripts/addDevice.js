@@ -67,6 +67,8 @@ models.r
 
         const copy = status('Copying files...');
 
+        generate = status('Generating certificates...');
+
         try {
             fs.mkdirsSync(`./ssl/${deviceName}`);
 
@@ -82,8 +84,6 @@ models.r
             copy(false);
             return Promise.reject(new Error(e));
         }
-
-        generate = status('Generating certificates...');
 
         /* eslint-disable max-len */
         return exec(`cd ./ssl/${deviceName} &&
