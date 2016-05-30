@@ -534,24 +534,16 @@ export default {
         arr.push(data.periodPoints.periodPointEternityForEEtop2Foyer.save());
 
         /* Points - Relationships : periodPoints, articles, promotions, purchases, reloads */
-        data.points.pointFoyer.articles = [
-            data.articles.articleKinderDelice,
-            data.articles.articleMars,
-            data.articles.articleKinderCountry,
-            data.articles.articleIceTeaPeche,
-            data.articles.articleEau,
-            data.articles.articleIceTeaMangue,
-            data.articles.articleLiptonic,
-            data.articles.articleSchweppes,
-            data.articles.articleSchweppesAgrum,
-            data.articles.articleCocaCola,
-            data.articles.articleCrepe,
-            data.articles.articleBeer
-        ];
         data.points.pointFoyer.categories = [
             data.categories.categoryGeneral,
             data.categories.categoryCanettes,
             data.categories.categoryBarres
+        ];
+        data.points.pointFoyer.prices = [
+            data.prices.price50,
+            data.prices.price100F1E,
+            data.prices.price1003C,
+            data.prices.price250
         ];
         arr.push(data.points.pointFoyer.saveAll({
             articles  : true,
@@ -598,13 +590,11 @@ export default {
             data.sets.setBarresf1e,
             data.sets.setCanettesf1e
         ];
-        data.promotions.promotionF1e.Point_id = data.points.pointFoyer.id;
         data.promotions.promotionF1e.prices   = [ data.prices.price100F1E ];
         arr.push(data.promotions.promotionF1e.saveAll({
             sets: true
         }));
 
-        data.promotions.promotion3crepes.Point_id = data.points.pointFoyer.id;
         data.promotions.promotion3crepes.prices   = [ data.prices.price1003C ];
         arr.push(data.promotions.promotion3crepes.save());
 

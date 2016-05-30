@@ -31,7 +31,6 @@ Article.ensureIndex('editedAt');
 
 Article.associate = models => {
     models.Article.hasAndBelongsToMany(models.Category, 'categories', 'id', 'id');
-    models.Article.hasAndBelongsToMany(models.Point, 'points', 'id', 'id');
     // n:n instead of 1:n to allow one set containing multiple times the same article
     models.Article.hasAndBelongsToMany(models.Set, 'sets', 'id', 'id');
     // n:n instead of 1:n to allow one promotion containing multiple times the same article
