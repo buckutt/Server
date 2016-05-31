@@ -25,7 +25,7 @@ export default function token (req, res, next) {
     // Config is invalid
     /* istanbul ignore if */
     if (!secret) {
-        throw new Error('config.secret must be set');
+        throw new Error('config.app.secret must be set');
     }
 
     // Missing header
