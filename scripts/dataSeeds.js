@@ -547,7 +547,8 @@ export default {
         ];
         arr.push(data.points.pointFoyer.saveAll({
             articles  : true,
-            categories: true
+            categories: true,
+            prices    : true
         }));
 
         /* Prices - Relationships : fundation, group, period, articles, promotion */
@@ -590,13 +591,16 @@ export default {
             data.sets.setBarresf1e,
             data.sets.setCanettesf1e
         ];
-        data.promotions.promotionF1e.prices   = [ data.prices.price100F1E ];
+        data.promotions.promotionF1e.prices = [ data.prices.price100F1E ];
         arr.push(data.promotions.promotionF1e.saveAll({
+            prices: true,
             sets: true
         }));
 
-        data.promotions.promotion3crepes.prices   = [ data.prices.price1003C ];
-        arr.push(data.promotions.promotion3crepes.save());
+        data.promotions.promotion3crepes.prices = [ data.prices.price1003C ];
+        arr.push(data.promotions.promotion3crepes.saveAll({
+            prices: true
+        }));
 
         /* Rights - Relationships : point, period, users */
         data.rights.rightGJAdmin.Point_id  = data.points.pointFoyer.id;
