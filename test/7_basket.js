@@ -34,6 +34,13 @@ describe('Basket', () => {
                     Buyer_id : process.env.GJId,
                     Seller_id: process.env.GJId,
                     type     : 'reload'
+                },
+                // Without trace
+                {
+                    credit   : 0,
+                    Buyer_id : process.env.GJId,
+                    Seller_id: process.env.GJId,
+                    type     : 'reload'
                 }
             ])
             .end(response => {
@@ -142,6 +149,23 @@ describe('Basket', () => {
             .end(response => {
                 assert.equal(400, response.code);
                 assert.equal('Not enough credit', response.body.message);
+                done();
+            });
+    });
+
+    it('should not accept reload when sending invalid credit', done => {
+        unirest.post('https://localhost:3006/services/basket')
+            .send([
+                {
+                    credit   : {},
+                    trace    : 'card',
+                    Buyer_id : process.env.GJId,
+                    Seller_id: process.env.GJId,
+                    type     : 'reload'
+                }
+            ])
+            .end(response => {
+                assert.equal(200, response.code);
                 done();
             });
     });

@@ -128,6 +128,18 @@ describe('Create', function () {
                 });
         });
 
+        it('should create Event', done => {
+            unirest.post('https://localhost:3006/events')
+                .send({
+                    name: 'EventFoo',
+                })
+                .end(response => {
+                    assert.equal(200, response.code);
+                    assert.equal('string', typeof response.body.id);
+                    done();
+                });
+        });
+
         it('should create MeanOfLogin', done => {
             unirest.post('https://localhost:3006/meansoflogin')
                 .send({
