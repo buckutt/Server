@@ -594,7 +594,7 @@ export default {
         data.promotions.promotionF1e.prices = [ data.prices.price100F1E ];
         arr.push(data.promotions.promotionF1e.saveAll({
             prices: true,
-            sets: true
+            sets  : true
         }));
 
         data.promotions.promotion3crepes.prices = [ data.prices.price1003C ];
