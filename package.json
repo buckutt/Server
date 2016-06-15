@@ -58,7 +58,7 @@
     "coveralls": "^2.11.6",
     "eslint": "^2.12.0",
     "eslint-config-airbnb": "^9.0.1",
-    "eslint-plugin-import": "^1.5.0",
+    "eslint-plugin-import": "^1.8.1",
     "eventsource": "github:gjuchault/eventsource-node",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
