@@ -33,7 +33,7 @@
     "cookie-parser": "^1.4.2",
     "cors": "^2.7.1",
     "elegant-status": "^1.1.0",
-    "eslint": "^2.5.3",
+    "eslint": "^3.0.0",
     "express": "^4.13.4",
     "fs-extra": "^0.30.0",
     "fs-walk": "0.0.1",
