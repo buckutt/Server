@@ -1,8 +1,10 @@
+import models from '../src/models';
+
 // Shim for values
 Object.values = obj => Object.keys(obj).map(key => obj[key]);
 
-export default {
-    raw: models => {
+const seeder = {
+    raw: () => {
         /* Articles */
         const articleKinderDelice = new models.Article({
             name : 'Kinder Delice',
@@ -388,7 +390,7 @@ export default {
             all
         };
     },
-    rels: (models, data) => {
+    rels: data => {
         const arr = [];
 
         /* Articles - Relationships : cateogries, point, price, sets, promotion */
@@ -621,7 +623,7 @@ export default {
 
         return arr;
     },
-    post: (models, data) => {
+    post: data => {
         const r                = models.r;
         const ArticlePromotion = models.Promotion._joins.articles.link;
         return r.table(ArticlePromotion).insert([
@@ -631,3 +633,21 @@ export default {
         ]).run();
     }
 };
+
+models.loadModels().then(() => {
+    const raw = seeder.raw();
+
+    Promise
+        .all(raw.all.map(document => document.save()))
+        .then(() => {
+            console.log('Inserted documents');
+            return Promise.all(seeder.rels(raw.data));
+        })
+        .then(() => seeder.post(raw.data))
+        .then(() => {
+            console.log('Inserted relationships');
+        })
+        .catch((err) => {
+            console.log(err.stack);
+        });
+});
