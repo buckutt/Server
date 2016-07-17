@@ -30,12 +30,21 @@ router.put('/:model/:id', (req, res, next) => {
             // Save all (including relatives)
             return inst.save();
         })
-        .then(result =>
+        .then(result => {
+            console.log('HAS EMBED', req.query.embed);
+            if (req.query.embed) {
+                return req.Model.get(result.id).getJoin(req.query.embed).run();
+            }
+
+            return result;
+        })
+        .then(result => {
+            console.log('RESULT IS', result);
             res
                 .status(200)
                 .json(result)
-                .end()
-        )
+                .end();
+        })
         .catch(thinky.Errors.DocumentNotFound, err =>
             next(new APIError(404, 'Document not found', err))
         )
