@@ -1,5 +1,7 @@
 # Buckless-Server
-[![Build Status](https://travis-ci.org/buckless/Server.svg?branch=master)](https://travis-ci.org/buckless/Server) [![Coverage Status](https://coveralls.io/repos/github/buckless/Server/badge.svg?branch=master)](https://coveralls.io/github/buckless/Server?branch=master)  
+[![dependencies Status](https://david-dm.org/buckless/server/status.svg)](https://david-dm.org/buckless/server)
+[![Build Status](https://travis-ci.org/buckless/Server.svg?branch=master)](https://travis-ci.org/buckless/Server)
+[![Coverage Status](https://coveralls.io/repos/github/buckless/Server/badge.svg?branch=master)](https://coveralls.io/github/buckless/Server?branch=master)  
 
 Buckless is an electronic payment system.
 It aims to remove almost any cashflow in your events.
