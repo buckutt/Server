@@ -1,3 +1,4 @@
+import path          from 'path';
 import fs            from 'fs-extra';
 import inquirer      from 'inquirer';
 import childProcess  from 'child_process';
@@ -53,14 +54,13 @@ inquirer.prompt([
 
     generate = status('Generating certificates...');
 
-    /* eslint-disable max-len */
-    return exec(`cd ssl &&
-        openssl req -new -x509 -days 9999 -config ca.cnf -keyout ca-key.pem -out ca-crt.pem
+    const cwd = path.join(__dirname, '..', 'ssl');
 
-        openssl genrsa -out server-key.pem 4096 &&
-        openssl req -new -config server.cnf -key server-key.pem -out server-csr.pem &&
-        openssl x509 -req -extfile server.cnf -days 999 -passin "pass:${answer.outPassword}" -in server-csr.pem -CA ca-crt.pem -CAkey ca-key.pem -CAcreateserial -out server-crt.pem
-    `);
+    /* eslint-disable max-len */
+    return exec('openssl req -new -x509 -days 9999 -config ca.cnf -keyout ca-key.pem -out ca-crt.pem', { cwd })
+        .then(() => exec('openssl genrsa -out server-key.pem 4096', { cwd }))
+        .then(() => exec('openssl req -new -config server.cnf -key server-key.pem -out server-csr.pem', { cwd }))
+        .then(() => exec(`openssl x509 -req -extfile server.cnf -days 999 -passin "pass:${answer.outPassword}" -in server-csr.pem -CA ca-crt.pem -CAkey ca-key.pem -CAcreateserial -out server-crt.pem`, { cwd }));
     /* eslint-enable max-len */
 })
 .then(() => {

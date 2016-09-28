@@ -1,7 +1,7 @@
 import APIError from '../errors/APIError';
 import config   from '../config';
 
-const disableAuth = false;
+const disableAuth = true;
 
 /**
  * Check for the current user wether he can do what he wants

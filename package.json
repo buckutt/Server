@@ -20,7 +20,7 @@
     "start": "npm run build && node build/app",
     "startdb": "rethinkdb&",
     "stopdb": "killall rethinkdb -s SIGINT",
-    "seed": "babel-node sripts/seed",
+    "seed": "babel-node scripts/dataSeeds",
     "lint": "eslint .",
     "sslConfig": "babel-node scripts/sslConfig",
     "addDevice": "babel-node scripts/addDevice",

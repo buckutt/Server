@@ -645,7 +645,7 @@ models.loadModels().then(() => {
         })
         .then(() => seeder.post(raw.data))
         .then(() => {
-            console.log('Inserted relationships');
+            console.log('Inserted relationships. Press Ctrl+C to exit');
         })
         .catch((err) => {
             console.log(err.stack);
