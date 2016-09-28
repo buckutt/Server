@@ -2,10 +2,10 @@ import Promise  from 'bluebird';
 import syncExec from 'sync-exec';
 import thinky   from '../src/lib/thinky';
 
-const sslResult = syncExec('openssl x509 -noout -fingerprint -in ssl/test/test.crt').stdout;
+const sslResult = syncExec('openssl x509 -noout -fingerprint -in ssl/test/test-crt.pem').stdout;
 
 if (sslResult.indexOf('=') === -1) {
-    console.error('Couldn\'t find test certificate (ssl/test/test.crt). See README.md to create it');
+    console.error('Couldn\'t find test certificate (ssl/test/test-crt.pem). Start `npm run addTestDevice`');
     process.exit(1);
 }
 

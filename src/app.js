@@ -74,9 +74,9 @@ app.start = () => {
 
     /* istanbul ignore else */
     if (process.env.NODE_ENV === 'test') {
-        key  = './ssl/test/server.key';
-        cert = './ssl/test/server.crt';
-        ca   = './ssl/test/ca.crt';
+        key  = './ssl/test/server-key.pem';
+        cert = './ssl/test/server-crt.pem';
+        ca   = './ssl/test/ca-crt.pem';
     } else {
         key  = './ssl/server-key.pem';
         cert = './ssl/server-crt.pem';

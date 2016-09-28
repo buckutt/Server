@@ -4,7 +4,6 @@ rethinkdb_data/
 coverage/
 npm-debug.log
 ssl/*
-!ssl/test
 !ssl/example
 server.log
 
