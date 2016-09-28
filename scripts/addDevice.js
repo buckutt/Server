@@ -1,3 +1,4 @@
+import path          from 'path';
 import fs            from 'fs-extra';
 import inquirer      from 'inquirer';
 import childProcess  from 'child_process';
@@ -85,16 +86,14 @@ models.r
             return Promise.reject(new Error(e));
         }
 
+        const cwd = path.join(__dirname, '..', 'ssl', deviceName);
+
         /* eslint-disable max-len */
-        return exec(`cd ./ssl/${deviceName} &&
-            openssl genrsa -out ${deviceName}-key.pem 4096 &&
-            openssl req -new -config ${deviceName}.cnf -key ${deviceName}-key.pem -out ${deviceName}-csr.pem &&
-            openssl x509 -req -extfile ${deviceName}.cnf -days 999 -passin "pass:${outPassword}" -in ${deviceName}-csr.pem -CA ../ca-crt.pem -CAkey ../ca-key.pem -CAcreateserial -out ${deviceName}-crt.pem &&
-
-            openssl verify -CAfile ../ca-crt.pem ${deviceName}-crt.pem &&
-
-            openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"
-        `);
+        return exec(`openssl genrsa -out ${deviceName}-key.pem 4096`, { cwd })
+            .then(() => exec(`openssl req -new -config ${deviceName}.cnf -key ${deviceName}-key.pem -out ${deviceName}-csr.pem`, { cwd }))
+            .then(() => exec(`openssl x509 -req -extfile ${deviceName}.cnf -days 999 -passin "pass:${outPassword}" -in ${deviceName}-csr.pem -CA ../ca-crt.pem -CAkey ../ca-key.pem -CAcreateserial -out ${deviceName}-crt.pem`, { cwd }))
+            .then(() => exec(`openssl verify -CAfile ../ca-crt.pem ${deviceName}-crt.pem`, { cwd }))
+            .then(() => exec(`openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"`, { cwd }));
         /* eslint-enable max-len */
     })
     .catch(e => {

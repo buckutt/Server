@@ -12,8 +12,8 @@ import fs          from 'fs';
  */
 function _EventSource (url, options) {
     return new EventSource(url, Object.assign({
-        cert              : fs.readFileSync('ssl/test/test.crt'),
-        key               : fs.readFileSync('ssl/test/test.key'),
+        cert              : fs.readFileSync('ssl/test/test-crt.pem'),
+        key               : fs.readFileSync('ssl/test/test-key.pem'),
         strictSSL         : false,
         rejectUnauthorized: false,
         headers           : {

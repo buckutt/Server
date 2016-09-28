@@ -9,13 +9,14 @@
   ],
   "license": "MIT",
   "scripts": {
+    "postinstall": "npm run addTestDevice",
     "build": "gulp && npm run config",
     "config": "cp src/config/*.json build/config",
     "clear": "rimraf build",
     "cleardb": "rimraf rethinkdb_data",
-    "test": "npm run test:nocoverage",
-    "test:nocoverage": "npm run build && NODE_ENV=test ./node_modules/.bin/babel-node ./node_modules/.bin/_mocha --sort --bail",
-    "test:coverage": "npm run build && NODE_ENV=test babel-node ./node_modules/.bin/babel-istanbul cover ./node_modules/.bin/_mocha -- --sort --bail",
+    "test": "npm run test:coverage",
+    "test:nocoverage": "babel-node scripts/test",
+    "test:coverage": "babel-node scripts/test --coverage",
     "coveralls": "cat ./coverage/lcov.info | coveralls",
     "start": "npm run build && node build/app",
     "startdb": "rethinkdb&",
@@ -24,6 +25,7 @@
     "lint": "eslint .",
     "sslConfig": "babel-node scripts/sslConfig",
     "addDevice": "babel-node scripts/addDevice",
+    "addTestDevice": "rimraf ssl/test && babel-node scripts/addTestDevice",
     "databaseAccess": "node -r ./scripts/databaseAccess"
   },
   "dependencies": {
@@ -33,6 +35,7 @@
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.2",
     "cors": "^2.7.1",
+    "cross-env": "^3.0.0",
     "elegant-status": "^1.1.0",
     "eslint": "^3.0.0",
     "express": "^4.13.4",
