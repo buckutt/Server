@@ -12,13 +12,8 @@ const mocha        = './node_modules/mocha/bin/_mocha';
 const start = (p, cb) => {
     const proc = childProcess.spawn(p, { cwd, shell: true });
 
-    proc.stdout.on('data', data => {
-        console.log(data.toString());
-    });
-
-    proc.stderr.on('data', data => {
-        console.error(data.toString());
-    });
+    proc.stdout.pipe(process.stdout);
+    proc.stderr.pipe(process.stderr);
 
     if (cb) {
         proc.on('exit', cb);

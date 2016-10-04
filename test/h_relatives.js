@@ -79,7 +79,7 @@ describe('Relatives', () => {
                 });
         });
 
-        it('should not add a relation if the document does not exists', done => {
+        it('should not add a relation if the document does not exist', done => {
             const gid = '00000000-0000-1000-8000-000000000000';
 
             unirest.post(`https://localhost:3006/groups/${gid}/users`)
@@ -88,6 +88,21 @@ describe('Relatives', () => {
                     assert.equal(404, response2.code);
 
                     done();
+                });
+        });
+
+        it('should not add a relation if the subdocument does not exist', done => {
+            unirest.get('https://localhost:3006/groups')
+                .end(response => {
+                    const gid = response.body[0].id;
+
+                    unirest.post(`https://localhost:3006/groups/${gid}/users`)
+                        .send({ id: '00000000-0000-1000-8000-000000000000' })
+                        .end(response2 => {
+                            assert.equal(404, response2.code);
+
+                            done();
+                        });
                 });
         });
 

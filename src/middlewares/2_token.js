@@ -5,7 +5,7 @@ import config   from '../config';
 
 Promise.promisifyAll(jwt);
 
-const disableAuth = true;
+const disableAuth = false;
 
 /**
  * Parses the client token

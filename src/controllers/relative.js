@@ -7,6 +7,7 @@ import { pp }      from '../lib/utils';
 import APIError    from '../errors/APIError';
 
 const log = logger(module);
+const r   = thinky.r;
 
 /**
  * Read submodel controller. Handles reading the children of one element (based on a relation).
@@ -72,30 +73,57 @@ router.post('/:model/:id/:submodel', (req, res, next) => {
         .run()`;
     log.info(queryLog);
 
-    req.Model
-        .get(req.params.id)
-        .addRelation(req.params.submodel, { id: req.body.id })
-        .then(status =>
+    const tableJoin = req.Model._joins[submodel].link;
+    const leftName  = `${req.Model.getTableName()}_id`;
+    const leftId    = req.params.id;
+    const rightName = `${req.Model._joins[submodel].model.getTableName()}_id`;
+    const rightId   = req.body.id;
+
+    log.info(`r.table(${tableJoin}).insert({
+        ['${leftName}'] : ${leftId},
+        ['${rightName}']: ${rightId}
+    });`);
+
+    r
+        // Check left model existence
+        .table(req.Model.getTableName())
+        .get(leftId)
+        .then(leftModel => {
+            if (!leftModel) {
+                throw new APIError(404, 'Left document does not exist');
+            }
+
+            // Check right model
+            return r
+                .table(req.Model._joins[submodel].model.getTableName())
+                .get(rightId);
+        })
+        .then(rightModel => {
+            if (!rightModel) {
+                throw new APIError(404, 'Right document does not exist');
+            }
+
+            return r
+                .table(tableJoin)
+                .insert({
+                    [leftName] : leftId,
+                    [rightName]: rightId
+                });
+        })
+        .then(() =>
             res
                 .status(200)
-                .json({ status })
+                .json({})
                 .end()
         )
-        .catch(thinky.Errors.DocumentNotFound, err =>
-            next(new APIError(404, 'Document not found', err))
-        )
-        .catch(thinky.Errors.ValidationError, err =>
+        .catch(err => {
+            if (err.isAPIError) {
+                return next(err);
+            }
+
             /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err))
-        )
-        .catch(thinky.Errors.InvalidWrite, err =>
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err))
-        )
-        .catch(err =>
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err))
-        );
+            return next(new APIError(500, 'Unknown error', err));
+        });
 });
 
 router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
@@ -105,38 +133,43 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
         return next(new APIError(404, 'Document not found', `Submodel ${submodel} does not exist`));
     }
 
-    const queryLog = `${req.Model}
-        .get(${req.params.id})
-        .removeRelation(${req.params.submodel}, { id: ${req.params.subid} })
-        .run()`;
-    log.info(queryLog);
+    const tableJoin = req.Model._joins[submodel].link;
+    const leftName  = `${req.Model.getTableName()}_id`;
+    const leftId    = req.params.id;
+    const rightName = `${req.Model._joins[submodel].model.getTableName()}_id`;
+    const rightId   = req.params.subid;
 
-    req.Model
-        .get(req.params.id)
-        .removeRelation(req.params.submodel, { id: req.params.subid })
-        .then(status =>
+    log.info(`r.table(${tableJoin})
+        .filter({
+            ['${leftName}'] : ${leftId},
+            ['${rightName}']: ${rightId}
+        })
+        .nth(0)
+        .default(null)`);
+
+    r.table(tableJoin)
+        .filter({
+            [leftName] : leftId,
+            [rightName]: rightId
+        })
+        .nth(0)
+        .default(null)
+        .then(rel => {
+            if (!rel) {
+                throw new APIError(404, 'Document not found');
+            }
+
+            return r.table(tableJoin).get(rel.id).delete();
+        })
+        .then(() =>
             res
                 .status(200)
-                .json({ status })
+                .json({})
                 .end()
         )
-        .catch(thinky.Errors.DocumentNotFound, err =>
-            // Ignore this one for now as the error is catch by ReqlUserError
-            // https://github.com/neumino/thinky/issues/487
-            /* istanbul ignore next */
-            next(new APIError(404, 'Document not found', err))
-        )
-        .catch(thinky.Errors.ValidationError, err =>
-            /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err))
-        )
-        .catch(thinky.Errors.InvalidWrite, err =>
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err))
-        )
         .catch(err => {
-            if (err.name === 'ReqlUserError') {
-                return next(new APIError(404, 'Document not found', err));
+            if (err.isAPIError) {
+                return next(err);
             }
 
             /* istanbul ignore next */
