@@ -65,19 +65,28 @@ router.post('/services/basket', (req, res, next) => {
     req.body.forEach(item => {
         if (item.type === 'purchase') {
             // Purchases
+            const articlesIds = item.articles.map(article => article.id);
+
+            const articlesAmount = item.articles.map(article => ({
+                id   : article.id,
+                price: article.price,
+                vat  : article.vat
+            }));
+
             const purchase = new models.Purchase({
                 Buyer_id    : item.Buyer_id,
                 Price_id    : item.Price_id,
                 Point_id    : req.Point_id,
                 Promotion_id: item.Promotion_id ? item.Promotion_id : '',
-                Seller_id   : item.Seller_id
+                Seller_id   : item.Seller_id,
+                articlesAmount
             });
 
-            queryLog += `buys ${pp(item.articles)} `;
-            purchasesRels.push(item.articles);
+            queryLog += `buys ${pp(articlesIds)} `;
+            purchasesRels.push(articlesIds);
 
             // Stock reduction
-            item.articles.forEach(article => {
+            articlesIds.forEach(article => {
                 const stockReduction = models.Article
                     .get(article)
                     .update({
