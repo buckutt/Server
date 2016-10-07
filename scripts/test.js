@@ -30,6 +30,8 @@ start('npm run build', code => {
             cmd = `cross-env NODE_ENV=test babel-node ${mocha} --sort --bail`;
         }
 
-        start(cmd);
+        start(cmd, code => {
+            process.exit(code);
+        });
     }
 });
