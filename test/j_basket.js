@@ -14,11 +14,16 @@ describe('Basket', () => {
                     cost        : 50,
                     type        : 'purchase',
                     articles    : [
-                        process.env.KinderDeliceId
+                        {
+                            id   : process.env.KinderDeliceId,
+                            price: 'article-price-id',
+                            vat  : 0
+                        }
                     ]
                 }
             ])
             .end(response => {
+                console.log('ERR IS', response.body);
                 assert.equal(200, response.code);
                 assert.equal(100, response.body.newCredit);
                 done();
@@ -61,8 +66,16 @@ describe('Basket', () => {
                     cost        : 100,
                     type        : 'purchase',
                     articles    : [
-                        process.env.KinderDeliceId,
-                        process.env.IceTeaPecheId
+                        {
+                            id   : process.env.KinderDeliceId,
+                            price: 'article-price-id',
+                            vat  : 0
+                        },
+                        {
+                            id   : process.env.IceTeaPecheId,
+                            price: 'article-price-id',
+                            vat  : 0
+                        }
                     ]
                 }
             ])
@@ -84,8 +97,16 @@ describe('Basket', () => {
                     cost        : 100,
                     type        : 'purchase',
                     articles    : [
-                        process.env.KinderDeliceId,
-                        process.env.IceTeaPecheId
+                        {
+                            id   : process.env.KinderDeliceId,
+                            price: 'article-price-id',
+                            vat  : 0
+                        },
+                        {
+                            id   : process.env.IceTeaPecheId,
+                            price: 'article-price-id',
+                            vat  : 0
+                        }
                     ]
                 },
                 {
@@ -103,7 +124,11 @@ describe('Basket', () => {
                     cost        : 50,
                     type        : 'purchase',
                     articles    : [
-                        process.env.KinderDeliceId
+                        {
+                            id   : process.env.KinderDeliceId,
+                            price: 'article-price-id',
+                            vat  : 0
+                        }
                     ]
                 }
             ])
