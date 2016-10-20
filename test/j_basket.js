@@ -178,6 +178,42 @@ describe('Basket', () => {
             });
     });
 
+    it('should not accept if the user tries to reload too much', done => {
+        unirest.post('https://localhost:3006/services/basket')
+            .send([
+                {
+                    credit   : 5000 * 100,
+                    trace    : 'card',
+                    Buyer_id : process.env.GJId,
+                    Seller_id: process.env.GJId,
+                    type     : 'reload'
+                }
+            ])
+            .end(response => {
+                assert.equal(400, response.code);
+                assert.equal(0, response.body.message.indexOf('Maximum exceeded :'));
+                done();
+            });
+    });
+
+    it('should not accept if the user reload not enough', done => {
+        unirest.post('https://localhost:3006/services/basket')
+            .send([
+                {
+                    credit   : 1 * 100,
+                    trace    : 'card',
+                    Buyer_id : process.env.GJId,
+                    Seller_id: process.env.GJId,
+                    type     : 'reload'
+                }
+            ])
+            .end(response => {
+                assert.equal(400, response.code);
+                assert.equal(0, response.body.message.indexOf('Can not reload less than : '));
+                done();
+            });
+    });
+
     it('should not accept reload when sending invalid credit', done => {
         unirest.post('https://localhost:3006/services/basket')
             .send([

@@ -122,20 +122,34 @@ describe('Before tests', () => {
             }]);
         })
         .then(() =>
+            r.table('Event').insert({
+                name  : 'Vente permanente au Foyer',
+                config: {
+                    minReload    : 500,
+                    maxPerAccount: 100 * 100
+                },
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false
+            })
+        )
+        .then(res =>
             r.table('Period').insert([{
                 name     : 'Surrounding',
                 start    : new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
                 end      : new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
                 createdAt: new Date(),
                 editedAt : new Date(),
-                isRemoved: false
+                isRemoved: false,
+                Event_id : res.generated_keys[0]
             }, {
                 name     : 'Never',
                 start    : new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 2),
                 end      : new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
                 createdAt: new Date(),
                 editedAt : new Date(),
-                isRemoved: false
+                isRemoved: false,
+                Event_id : res.generated_keys[0]
             }])
         )
         .then(res => {
@@ -155,7 +169,7 @@ describe('Before tests', () => {
             }]);
         })
         .then(res => {
-            pointId       = res.generated_keys[0];
+            pointId = res.generated_keys[0];
         })
         .then(() =>
             r.table('Right').insert([{

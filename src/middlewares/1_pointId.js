@@ -19,7 +19,9 @@ export default function pointId (req, res, next) {
         })
         .getJoin({
             periodPoints: {
-                period: true
+                period: {
+                    event: true
+                }
             }
         })
         .run()
@@ -40,10 +42,16 @@ export default function pointId (req, res, next) {
 
                 if (diff < minPeriod) {
                     req.Point_id = periodPoint.Point_id;
+                    req.Event_id = periodPoint.Event_id;
                     minPeriod    = diff;
+
+                    req.device = device;
+                    req.point  = periodPoint.period;
+                    req.event  = periodPoint.period.event;
                 }
             });
 
+            res.header('event', req.Event_id);
             res.header('point', req.Point_id);
             res.header('device', device.id);
 

@@ -48,6 +48,9 @@ describe('Login', () => {
             })
             .end(response => {
                 assert.equal(200, response.code);
+                assert.equal(true, response.headers.event.length > 0);
+                assert.equal(true, response.headers.point.length > 0);
+                assert.equal(true, response.headers.device.length > 0);
                 sellerToken = response.body.token;
 
                 unirest.get('https://localhost:3006/articles')

@@ -56,8 +56,23 @@ router.post('/services/basket', (req, res, next) => {
         })
         .reduce((a, b) => a + b);
 
+    const reloadOnly = req.body
+        .filter(item => item.type === 'reload')
+        .map(item => item.credit)
+        .reduce((a, b) => a + b, 0);
+
     if (req.buyer.credit < totalCost) {
         return next(new APIError(400, 'Not enough credit'));
+    }
+
+    if (req.event.config.maxPerAccount && req.buyer.credit - totalCost > req.event.config.maxPerAccount) {
+        const max = (req.event.config.maxPerAccount / 100).toFixed(2);
+        return next(new APIError(400, `Maximum exceeded : ${max}€`));
+    }
+
+    if (req.event.config.minReload && reloadOnly < req.event.config.minReload && reloadOnly > 0) {
+        const min = (req.event.config.minReload / 100).toFixed(2);
+        return next(new APIError(400, `Can not reload less than : ${min}€`));
     }
 
     queryLog += `User ${req.buyer.id} `;

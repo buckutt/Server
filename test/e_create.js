@@ -131,7 +131,11 @@ describe('Create', function () {
         it('should create Event', done => {
             unirest.post('https://localhost:3006/events')
                 .send({
-                    name: 'EventFoo'
+                    name  : 'EventFoo',
+                    config: {
+                        minReload    : 500,
+                        maxPerAccount: 120 * 100
+                    }
                 })
                 .end(response => {
                     assert.equal(200, response.code);
