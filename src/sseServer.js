@@ -1,9 +1,10 @@
-import SSE             from 'sse';
-import qs              from 'qs';
-import { promisify }   from 'bluebird';
-import logger          from './lib/log';
-import modelParser     from './lib/modelParser';
-import middlewares_    from './middlewares';
+import SSE               from 'sse';
+import qs                from 'qs';
+import { promisify }     from 'bluebird';
+import logger            from './lib/log';
+import { modelFromName } from './lib/modelParser';
+import middlewares_      from './middlewares';
+import APIError          from './errors/APIError';
 
 const log = logger(module);
 
@@ -24,9 +25,11 @@ export default (httpServer, app) => {
         // Create a `request` object in order to pass it through middlewares
         req.query                 = qs.parse(req.url.slice(req.url.indexOf('?') + 1));
         req.headers.authorization = req.query.authorization;
-        req.params                = { model: req.query.model };
+        let models                = [];
 
-        const model = req.query.model;
+        if (req.query.models) {
+            models = req.query.models.split(',');
+        }
 
         // Skip function as the headers have already been sent
         // That will disable point/device headers (which are not used by changefeeds)
@@ -38,45 +41,52 @@ export default (httpServer, app) => {
 
         // Execute promises in serie
         middlewares.reduce((p, mw) => p.then(() => mw(req, res)), Promise.resolve())
-            .then(() =>
-                new Promise((resolve, reject) => {
-                    modelParser(req, res, err => {
-                        if (err instanceof Error) {
-                            return reject(err);
-                        }
-
-                        resolve();
-                    }, model);
-                })
-            )
             .then(() => {
-                log.info(`A client has connected to watch for changes in ${model}`);
-                client.send('ok');
+                if (models.length < 1) {
+                    throw new APIError(404, 'No model required');
+                }
 
-                req.Model.changes().then(feed => {
-                    feed.each((err, doc) => {
-                        /* istanbul ignore if */
-                        if (err) {
-                            return;
-                        }
+                models.forEach(model => {
+                    const Model = modelFromName(req, res, model);
 
-                        if (doc.isSaved() === false) {
-                            client.send(JSON.stringify({
-                                action: 'delete',
-                                doc
-                            }));
-                        } else if (!doc.getOldValue()) {
-                            client.send(JSON.stringify({
-                                action: 'create',
-                                doc
-                            }));
-                        } else {
-                            client.send(JSON.stringify({
-                                action: 'update',
-                                from  : doc.getOldValue(),
-                                doc
-                            }));
-                        }
+                    if (Model instanceof Error) {
+                        throw Model;
+                    }
+
+                    log.info(`A client has connected to watch for changes in ${model}`);
+                    client.send(JSON.stringify({
+                        model,
+                        action: 'listen'
+                    }));
+
+                    Model.changes().then(feed => {
+                        feed.each((err, doc) => {
+                            /* istanbul ignore if */
+                            if (err) {
+                                return;
+                            }
+
+                            if (doc.isSaved() === false) {
+                                client.send(JSON.stringify({
+                                    model,
+                                    action: 'delete',
+                                    doc
+                                }));
+                            } else if (!doc.getOldValue()) {
+                                client.send(JSON.stringify({
+                                    model,
+                                    action: 'create',
+                                    doc
+                                }));
+                            } else {
+                                client.send(JSON.stringify({
+                                    model,
+                                    action: 'update',
+                                    from  : doc.getOldValue(),
+                                    doc
+                                }));
+                            }
+                        });
                     });
                 });
             })

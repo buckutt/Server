@@ -61,6 +61,21 @@ describe('Changes', () => {
         const es = new _EventSource(`https://localhost:3006/changes?${query}`);
 
         es.onmessage = e => {
+            assert.equal('Error: No model required', e.data);
+            es.close();
+            done();
+        };
+    });
+
+    it('should not allow a query on a non-existant model', done => {
+        const token = `authorization=Bearer%20${process.env.TOKEN}`;
+        const model = 'models=foobar';
+
+        const query = `${token}&${model}`;
+
+        const es = new _EventSource(`https://localhost:3006/changes?${query}`);
+
+        es.onmessage = e => {
             assert.equal('Error: Model not found', e.data);
             es.close();
             done();
@@ -69,14 +84,14 @@ describe('Changes', () => {
 
     it('should sends data when the Authorization header is okay', done => {
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
-        const model = 'model=purchases';
+        const model = 'models=purchases';
 
         const query = `${token}&${model}`;
 
         const es = new _EventSource(`https://localhost:3006/changes?${query}`);
 
         es.onmessage = e => {
-            assert.equal('ok', e.data);
+            assert.equal('{"model":"purchases","action":"listen"}', e.data);
             es.close();
             done();
         };
@@ -86,7 +101,7 @@ describe('Changes', () => {
         this.timeout(5000);
 
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
-        const model = 'model=meansofpayment';
+        const model = 'models=meansofpayment';
 
         const query = `${token}&${model}`;
 
@@ -148,21 +163,23 @@ describe('Changes', () => {
         es.onmessage = e => {
             ++calls;
 
-            if (e.data === 'ok') {
-                assert.equal('ok', e.data);
+            const obj = JSON.parse(e.data);
+
+            if (obj.action === 'listen') {
+                assert.equal('string', typeof obj.model);
                 requestCreate();
                 return;
             }
 
-            const obj = JSON.parse(e.data);
-
             if (obj.action === 'create') {
+                assert.equal('string', typeof obj.model);
                 assert.equal('object', typeof obj.doc);
                 assert.equal('string', typeof obj.doc.id);
                 assert.equal(2, calls);
             }
 
             if (obj.action === 'update') {
+                assert.equal('string', typeof obj.model);
                 assert.equal('object', typeof obj.doc);
                 assert.equal('string', typeof obj.doc.id);
                 assert.equal('string', typeof obj.from.id);
@@ -170,6 +187,7 @@ describe('Changes', () => {
             }
 
             if (obj.action === 'delete') {
+                assert.equal('string', typeof obj.model);
                 assert.equal('string', typeof obj.doc.id);
                 assert.equal(4, calls);
             }
