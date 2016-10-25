@@ -73,17 +73,18 @@ describe('Relatives', () => {
             unirest.post(`https://localhost:3006/groups/${gid}/foo`)
                 .send({ id: gid })
                 .end(response2 => {
+                    console.log(response2.body);
                     assert.equal(404, response2.code);
 
                     done();
                 });
         });
 
-        it('should not add a relation if the document does not exist', done => {
-            const gid = '00000000-0000-1000-8000-000000000000';
+        it('should not add a relation if the left document does not exist', done => {
+            const rid = '00000000-0000-1000-8000-000000000000';
 
-            unirest.post(`https://localhost:3006/groups/${gid}/users`)
-                .send({ id: gid })
+            unirest.post(`https://localhost:3006/rights/${rid}/users`)
+                .send({ id: rid })
                 .end(response2 => {
                     assert.equal(404, response2.code);
 
@@ -92,11 +93,11 @@ describe('Relatives', () => {
         });
 
         it('should not add a relation if the subdocument does not exist', done => {
-            unirest.get('https://localhost:3006/groups')
+            unirest.get('https://localhost:3006/rights')
                 .end(response => {
-                    const gid = response.body[0].id;
+                    const rid = response.body[0].id;
 
-                    unirest.post(`https://localhost:3006/groups/${gid}/users`)
+                    unirest.post(`https://localhost:3006/rights/${rid}/users`)
                         .send({ id: '00000000-0000-1000-8000-000000000000' })
                         .end(response2 => {
                             assert.equal(404, response2.code);
@@ -107,20 +108,20 @@ describe('Relatives', () => {
         });
 
         it('should add a relation', done => {
-            unirest.get('https://localhost:3006/groups')
+            unirest.get('https://localhost:3006/rights')
                 .end(response => {
-                    const gid = response.body[0].id;
+                    const rid = response.body[0].id;
 
-                    unirest.post(`https://localhost:3006/groups/${gid}/users`)
-                        .send({ id: process.env.GJId })
+                    unirest.post(`https://localhost:3006/users/${process.env.GJId}/rights`)
+                        .send({ id: rid })
                         .end(response2 => {
                             assert.equal(200, response2.code);
 
-                            const embed = q({ users: true });
+                            const embed = q({ rights: true });
 
-                            unirest.get(`https://localhost:3006/groups/${gid}?embed=${embed}`)
+                            unirest.get(`https://localhost:3006/users/${process.env.GJId}?embed=${embed}`)
                                 .end(response3 => {
-                                    assert.equal(1, response3.body.users.length);
+                                    assert.equal(1, response3.body.rights.length);
 
                                     done();
                                 });
@@ -142,7 +143,7 @@ describe('Relatives', () => {
         it('should not delete a relation if the document does not exists', done => {
             const gid = '00000000-0000-1000-8000-000000000000';
 
-            unirest.delete(`https://localhost:3006/groups/${gid}/users/${gid}`)
+            unirest.delete(`https://localhost:3006/users/${gid}/rights/${gid}`)
                 .end(response2 => {
                     assert.equal(404, response2.code);
 
@@ -151,20 +152,20 @@ describe('Relatives', () => {
         });
 
         it('should delete a relation', done => {
-            unirest.get('https://localhost:3006/groups')
+            const embed = q({ users: true });
+            unirest.get(`https://localhost:3006/rights?embed=${embed}`)
                 .end(response => {
-                    const gid = response.body[0].id;
+                    const rid    = response.body[0].id;
+                    const before = response.body[0].users.length;
 
-                    unirest.delete(`https://localhost:3006/groups/${gid}/users/${process.env.GJId}`)
-                        .send({ id: process.env.GJId })
+                    unirest.delete(`https://localhost:3006/rights/${rid}/users/${process.env.GJId}`)
+                        .send()
                         .end(response2 => {
                             assert.equal(200, response2.code);
 
-                            const embed = q({ users: true });
-
-                            unirest.get(`https://localhost:3006/groups/${gid}?embed=${embed}`)
+                            unirest.get(`https://localhost:3006/rights/${rid}?embed=${embed}`)
                                 .end(response3 => {
-                                    assert.equal(0, response3.body.users.length);
+                                    assert.equal(before - 1, response3.body.users.length);
 
                                     done();
                                 });

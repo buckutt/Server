@@ -40,7 +40,7 @@ User.ensureIndex('createdAt');
 User.ensureIndex('editedAt');
 
 User.associate = models => {
-    models.User.hasAndBelongsToMany(models.Group, 'groups', 'id', 'id');
+    models.User.hasAndBelongsToMany(models.GroupPeriod, 'groupPeriods', 'id', 'id');
     models.User.hasAndBelongsToMany(models.Right, 'rights', 'id', 'id');
     models.User.hasMany(models.MeanOfLogin, 'meansOfLogin', 'id', 'User_id');
     models.User.hasMany(models.Purchase, 'purchases', 'id', 'Buyer_id');

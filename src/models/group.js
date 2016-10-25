@@ -27,7 +27,7 @@ Group.ensureIndex('createdAt');
 Group.ensureIndex('editedAt');
 
 Group.associate = models => {
-    models.Group.hasAndBelongsToMany(models.User, 'users', 'id', 'id');
+    models.Group.hasMany(models.GroupPeriod, 'groupPeriods', 'id', 'Group_id');
     models.Group.hasMany(models.Price, 'prices', 'id', 'Group_id');
 };
 

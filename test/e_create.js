@@ -128,6 +128,19 @@ describe('Create', function () {
                 });
         });
 
+        it('should create GroupPeriod', done => {
+            unirest.post('https://localhost:3006/groupPeriods')
+                .send({
+                    Group_id : '',
+                    Period_id: ''
+                })
+                .end(response => {
+                    assert.equal(200, response.code);
+                    assert.equal('string', typeof response.body.id);
+                    done();
+                });
+        });
+
         it('should create Event', done => {
             unirest.post('https://localhost:3006/events')
                 .send({
