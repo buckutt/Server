@@ -8,10 +8,11 @@ const Device = thinky.createModel('Device', {
     fingerprint     : String,
     name            : String,
     doubleValidation: type.boolean().default(false),
-    offlineSupport  : type.boolean().default(false),
     alcohol         : type.boolean().default(false),
     showPicture     : type.boolean().default(false),
     showCategories  : type.boolean().default(true),
+    realtime        : type.boolean().default(false),
+    refreshInterval : type.number().default(5),
     createdAt       : type.date().default(new Date()),
     editedAt        : Date,
     isRemoved       : type.boolean().default(false)
