@@ -7,6 +7,7 @@ const modelsNames = {
     events        : 'Event',
     fundations    : 'Fundation',
     groups        : 'Group',
+    groupPeriods  : 'GroupPeriod',
     meansoflogin  : 'MeanOfLogin',
     meansofpayment: 'MeanOfPayment',
     periods       : 'Period',
