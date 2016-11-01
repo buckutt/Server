@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -15,7 +15,7 @@ const Promotion = thinky.createModel('Promotion', {
     enforce_type   : 'strict'
 });
 
-Promotion.pre('save', function (next) {
+Promotion.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -24,7 +24,7 @@ Promotion.ensureIndex('name');
 Promotion.ensureIndex('createdAt');
 Promotion.ensureIndex('editedAt');
 
-Promotion.associate = models => {
+Promotion.associate = (models) => {
     models.Promotion.hasAndBelongsToMany(models.Price, 'prices', 'id', 'id');
     // n:n instead of 1:n to allow one promotion containing multiple times the same article
     models.Promotion.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
@@ -33,4 +33,4 @@ Promotion.associate = models => {
     models.Promotion.hasMany(models.Purchase, 'purchases', 'id', 'Promotion_id');
 };
 
-export default Promotion;
+module.exports = Promotion;

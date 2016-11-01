@@ -1,12 +1,12 @@
-import bcrypt_  from 'bcryptjs';
-import express  from 'express';
-import jwt      from 'jsonwebtoken';
-import Promise  from 'bluebird';
-import config   from '../../config';
-import logger   from '../../lib/log';
-import thinky   from '../../lib/thinky';
-import { pp }   from '../../lib/utils';
-import APIError from '../../errors/APIError';
+const bcrypt_  = require('bcryptjs');
+const express  = require('express');
+const jwt      = require('jsonwebtoken');
+const Promise  = require('bluebird');
+const config   = require('../../config');
+const logger   = require('../../lib/log');
+const thinky   = require('../../lib/thinky');
+const { pp }   = require('../../lib/utils');
+const APIError = require('../../errors/APIError');
 
 const bcrypt = Promise.promisifyAll(bcrypt_);
 const log    = logger(module);
@@ -72,7 +72,7 @@ router.post('/services/login', (req, res, next) => {
                 }
             }
         })
-        .then(mol => {
+        .then((mol) => {
             if (mol.length === 0) {
                 const errDetails = {
                     mol  : req.body.meanOfLogin.toString(),
@@ -136,14 +136,14 @@ router.post('/services/login', (req, res, next) => {
                 .end();
         })
         .catch(Error, err => next(err))
-        .catch(thinky.Errors.DocumentNotFound, err =>
+        .catch(thinky.Errors.DocumentNotFound, (err) => {
             /* istanbul ignore next */
-            next(new APIError(404, 'User not found', err))
-        )
-        .catch(err =>
+            next(new APIError(404, 'User not found', err));
+        })
+        .catch((err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err))
-        );
+            next(new APIError(500, 'Unknown error', err));
+        });
 });
 
-export default router;
+module.exports = router;

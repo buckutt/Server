@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -20,7 +20,7 @@ const Article = thinky.createModel('Article', {
     enforce_type   : 'strict'
 });
 
-Article.pre('save', function (next) {
+Article.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -29,7 +29,7 @@ Article.ensureIndex('name');
 Article.ensureIndex('createdAt');
 Article.ensureIndex('editedAt');
 
-Article.associate = models => {
+Article.associate = (models) => {
     models.Article.hasAndBelongsToMany(models.Category, 'categories', 'id', 'id');
     // n:n instead of 1:n to allow one set containing multiple times the same article
     models.Article.hasAndBelongsToMany(models.Set, 'sets', 'id', 'id');
@@ -39,4 +39,4 @@ Article.associate = models => {
     models.Article.hasAndBelongsToMany(models.Price, 'prices', 'id', 'id');
 };
 
-export default Article;
+module.exports = Article;

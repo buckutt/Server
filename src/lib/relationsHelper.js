@@ -1,4 +1,4 @@
-import { clone } from './utils';
+const { clone } = require('./utils');
 
 /**
  * Extracts relations from JSON data. Useful to insert them later (with restore) to user Thinky's setters
@@ -10,7 +10,7 @@ const sanitize = (Model, modelData) => {
     const leftKeys  = Object.keys(Model._joins);
     const saved     = {};
 
-    leftKeys.forEach(key => {
+    leftKeys.forEach((key) => {
         if (modelData[key]) {
             // Save the relation
             saved[key] = clone(modelData[key], false);
@@ -28,9 +28,9 @@ const sanitize = (Model, modelData) => {
  * @param {Object} leftKeysExtracted Left keys extracted by sanitize
  */
 const restore = (instance, leftKeysExtracted) => {
-    Object.keys(leftKeysExtracted).forEach(leftKey => {
+    Object.keys(leftKeysExtracted).forEach((leftKey) => {
         instance[leftKey] = leftKeysExtracted[leftKey];
     });
 };
 
-export default { sanitize, restore };
+module.exports = { sanitize, restore };

@@ -1,7 +1,7 @@
-import jwt      from 'jsonwebtoken';
-import Promise  from 'bluebird';
-import APIError from '../errors/APIError';
-import config   from '../config';
+const jwt      = require('jsonwebtoken');
+const Promise  = require('bluebird');
+const APIError = require('../errors/APIError');
+const config   = require('../config');
 
 Promise.promisifyAll(jwt);
 
@@ -14,7 +14,7 @@ const disableAuth = false;
  * @param  {Function} next Next middleware
  * @return {Function} The next middleware
  */
-export default function token (req, res, next) {
+module.exports = function token(req, res, next) {
     const secret = config.app.secret;
 
     // Login : no token required
@@ -53,7 +53,7 @@ export default function token (req, res, next) {
 
     jwt
         .verifyAsync(bearer, secret)
-        .then(decoded => {
+        .then((decoded) => {
             const userId = decoded.id;
             connectType  = decoded.connectType;
 
@@ -64,11 +64,11 @@ export default function token (req, res, next) {
                 }
             });
         })
-        .then(user => {
+        .then((user) => {
             req.user = user;
 
             req.user.rights = req.user.rights
-                .map(right => {
+                .map((right) => {
                     // If pin is not allowed with this right, pass
                     if (connectType === 'pin' && pinLoggingAllowed.indexOf(right.name) === -1) {
                         return null;
@@ -95,4 +95,4 @@ export default function token (req, res, next) {
         .catch(jwt.JsonWebTokenError, err =>
             next(new APIError(401, 'Invalid token', err))
         );
-}
+};

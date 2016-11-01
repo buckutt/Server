@@ -1,7 +1,7 @@
-import express  from 'express';
-import logger   from '../../lib/log';
-import thinky   from '../../lib/thinky';
-import APIError from '../../errors/APIError';
+const express  = require('express');
+const logger   = require('../../lib/log');
+const thinky   = require('../../lib/thinky');
+const APIError = require('../../errors/APIError');
 
 const log = logger(module);
 
@@ -20,7 +20,7 @@ router.post('/services/transfer', (req, res, next) => {
 
     req.app.locals.models.User
         .get(req.Reciever_id)
-        .then(user => {
+        .then((user) => {
             req.recieverUser = user;
             next();
         });
@@ -61,18 +61,18 @@ router.post('/services/transfer', (req, res, next) => {
                 })
                 .end()
         )
-        .catch(thinky.Errors.ValidationError, err =>
+        .catch(thinky.Errors.ValidationError, (err) => {
             /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err))
-        )
-        .catch(thinky.Errors.InvalidWrite, err =>
+            next(new APIError(400, 'Invalid model', err));
+        })
+        .catch(thinky.Errors.InvalidWrite, (err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err))
-        )
-        .catch(err =>
+            next(new APIError(500, 'Couldn\'t write to disk', err));
+        })
+        .catch((err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err))
-        );
+            next(new APIError(500, 'Unknown error', err));
+        });
 });
 
-export default router;
+module.exports = router;

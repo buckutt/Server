@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -19,7 +19,7 @@ const MeanOfLogin = thinky.createModel('MeanOfLogin', {
     enforce_type   : 'strict'
 });
 
-MeanOfLogin.pre('save', function (next) {
+MeanOfLogin.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -28,8 +28,8 @@ MeanOfLogin.ensureIndex('type');
 MeanOfLogin.ensureIndex('createdAt');
 MeanOfLogin.ensureIndex('editedAt');
 
-MeanOfLogin.associate = models => {
+MeanOfLogin.associate = (models) => {
     models.MeanOfLogin.belongsTo(models.User, 'user', 'User_id', 'id');
 };
 
-export default MeanOfLogin;
+module.exports = MeanOfLogin;

@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -17,7 +17,7 @@ const PeriodPoint = thinky.createModel('PeriodPoint', {
     enforce_type   : 'strict'
 });
 
-PeriodPoint.pre('save', function (next) {
+PeriodPoint.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -25,10 +25,10 @@ PeriodPoint.pre('save', function (next) {
 PeriodPoint.ensureIndex('createdAt');
 PeriodPoint.ensureIndex('editedAt');
 
-PeriodPoint.associate = models => {
+PeriodPoint.associate = (models) => {
     models.PeriodPoint.belongsTo(models.Point, 'point', 'Point_id', 'id');
     models.PeriodPoint.belongsTo(models.Period, 'period', 'Period_id', 'id');
     models.PeriodPoint.hasAndBelongsToMany(models.Device, 'devices', 'id', 'id');
 };
 
-export default PeriodPoint;
+module.exports = PeriodPoint;

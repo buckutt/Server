@@ -1,12 +1,12 @@
-import path         from 'path';
-import childProcess from 'child_process';
-import Promise      from 'bluebird';
+const path         = require('path');
+const childProcess = require('child_process');
+const Promise      = require('bluebird');
 
 Promise.promisifyAll(childProcess);
 
 const cwd          = path.join(__dirname, '..');
 const withCoverage = process.argv.slice(2).indexOf('--coverage') > -1;
-const istanbul     = './node_modules/babel-istanbul/lib/cli';
+const istanbul     = './node_modules/istanbul/lib/cli';
 const mocha        = './node_modules/mocha/bin/_mocha';
 
 const start = (p, cb) => {
@@ -20,18 +20,10 @@ const start = (p, cb) => {
     }
 };
 
-start('npm run build', code => {
-    if (code === 0) {
-        let cmd;
+const cmd = (withCoverage) ?
+    `cross-env NODE_ENV=test node ${istanbul} cover ${mocha} -- --sort --bail` :
+    `cross-env NODE_ENV=test node ${mocha} --sort --bail`;
 
-        if (withCoverage) {
-            cmd = `cross-env NODE_ENV=test babel-node ${istanbul} cover ${mocha} -- --sort --bail`;
-        } else {
-            cmd = `cross-env NODE_ENV=test babel-node ${mocha} --sort --bail`;
-        }
-
-        start(cmd, testCode => {
-            process.exit(testCode);
-        });
-    }
+start(cmd, (testCode) => {
+    process.exit(testCode);
 });

@@ -1,16 +1,18 @@
-import assert from 'assert';
+/* eslint-disable func-names */
+
+const assert = require('assert');
 
 /* global unirest */
 
 describe('Transfers', () => {
     describe('Correct input', () => {
-        it('should transfer from one account to another', done => {
+        it('should transfer from one account to another', (done) => {
             unirest.post('https://localhost:3006/services/transfer')
                 .send({
                     Reciever_id: process.env.GJId,
                     amount     : 100
                 })
-                .end(response => {
+                .end((response) => {
                     assert.equal(200, response.code);
                     assert.equal(20, response.body.newCredit);
                     done();
@@ -19,36 +21,36 @@ describe('Transfers', () => {
     });
 
     describe('Incorrect data', () => {
-        it('should not transfer if the reciever is invalid', done => {
+        it('should not transfer if the reciever is invalid', (done) => {
             unirest.post('https://localhost:3006/services/transfer')
                 .send({
                     amount: 150
                 })
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
                     done();
                 });
         });
 
-        it('should not transfer if sender has not enough money', done => {
+        it('should not transfer if sender has not enough money', (done) => {
             unirest.post('https://localhost:3006/services/transfer')
                 .send({
                     Reciever_id: process.env.GJId,
                     amount     : 150
                 })
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
                     done();
                 });
         });
 
-        it('should not transfer if reciever would have more than 100€', done => {
+        it('should not transfer if reciever would have more than 100€', (done) => {
             unirest.post('https://localhost:3006/services/transfer')
                 .send({
                     Reciever_id: process.env.GJId,
                     amount     : 120 * 100
                 })
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
                     done();
                 });

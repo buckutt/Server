@@ -1,6 +1,8 @@
-import Promise  from 'bluebird';
-import syncExec from 'sync-exec';
-import thinky   from '../src/lib/thinky';
+/* eslint-disable func-names */
+
+const Promise  = require('bluebird');
+const syncExec = require('sync-exec');
+const thinky   = require('../src/lib/thinky');
 
 const sslResult = syncExec('openssl x509 -noout -fingerprint -in ssl/test/test-crt.pem').stdout;
 
@@ -16,11 +18,11 @@ describe('Before tests', () => {
     it('should empty all the databases', function (done) {
         this.timeout(20 * 1000);
 
-        return r.tableList()
-            .then(tableList => {
+        r.tableList()
+            .then((tableList) => {
                 const deletePromises = [];
 
-                tableList.forEach(table => {
+                tableList.forEach((table) => {
                     deletePromises.push(r.table(table).delete());
                 });
 
@@ -86,7 +88,7 @@ describe('Before tests', () => {
                 failedAuth : 0
             }
         ])
-        .then(res => {
+        .then((res) => {
             userId         = res.generated_keys[0];
             noRightsUserId = res.generated_keys[1];
             sellerUserId   = res.generated_keys[2];
@@ -136,23 +138,23 @@ describe('Before tests', () => {
         .then(res =>
             r.table('Period').insert([{
                 name     : 'Surrounding',
-                start    : new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
-                end      : new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+                start    : new Date(Date.now() - (1000 * 60 * 60 * 24 * 30)),
+                end      : new Date(Date.now() + (1000 * 60 * 60 * 24 * 30)),
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
                 Event_id : res.generated_keys[0]
             }, {
                 name     : 'Never',
-                start    : new Date(Date.now() - 1000 * 60 * 60 * 24 * 30 * 2),
-                end      : new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
+                start    : new Date(Date.now() - (1000 * 60 * 60 * 24 * 30 * 2)),
+                end      : new Date(Date.now() - (1000 * 60 * 60 * 24 * 30)),
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
                 Event_id : res.generated_keys[0]
             }])
         )
-        .then(res => {
+        .then((res) => {
             periodId         = res.generated_keys[0];
             outdatedPeriodId = res.generated_keys[1];
 
@@ -168,7 +170,7 @@ describe('Before tests', () => {
                 isRemoved: false
             }]);
         })
-        .then(res => {
+        .then((res) => {
             pointId = res.generated_keys[0];
         })
         .then(() =>
@@ -200,8 +202,8 @@ describe('Before tests', () => {
                 Period_id: periodId,
                 Point_id : pointId
             }])
-        ).
-        then(res =>
+        )
+        .then(res =>
             r.table('Right_User').insert([{
                 Right_id: res.generated_keys[0],
                 User_id : userId
@@ -225,7 +227,7 @@ describe('Before tests', () => {
                 isRemoved: false
             })
         )
-        .then(res => {
+        .then((res) => {
             deviceId = res.generated_keys[0];
         })
         .then(() =>

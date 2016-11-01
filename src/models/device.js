@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -22,7 +22,7 @@ const Device = thinky.createModel('Device', {
     enforce_type   : 'strict'
 });
 
-Device.pre('save', function (next) {
+Device.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -32,8 +32,8 @@ Device.ensureIndex('createdAt');
 Device.ensureIndex('editedAt');
 Device.ensureIndex('fingerprint');
 
-Device.associate = models => {
+Device.associate = (models) => {
     models.Device.hasAndBelongsToMany(models.PeriodPoint, 'periodPoints', 'id', 'id');
 };
 
-export default Device;
+module.exports = Device;

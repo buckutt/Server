@@ -1,9 +1,9 @@
-import path          from 'path';
-import fs            from 'fs-extra';
-import inquirer      from 'inquirer';
-import childProcess  from 'child_process';
-import Promise       from 'bluebird';
-import status        from 'elegant-status';
+const path         = require('path');
+const fs           = require('fs-extra');
+const inquirer     = require('inquirer');
+const childProcess = require('child_process');
+const Promise      = require('bluebird');
+const status       = require('elegant-status');
 
 Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
@@ -34,7 +34,7 @@ inquirer.prompt([
         message: 'Define output password :'
     }
 ])
-.then(answer => {
+.then((answer) => {
     write = status('Updating files...');
 
     try {
@@ -67,7 +67,7 @@ inquirer.prompt([
     generate(true);
     process.exit(0);
 })
-.catch(err => {
+.catch((err) => {
     generate(false);
     console.log(err.stack);
     process.exit(1);

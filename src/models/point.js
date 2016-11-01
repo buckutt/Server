@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -15,7 +15,7 @@ const Point = thinky.createModel('Point', {
     enforce_type   : 'strict'
 });
 
-Point.pre('save', function (next) {
+Point.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -24,7 +24,7 @@ Point.ensureIndex('name');
 Point.ensureIndex('createdAt');
 Point.ensureIndex('editedAt');
 
-Point.associate = models => {
+Point.associate = (models) => {
     models.Point.hasMany(models.PeriodPoint, 'periodPoints', 'id', 'Point_id');
     models.Point.hasMany(models.Price, 'prices', 'id', 'Point_id');
     models.Point.hasMany(models.Purchase, 'purchases', 'id', 'Purchase_id');
@@ -33,4 +33,4 @@ Point.associate = models => {
     models.Point.hasAndBelongsToMany(models.Category, 'categories', 'id', 'id');
 };
 
-export default Point;
+module.exports = Point;

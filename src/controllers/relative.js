@@ -1,10 +1,10 @@
-import express     from 'express';
-import idParser    from '../lib/idParser';
-import logger      from '../lib/log';
-import modelParser from '../lib/modelParser';
-import thinky      from '../lib/thinky';
-import { pp }      from '../lib/utils';
-import APIError    from '../errors/APIError';
+const express     = require('express');
+const idParser    = require('../lib/idParser');
+const logger      = require('../lib/log');
+const modelParser = require('../lib/modelParser');
+const thinky      = require('../lib/thinky');
+const { pp }      = require('../lib/utils');
+const APIError    = require('../errors/APIError');
 
 const log = logger(module);
 const r   = thinky.r;
@@ -46,18 +46,18 @@ router.get('/:model/:id/:submodel', (req, res, next) => {
         .catch(thinky.Errors.DocumentNotFound, err =>
             next(new APIError(404, 'Document not found', err))
         )
-        .catch(thinky.Errors.ValidationError, err =>
+        .catch(thinky.Errors.ValidationError, (err) => {
             /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err))
-        )
-        .catch(thinky.Errors.InvalidWrite, err =>
+            next(new APIError(400, 'Invalid model', err));
+        })
+        .catch(thinky.Errors.InvalidWrite, (err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err))
-        )
-        .catch(err =>
+            next(new APIError(500, 'Couldn\'t write to disk', err));
+        })
+        .catch((err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err))
-        );
+            next(new APIError(500, 'Unknown error', err));
+        });
 });
 
 router.post('/:model/:id/:submodel', (req, res, next) => {
@@ -88,7 +88,7 @@ router.post('/:model/:id/:submodel', (req, res, next) => {
         // Check left model existence
         .table(req.Model.getTableName())
         .get(leftId)
-        .then(leftModel => {
+        .then((leftModel) => {
             if (!leftModel) {
                 throw new APIError(404, 'Left document does not exist');
             }
@@ -98,7 +98,7 @@ router.post('/:model/:id/:submodel', (req, res, next) => {
                 .table(req.Model._joins[submodel].model.getTableName())
                 .get(rightId);
         })
-        .then(rightModel => {
+        .then((rightModel) => {
             if (!rightModel) {
                 throw new APIError(404, 'Right document does not exist');
             }
@@ -116,13 +116,10 @@ router.post('/:model/:id/:submodel', (req, res, next) => {
                 .json({})
                 .end()
         )
-        .catch(err => {
-            if (err.isAPIError) {
-                return next(err);
-            }
-
+        .catch(APIError, err => next(err))
+        .catch((err) => {
             /* istanbul ignore next */
-            return next(new APIError(500, 'Unknown error', err));
+            next(new APIError(500, 'Unknown error', err));
         });
 });
 
@@ -154,7 +151,7 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
         })
         .nth(0)
         .default(null)
-        .then(rel => {
+        .then((rel) => {
             if (!rel) {
                 throw new APIError(404, 'Document not found');
             }
@@ -167,13 +164,10 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
                 .json({})
                 .end()
         )
-        .catch(err => {
-            if (err.isAPIError) {
-                return next(err);
-            }
-
+        .catch(APIError, err => next(err))
+        .catch((err) => {
             /* istanbul ignore next */
-            return next(new APIError(500, 'Unknown error', err));
+            next(new APIError(500, 'Unknown error', err));
         });
 });
 
@@ -181,4 +175,4 @@ router.param('model', modelParser);
 router.param('id', idParser);
 router.param('subid', idParser);
 
-export default router;
+module.exports = router;

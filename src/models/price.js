@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -20,7 +20,7 @@ const Price = thinky.createModel('Price', {
     enforce_type   : 'strict'
 });
 
-Price.pre('save', function (next) {
+Price.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -29,7 +29,7 @@ Price.ensureIndex('amount');
 Price.ensureIndex('createdAt');
 Price.ensureIndex('editedAt');
 
-Price.associate = models => {
+Price.associate = (models) => {
     models.Price.belongsTo(models.Fundation, 'fundation', 'Fundation_id', 'id');
     models.Price.belongsTo(models.Group, 'group', 'Group_id', 'id');
     models.Price.belongsTo(models.Period, 'period', 'Period_id', 'id');
@@ -39,4 +39,4 @@ Price.associate = models => {
     models.Price.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
 };
 
-export default Price;
+module.exports = Price;

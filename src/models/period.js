@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -18,7 +18,7 @@ const Period = thinky.createModel('Period', {
     enforce_type   : 'strict'
 });
 
-Period.pre('save', function (next) {
+Period.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -29,7 +29,7 @@ Period.ensureIndex('end');
 Period.ensureIndex('createdAt');
 Period.ensureIndex('editedAt');
 
-Period.associate = models => {
+Period.associate = (models) => {
     models.Period.belongsTo(models.Event, 'event', 'Event_id', 'id');
     models.Period.hasMany(models.PeriodPoint, 'periodPoints', 'id', 'Period_id');
     models.Period.hasMany(models.GroupPeriod, 'groupPeriods', 'id', 'Period_id');
@@ -37,4 +37,4 @@ Period.associate = models => {
     models.Period.hasMany(models.Right, 'rights', 'id', 'Period_id');
 };
 
-export default Period;
+module.exports = Period;

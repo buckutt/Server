@@ -1,9 +1,9 @@
-import express  from 'express';
-import Promise  from 'bluebird';
-import APIError from '../../errors/APIError';
-import logger   from '../../lib/log';
-import thinky   from '../../lib/thinky';
-import { pp }   from '../../lib/utils';
+const express  = require('express');
+const Promise  = require('bluebird');
+const APIError = require('../../errors/APIError');
+const logger   = require('../../lib/log');
+const thinky   = require('../../lib/thinky');
+const { pp }   = require('../../lib/utils');
 
 const log = logger(module);
 
@@ -26,7 +26,7 @@ router.post('/services/basket', (req, res, next) => {
 
     req.app.locals.models.User
         .get(req.Buyer_id)
-        .then(user => {
+        .then((user) => {
             req.buyer = user;
             next();
         });
@@ -47,7 +47,7 @@ router.post('/services/basket', (req, res, next) => {
     let queryLog  = '';
 
     const totalCost = req.body
-        .map(item => {
+        .map((item) => {
             if (item.type === 'purchase') {
                 return item.cost;
             } else if (item.type === 'reload') {
@@ -77,7 +77,7 @@ router.post('/services/basket', (req, res, next) => {
 
     queryLog += `User ${req.buyer.id} `;
 
-    req.body.forEach(item => {
+    req.body.forEach((item) => {
         if (item.type === 'purchase') {
             // Purchases
             const articlesIds = item.articles.map(article => article.id);
@@ -101,7 +101,7 @@ router.post('/services/basket', (req, res, next) => {
             purchasesRels.push(articlesIds);
 
             // Stock reduction
-            articlesIds.forEach(article => {
+            articlesIds.forEach((article) => {
                 const stockReduction = models.Article
                     .get(article)
                     .update({
@@ -154,7 +154,7 @@ router.post('/services/basket', (req, res, next) => {
 
     Promise
         .all(purchases)
-        .then(purchases_ => {
+        .then((purchases_) => {
             const allRels = purchases_.map(({ id }, i) =>
                 models.r.table('Article_Purchase').insert(purchasesRels[i].map(articleId =>
                     ({
@@ -175,18 +175,18 @@ router.post('/services/basket', (req, res, next) => {
                 })
                 .end()
         )
-        .catch(thinky.Errors.ValidationError, err =>
+        .catch(thinky.Errors.ValidationError, (err) => {
             /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err))
-        )
-        .catch(thinky.Errors.InvalidWrite, err =>
+            next(new APIError(400, 'Invalid model', err));
+        })
+        .catch(thinky.Errors.InvalidWrite, (err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err))
-        )
-        .catch(err =>
+            next(new APIError(500, 'Couldn\'t write to disk', err));
+        })
+        .catch((err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err))
-        );
+            next(new APIError(500, 'Unknown error', err));
+        });
 });
 
-export default router;
+module.exports = router;

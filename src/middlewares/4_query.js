@@ -1,4 +1,4 @@
-import APIError from '../errors/APIError';
+const APIError = require('../errors/APIError');
 
 const types = {
     q     : 'object',
@@ -20,7 +20,7 @@ const interpolate = {
  * @param  {Function} next Next middleware
  * @return {Function} The next middleware
  */
-export default function query (req, res, next) {
+module.exports = function query(req, res, next) {
     for (const q of Object.keys(types)) {
         if (req.query.hasOwnProperty(q)) {
             if (typeof req.query[q] !== types[q]) {
@@ -36,4 +36,4 @@ export default function query (req, res, next) {
     }
 
     return next();
-}
+};

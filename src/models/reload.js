@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -21,7 +21,7 @@ const Reload = thinky.createModel('Reload', {
     enforce_type   : 'strict'
 });
 
-Reload.pre('save', function (next) {
+Reload.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -32,10 +32,10 @@ Reload.ensureIndex('trace');
 Reload.ensureIndex('createdAt');
 Reload.ensureIndex('editedAt');
 
-Reload.associate = models => {
+Reload.associate = (models) => {
     models.Reload.belongsTo(models.Point, 'point', 'Point_id', 'id');
     models.Reload.belongsTo(models.User, 'buyer', 'Buyer_id', 'id');
     models.Reload.belongsTo(models.User, 'seller', 'Seller_id', 'id');
 };
 
-export default Reload;
+module.exports = Reload;

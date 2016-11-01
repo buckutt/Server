@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -17,7 +17,7 @@ const Fundation = thinky.createModel('Fundation', {
     enforce_type   : 'strict'
 });
 
-Fundation.pre('save', function (next) {
+Fundation.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -26,8 +26,8 @@ Fundation.ensureIndex('name');
 Fundation.ensureIndex('createdAt');
 Fundation.ensureIndex('editedAt');
 
-Fundation.associate = models => {
+Fundation.associate = (models) => {
     models.Fundation.hasMany(models.Price, 'prices', 'id', 'Fundation_id');
 };
 
-export default Fundation;
+module.exports = Fundation;

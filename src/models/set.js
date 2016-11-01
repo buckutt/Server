@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -16,7 +16,7 @@ const Set_ = thinky.createModel('Set', {
     enforce_type   : 'strict'
 });
 
-Set_.pre('save', function (next) {
+Set_.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -25,10 +25,10 @@ Set_.ensureIndex('name');
 Set_.ensureIndex('createdAt');
 Set_.ensureIndex('editedAt');
 
-Set_.associate = models => {
+Set_.associate = (models) => {
     // n:n instead of 1:n to allow one promotion containing multiple times the same set
     models.Set.hasAndBelongsToMany(models.Promotion, 'promotions', 'id', 'id');
     models.Set.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
 };
 
-export default Set_;
+module.exports = Set_;

@@ -41,29 +41,29 @@
             }
         }],
 
+        // Allow hasOwnProperty
+        "no-prototype-builtins": 0,
+
+        // Disable warning about dev dependencies
+        "import/no-extraneous-dependencies": 0,
+
+        // Allow custom requires
+        "import/no-dynamic-require": 0,
+
+        // Allow typeof with variables
+        "valid-typeof": 0,
+
         // Allow reassign props to params
         "no-param-reassign": ["error", { "props": false }],
 
         // Allow console
         "no-console": 0,
 
-        // Allow space before function paren
-        "space-before-function-paren": 0,
-
-        // Allow anonymous functions
-        "func-names": 0,
-
-        // 1TBS with single lines (arrow functions that does not return)
-        "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
-
         // Disable consistent return
         "consistent-return": 0,
 
         // Disable return in callbacks
         "array-callback-return": 0,
-
-        // Other bracket spaces style
-        "array-bracket-spacing": 0,
 
         // Require allowance
         "global-require": 0,

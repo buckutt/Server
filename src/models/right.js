@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -17,7 +17,7 @@ const Right = thinky.createModel('Right', {
     enforce_type   : 'strict'
 });
 
-Right.pre('save', function (next) {
+Right.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -26,10 +26,10 @@ Right.ensureIndex('name');
 Right.ensureIndex('createdAt');
 Right.ensureIndex('editedAt');
 
-Right.associate = models => {
+Right.associate = (models) => {
     models.Right.belongsTo(models.Period, 'period', 'Period_id', 'id');
     models.Right.belongsTo(models.Point, 'point', 'Point_id', 'id');
     models.Right.hasAndBelongsToMany(models.User, 'users', 'id', 'id');
 };
 
-export default Right;
+module.exports = Right;

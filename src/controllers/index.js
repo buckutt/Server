@@ -1,9 +1,9 @@
-import path         from 'path';
-import { Router }   from 'express';
-import { walkSync } from 'fs-walk';
-import middlewares  from '../middlewares';
+const path         = require('path');
+const express      = require('express');
+const { walkSync } = require('fs-walk');
+const middlewares  = require('../middlewares');
 
-const router = new Router('/');
+const router = new express.Router('/');
 
 /**
  * Use every middlewares
@@ -18,7 +18,7 @@ walkSync(__dirname, (basedir, f) => {
         return;
     }
 
-    router.use(require(path.join(basedir, f)).default);
+    router.use(require(path.join(basedir, f)));
 });
 
-export default router;
+module.exports = router;

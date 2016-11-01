@@ -1,5 +1,7 @@
-import assert from 'assert';
-import { isInt, pad2, pp } from '../src/lib/utils';
+/* eslint-disable func-names */
+
+const assert              = require('assert');
+const { isInt, pad2, pp } = require('../src/lib/utils');
 
 describe('utils', () => {
     describe('isInt', () => {

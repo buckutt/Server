@@ -1,9 +1,11 @@
-import assert from 'assert';
+/* eslint-disable func-names */
+
+const assert = require('assert');
 
 /* global unirest, q */
 
 describe('Basket', () => {
-    it('should support payment', done => {
+    it('should support payment', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -22,7 +24,7 @@ describe('Basket', () => {
                     ]
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 console.log('ERR IS', response.body);
                 assert.equal(200, response.code);
                 assert.equal(100, response.body.newCredit);
@@ -30,7 +32,7 @@ describe('Basket', () => {
             });
     });
 
-    it('should support reloads', done => {
+    it('should support reloads', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -48,14 +50,14 @@ describe('Basket', () => {
                     type     : 'reload'
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(200, response.code);
                 assert.equal(5100, response.body.newCredit);
                 done();
             });
     });
 
-    it('should support promotions', done => {
+    it('should support promotions', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -79,14 +81,14 @@ describe('Basket', () => {
                     ]
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(200, response.code);
                 assert.equal(5000, response.body.newCredit);
                 done();
             });
     });
 
-    it('should support payment, reloads and promotions', done => {
+    it('should support payment, reloads and promotions', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -132,31 +134,31 @@ describe('Basket', () => {
                     ]
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(200, response.code);
                 assert.equal(9850, response.body.newCredit);
                 done();
             });
     });
 
-    it('should not accept anything else than an array of payments, reloads or promotions', done => {
+    it('should not accept anything else than an array of payments, reloads or promotions', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {}
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(400, response.code);
 
                 unirest.post('https://localhost:3006/services/basket')
                     .send({})
-                    .end(response2 => {
+                    .end((response2) => {
                         assert.equal(400, response2.code);
                         done();
                     });
             });
     });
 
-    it('should not accept if the user does not have enough credit', done => {
+    it('should not accept if the user does not have enough credit', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -171,14 +173,14 @@ describe('Basket', () => {
                     ]
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(400, response.code);
                 assert.equal('Not enough credit', response.body.message);
                 done();
             });
     });
 
-    it('should not accept if the user tries to reload too much', done => {
+    it('should not accept if the user tries to reload too much', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -189,14 +191,14 @@ describe('Basket', () => {
                     type     : 'reload'
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(400, response.code);
                 assert.equal(0, response.body.message.indexOf('Maximum exceeded :'));
                 done();
             });
     });
 
-    it('should not accept if the user reload not enough', done => {
+    it('should not accept if the user reload not enough', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -207,14 +209,14 @@ describe('Basket', () => {
                     type     : 'reload'
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(400, response.code);
                 assert.equal(0, response.body.message.indexOf('Can not reload less than : '));
                 done();
             });
     });
 
-    it('should not accept reload when sending invalid credit', done => {
+    it('should not accept reload when sending invalid credit', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
                 {
@@ -225,7 +227,7 @@ describe('Basket', () => {
                     type     : 'reload'
                 }
             ])
-            .end(response => {
+            .end((response) => {
                 assert.equal(200, response.code);
                 done();
             });
@@ -235,17 +237,17 @@ describe('Basket', () => {
         let gj;
         let kinder;
 
-        before(done => {
+        before((done) => {
             const e = {
                 purchases: true,
                 reloads  : true
             };
             unirest.get(`https://localhost:3006/users/${process.env.GJId}?embed=${q(e)}`)
-                .end(response => {
+                .end((response) => {
                     gj = response.body;
 
                     unirest.get(`https://localhost:3006/articles/${process.env.KinderDeliceId}`)
-                        .end(response2 => {
+                        .end((response2) => {
                             kinder = response2.body;
 
                             done();

@@ -1,10 +1,10 @@
-import SSE               from 'sse';
-import qs                from 'qs';
-import { promisify }     from 'bluebird';
-import logger            from './lib/log';
-import { modelFromName } from './lib/modelParser';
-import middlewares_      from './middlewares';
-import APIError          from './errors/APIError';
+const SSE          = require('sse');
+const qs           = require('qs');
+const bluebird     = require('bluebird');
+const logger       = require('./lib/log');
+const modelParser  = require('./lib/modelParser');
+const middlewares_ = require('./middlewares');
+const APIError     = require('./errors/APIError');
 
 const log = logger(module);
 
@@ -13,13 +13,13 @@ const log = logger(module);
  * @param {HTTPServer} httpServer The node std http server
  * @param {Express}    app        The express instance
  */
-export default (httpServer, app) => {
+module.exports = (httpServer, app) => {
     const sse = new SSE(httpServer, {
         path: '/changes',
         CORS: true
     });
 
-    sse.on('connection', client => {
+    sse.on('connection', (client) => {
         const { req, res } = client;
 
         // Create a `request` object in order to pass it through middlewares
@@ -37,7 +37,7 @@ export default (httpServer, app) => {
         req.app = app;
 
         // Dynamically resolve middlewares and convert them to Promises
-        const middlewares = Object.keys(middlewares_).map(key => promisify(middlewares_[key]));
+        const middlewares = Object.keys(middlewares_).map(key => bluebird.promisify(middlewares_[key]));
 
         // Execute promises in serie
         middlewares.reduce((p, mw) => p.then(() => mw(req, res)), Promise.resolve())
@@ -46,8 +46,9 @@ export default (httpServer, app) => {
                     throw new APIError(404, 'No model required');
                 }
 
-                models.forEach(model => {
-                    const Model = modelFromName(req, res, model);
+
+                models.forEach((model) => {
+                    const Model = modelParser.modelFromName(req, res, model);
 
                     if (Model instanceof Error) {
                         throw Model;
@@ -59,7 +60,7 @@ export default (httpServer, app) => {
                         action: 'listen'
                     }));
 
-                    Model.changes().then(feed => {
+                    Model.changes().then((feed) => {
                         feed.each((err, doc) => {
                             /* istanbul ignore if */
                             if (err) {
@@ -90,7 +91,7 @@ export default (httpServer, app) => {
                     });
                 });
             })
-            .catch(err => {
+            .catch((err) => {
                 log.error(err.message);
                 return client.send(`Error: ${err.message}`);
             });

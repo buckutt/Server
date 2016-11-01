@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -17,7 +17,7 @@ const Group = thinky.createModel('Group', {
     enforce_type   : 'strict'
 });
 
-Group.pre('save', function (next) {
+Group.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -26,9 +26,9 @@ Group.ensureIndex('name');
 Group.ensureIndex('createdAt');
 Group.ensureIndex('editedAt');
 
-Group.associate = models => {
+Group.associate = (models) => {
     models.Group.hasMany(models.GroupPeriod, 'groupPeriods', 'id', 'Group_id');
     models.Group.hasMany(models.Price, 'prices', 'id', 'Group_id');
 };
 
-export default Group;
+module.exports = Group;

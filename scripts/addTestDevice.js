@@ -1,8 +1,8 @@
-import fs            from 'fs-extra';
-import path          from 'path';
-import childProcess  from 'child_process';
-import Promise       from 'bluebird';
-import status        from 'elegant-status';
+const fs           = require('fs-extra');
+const path         = require('path');
+const childProcess = require('child_process');
+const Promise      = require('bluebird');
+const status       = require('elegant-status');
 
 Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
@@ -20,7 +20,7 @@ try {
 }
 
 // Copy server files
-function copyServer () {
+function copyServer() {
     const write = status('Copying server config files...');
 
     try {
@@ -41,7 +41,7 @@ function copyServer () {
 }
 
 // Generating server key files
-function genServer () {
+function genServer() {
     const genServ = status('Generating server certificates...');
 
     /* eslint-disable max-len */
@@ -52,14 +52,14 @@ function genServer () {
         .then(() => {
             genServ(true);
         })
-        .catch(e => {
+        .catch((e) => {
             genServ(false);
             console.error(e);
             process.exit(1);
         });
 }
 
-function copyClient () {
+function copyClient() {
     const copy = status('Copying client files...');
 
     try {
@@ -76,18 +76,18 @@ function copyClient () {
     }
 }
 
-function genClient () {
+function genClient() {
     const gen = status('Generating client certificates...');
 
     return exec('openssl genrsa -out test-key.pem 4096', { cwd })
         .then(() => exec('openssl req -new -config test.cnf -key test-key.pem -out test-csr.pem', { cwd }))
         .then(() => exec(`openssl x509 -req -extfile test.cnf -days 999 -passin "pass:${testPassword}" -in test-csr.pem -CA ./ca-crt.pem -CAkey ./ca-key.pem -CAcreateserial -out test-crt.pem`, { cwd }))
         .then(() => exec('openssl verify -CAfile ./ca-crt.pem test-crt.pem', { cwd }))
-        .then(() => exec('openssl pkcs12 -export -clcerts -in test-crt.pem -inkey test-key.pem -out test.p12 -password "pass:${testPassword}"', { cwd }))
+        .then(() => exec(`openssl pkcs12 -export -clcerts -in test-crt.pem -inkey test-key.pem -out test.p12 -password "pass:${testPassword}"`, { cwd }))
         .then(() => {
             gen(true);
         })
-        .catch(e => {
+        .catch((e) => {
             gen(false);
             console.error(e);
             process.exit(1);

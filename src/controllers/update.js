@@ -1,9 +1,9 @@
-import express     from 'express';
-import idParser    from '../lib/idParser';
-import logger      from '../lib/log';
-import modelParser from '../lib/modelParser';
-import thinky      from '../lib/thinky';
-import APIError    from '../errors/APIError';
+const express     = require('express');
+const idParser    = require('../lib/idParser');
+const logger      = require('../lib/log');
+const modelParser = require('../lib/modelParser');
+const thinky      = require('../lib/thinky');
+const APIError    = require('../errors/APIError');
 
 const log = logger(module);
 
@@ -20,9 +20,9 @@ router.put('/:model/:id', (req, res, next) => {
     req.Model
         .get(req.params.id)
         .run()
-        .then(inst => {
+        .then((inst) => {
             // Update based on body values
-            Object.keys(req.body).forEach(k => {
+            Object.keys(req.body).forEach((k) => {
                 inst[k] = req.body[k];
             });
 
@@ -30,14 +30,14 @@ router.put('/:model/:id', (req, res, next) => {
             // Save all (including relatives)
             return inst.save();
         })
-        .then(result => {
+        .then((result) => {
             if (req.query.embed) {
                 return req.Model.get(result.id).getJoin(req.query.embed).run();
             }
 
             return result;
         })
-        .then(result => {
+        .then((result) => {
             res
                 .status(200)
                 .json(result)
@@ -49,17 +49,17 @@ router.put('/:model/:id', (req, res, next) => {
         .catch(thinky.Errors.ValidationError, err =>
             next(new APIError(400, 'Invalid model', err))
         )
-        .catch(thinky.Errors.InvalidWrite, err =>
+        .catch(thinky.Errors.InvalidWrite, (err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err))
-        )
-        .catch(err =>
+            next(new APIError(500, 'Couldn\'t write to disk', err));
+        })
+        .catch((err) => {
             /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err))
-        );
+            next(new APIError(500, 'Unknown error', err));
+        });
 });
 
 router.param('model', modelParser);
 router.param('id', idParser);
 
-export default router;
+module.exports = router;

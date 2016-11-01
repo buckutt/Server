@@ -1,4 +1,4 @@
-import APIError from '../errors/APIError';
+const APIError = require('../errors/APIError');
 
 const uuid = /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i;
 
@@ -10,7 +10,7 @@ const uuid = /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
  * @param  {String}   value The query value
  * @return {Function} The next middleware
  */
-function id (req, res, next, value) {
+function id(req, res, next, value) {
     if (uuid.test(value) || value === 'search') {
         return next();
     }
@@ -18,4 +18,4 @@ function id (req, res, next, value) {
     return next(new APIError(400, 'id is not a guid/uuid'));
 }
 
-export default id;
+module.exports = id;

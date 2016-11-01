@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -18,7 +18,7 @@ const Transfer = thinky.createModel('Transfer', {
     enforce_type   : 'strict'
 });
 
-Transfer.pre('save', function (next) {
+Transfer.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -27,9 +27,9 @@ Transfer.ensureIndex('name');
 Transfer.ensureIndex('createdAt');
 Transfer.ensureIndex('editedAt');
 
-Transfer.associate = models => {
+Transfer.associate = (models) => {
     models.Transfer.belongsTo(models.User, 'sender', 'Sender_id', 'id');
     models.Transfer.belongsTo(models.User, 'reciever', 'Reciever_id', 'id');
 };
 
-export default Transfer;
+module.exports = Transfer;

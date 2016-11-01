@@ -1,6 +1,6 @@
-import thinky from 'thinky';
-import config from '../config';
-import logger from './log';
+const thinky = require('thinky');
+const config = require('../config');
+const logger = require('./log');
 
 const log = logger(module);
 
@@ -15,4 +15,4 @@ conn.r
         process.exit(1);
     });
 
-export default conn;
+module.exports = conn;

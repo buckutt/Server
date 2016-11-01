@@ -1,19 +1,18 @@
-import 'source-map-support/register';
-import fs           from 'fs';
-import cors         from 'cors';
-import bodyParser   from 'body-parser';
-import compression  from 'compression';
-import cookieParser from 'cookie-parser';
-import express      from 'express';
-import https        from 'https';
-import morgan       from 'morgan';
-import config       from './config';
-import controllers  from './controllers';
-import models       from './models';
-import startSSE     from './sseServer';
-import logger       from './lib/log';
-import { pp }       from './lib/utils';
-import APIError     from './errors/APIError';
+const fs           = require('fs');
+const cors         = require('cors');
+const bodyParser   = require('body-parser');
+const compression  = require('compression');
+const cookieParser = require('cookie-parser');
+const express      = require('express');
+const https        = require('https');
+const morgan       = require('morgan');
+const config       = require('./config');
+const controllers  = require('./controllers');
+const models       = require('./models');
+const startSSE     = require('./sseServer');
+const logger       = require('./lib/log');
+const { pp }       = require('./lib/utils');
+const APIError     = require('./errors/APIError');
 
 const log = logger(module);
 
@@ -36,7 +35,6 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
-
 /**
  * Routes
  */
@@ -55,7 +53,7 @@ app.use((req, res, next) => {
 // Internal error
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
-    if (!err.isAPIError) {
+    if (!(err instanceof APIError)) {
         console.log(err.stack);
     } else {
         log.error(pp(err));
@@ -63,7 +61,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
     res
         .status(err.status || 500)
-        .json(err)
+        .send(err.toJSON() || JSON.stringify(err))
         .end();
 });
 
@@ -117,4 +115,4 @@ if (require.main === module) {
         .catch(err => log.error(err));
 }
 
-export default app;
+module.exports = app;

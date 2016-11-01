@@ -1,7 +1,7 @@
-import nconf  from 'nconf';
-import path   from 'path';
-import _      from 'lodash';
-import { pp } from '../lib/utils';
+const nconf  = require('nconf');
+const path   = require('path');
+const _      = require('lodash');
+const { pp } = require('../lib/utils');
 
 nconf
     .argv()
@@ -19,4 +19,4 @@ if (config.log.console === 'debug') {
     console.log('%s \n\n', pp(config));
 }
 
-export default config;
+module.exports = config;

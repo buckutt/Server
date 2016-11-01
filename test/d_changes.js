@@ -1,6 +1,8 @@
-import EventSource from 'eventsource';
-import assert      from 'assert';
-import fs          from 'fs';
+/* eslint-disable func-names */
+
+const EventSource = require('eventsource');
+const assert      = require('assert');
+const fs          = require('fs');
 
 /* global unirest */
 
@@ -10,7 +12,7 @@ import fs          from 'fs';
  * @param  {Object} options The options (see EventSource doc on MDN)
  * @return {EventSource} The event source instance
  */
-function _EventSource (url, options) {
+function _EventSource(url, options) {
     return new EventSource(url, Object.assign({
         cert              : fs.readFileSync('ssl/test/test-crt.pem'),
         key               : fs.readFileSync('ssl/test/test-key.pem'),
@@ -23,51 +25,51 @@ function _EventSource (url, options) {
 }
 
 describe('Changes', () => {
-    it('should not allow the changefeed when no Authorization header is sent', done => {
+    it('should not allow the changefeed when no Authorization header is sent', (done) => {
         const es = new _EventSource('https://localhost:3006/changes');
 
-        es.onmessage = e => {
+        es.onmessage = (e) => {
             assert.equal('Error: No token or scheme provided. Header format is Authorization: Bearer [token]', e.data);
             es.close();
             done();
         };
     });
 
-    it('should not allow the changefeed when the Authorization header is wrong', done => {
+    it('should not allow the changefeed when the Authorization header is wrong', (done) => {
         const es = new _EventSource('https://localhost:3006/changes?authorization=foo');
 
-        es.onmessage = e => {
+        es.onmessage = (e) => {
             assert.equal('Error: No token or scheme provided. Header format is Authorization: Bearer [token]', e.data);
             es.close();
             done();
         };
     });
 
-    it('should not allow the changefeed when the Authorization header is not Bearer', done => {
+    it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
         const es = new _EventSource('https://localhost:3006/changes?authorization=foo%20bar');
 
-        es.onmessage = e => {
+        es.onmessage = (e) => {
             assert.equal('Error: Scheme is `Bearer`. Header format is Authorization: Bearer [token]', e.data);
             es.close();
             done();
         };
     });
 
-    it('should not allow a query without a model', done => {
+    it('should not allow a query without a model', (done) => {
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
 
         const query = `${token}`;
 
         const es = new _EventSource(`https://localhost:3006/changes?${query}`);
 
-        es.onmessage = e => {
+        es.onmessage = (e) => {
             assert.equal('Error: No model required', e.data);
             es.close();
             done();
         };
     });
 
-    it('should not allow a query on a non-existant model', done => {
+    it('should not allow a query on a non-existant model', (done) => {
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
         const model = 'models=foobar';
 
@@ -75,14 +77,14 @@ describe('Changes', () => {
 
         const es = new _EventSource(`https://localhost:3006/changes?${query}`);
 
-        es.onmessage = e => {
+        es.onmessage = (e) => {
             assert.equal('Error: Model not found', e.data);
             es.close();
             done();
         };
     });
 
-    it('should sends data when the Authorization header is okay', done => {
+    it('should sends data when the Authorization header is okay', (done) => {
         const token = `authorization=Bearer%20${process.env.TOKEN}`;
         const model = 'models=purchases';
 
@@ -90,7 +92,7 @@ describe('Changes', () => {
 
         const es = new _EventSource(`https://localhost:3006/changes?${query}`);
 
-        es.onmessage = e => {
+        es.onmessage = (e) => {
             assert.equal('{"model":"purchases","action":"listen"}', e.data);
             es.close();
             done();
@@ -114,7 +116,7 @@ describe('Changes', () => {
         /**
          * Check if all the queries has been feeded to the event source client
          */
-        function checkDone () {
+        function checkDone() {
             assert.equal(4, calls);
 
             es.close();
@@ -124,7 +126,7 @@ describe('Changes', () => {
         /**
          * Delete a mean of payment
          */
-        function requestDelete () {
+        function requestDelete() {
             unirest.delete(`https://localhost:3006/meansofpayment/${mopId}`)
                 .end(() => {
                     setTimeout(checkDone, 500);
@@ -134,7 +136,7 @@ describe('Changes', () => {
         /**
          * Update a mean of payment
          */
-        function requestUpdate () {
+        function requestUpdate() {
             unirest.put(`https://localhost:3006/meansofpayment/${mopId}`)
                 .send({
                     slug: 'bar',
@@ -148,20 +150,20 @@ describe('Changes', () => {
         /**
          * Creates a mean of payment
          */
-        function requestCreate () {
+        function requestCreate() {
             unirest.post('https://localhost:3006/meansofpayment')
                 .send({
                     slug: 'foo',
                     name: 'Foo'
                 })
-                .end(response => {
+                .end((response) => {
                     mopId = response.body.id;
                     setTimeout(requestUpdate, 500);
                 });
         }
 
-        es.onmessage = e => {
-            ++calls;
+        es.onmessage = (e) => {
+            calls += 1;
 
             const obj = JSON.parse(e.data);
 

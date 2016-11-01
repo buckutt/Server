@@ -1,10 +1,10 @@
-import express     from 'express';
-import thinky      from '../lib/thinky';
-import { pp }      from '../lib/utils';
-import idParser    from '../lib/idParser';
-import logger      from '../lib/log';
-import modelParser from '../lib/modelParser';
-import APIError    from '../errors/APIError';
+const express     = require('express');
+const thinky      = require('../lib/thinky');
+const { pp }      = require('../lib/utils');
+const idParser    = require('../lib/idParser');
+const logger      = require('../lib/log');
+const modelParser = require('../lib/modelParser');
+const APIError    = require('../errors/APIError');
 
 const r   = thinky.r;
 const log = logger(module);
@@ -44,10 +44,10 @@ router.get('/:model/:id?', (req, res, next) => {
             .catch(thinky.Errors.DocumentNotFound, err =>
                 next(new APIError(404, 'Document not found', err))
             )
-            .catch(err =>
+            .catch((err) => {
                 /* istanbul ignore next */
-                next(new APIError(500, 'Unknown error', err))
-            );
+                next(new APIError(500, 'Unknown error', err));
+            });
     } else {
         // List instances
         let request = req.Model;
@@ -103,18 +103,18 @@ router.get('/:model/:id?', (req, res, next) => {
                     .json(results)
                     .end()
             )
-            .catch(thinky.Errors.DocumentNotFound, err =>
+            .catch(thinky.Errors.DocumentNotFound, (err) => {
                 /* istanbul ignore next */
-                next(new APIError(404, 'Document not found', err))
-            )
-            .catch(err =>
+                next(new APIError(404, 'Document not found', err));
+            })
+            .catch((err) => {
                 /* istanbul ignore next */
-                next(new APIError(500, 'Unknown error', err))
-            );
+                next(new APIError(500, 'Unknown error', err));
+            });
     }
 });
 
 router.param('model', modelParser);
 router.param('id', idParser);
 
-export default router;
+module.exports = router;

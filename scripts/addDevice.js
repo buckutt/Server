@@ -1,10 +1,10 @@
-import path          from 'path';
-import fs            from 'fs-extra';
-import inquirer      from 'inquirer';
-import childProcess  from 'child_process';
-import Promise       from 'bluebird';
-import status        from 'elegant-status';
-import models        from '../src/models';
+const path         = require('path');
+const fs           = require('fs-extra');
+const inquirer     = require('inquirer');
+const childProcess = require('child_process');
+const Promise      = require('bluebird');
+const status       = require('elegant-status');
+const models       = require('../src/models');
 
 Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
@@ -23,12 +23,12 @@ models.r
     .table('Period')
     .pluck('id', 'name')
     .run()
-    .then(res => {
+    .then((res) => {
         periods = res;
 
         return models.r.table('Point').pluck('id', 'name').run();
     })
-    .then(res => {
+    .then((res) => {
         points = res;
 
         return inquirer.prompt([
@@ -56,7 +56,7 @@ models.r
             }
         ]);
     })
-    .then(answer => {
+    .then((answer) => {
         pointId    = answer.point.split(' - ')[1];
         periodId   = answer.period.split(' - ')[1];
         deviceName = answer.name;
@@ -96,12 +96,12 @@ models.r
             .then(() => exec(`openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"`, { cwd }));
         /* eslint-enable max-len */
     })
-    .catch(e => {
+    .catch((e) => {
         generate(false);
         return Promise.reject(new Error(e));
     })
     .then(() => exec(`openssl x509 -fingerprint -in ./ssl/${deviceName}/${deviceName}-crt.pem`))
-    .then(out => {
+    .then((out) => {
         const fingerprint = out.match(/Fingerprint=(.*)/)[1].replace(/:/g, '');
 
         generate(true);
@@ -112,10 +112,10 @@ models.r
         const device = new models.Device({ name: deviceName, fingerprint });
 
         return models.PeriodPoint.filter({ Period_id: periodId, Point_id: pointId }).getJoin({ devices: true }).run()
-            .then(res => {
+            .then((res) => {
                 if (res.length === 0) {
                     periodPoint = new models.PeriodPoint({});
-                    periodPoint.devices = [ device ];
+                    periodPoint.devices = [device];
                 } else {
                     periodPoint = res[0];
                     periodPoint.devices.push(device);
@@ -124,12 +124,12 @@ models.r
                 return models.Period.get(periodId);
             }
         )
-        .then(period => {
+        .then((period) => {
             periodPoint.period = period;
 
             return models.Point.get(pointId);
         })
-        .then(point => {
+        .then((point) => {
             periodPoint.point = point;
             return periodPoint.saveAll();
         })
@@ -142,7 +142,7 @@ models.r
         insert(true);
         process.exit(0);
     })
-    .catch(err => {
+    .catch((err) => {
         generate(false);
         console.log(err.stack);
         process.exit(1);

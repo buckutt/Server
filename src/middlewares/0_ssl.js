@@ -5,7 +5,7 @@
  * @param  {Function} next Next middleware
  * @return {Function} The next middleware
  */
-export default function (req, res, next) {
+module.exports = (req, res, next) => {
     if (!req.client.authorized) {
         return res
             .status(401)
@@ -13,4 +13,4 @@ export default function (req, res, next) {
     }
 
     return next();
-}
+};

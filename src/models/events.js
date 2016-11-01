@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -19,7 +19,7 @@ const Event = thinky.createModel('Event', {
     enforce_type   : 'strict'
 });
 
-Event.pre('save', function (next) {
+Event.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -28,8 +28,8 @@ Event.ensureIndex('name');
 Event.ensureIndex('createdAt');
 Event.ensureIndex('editedAt');
 
-Event.associate = models => {
+Event.associate = (models) => {
     models.Event.hasMany(models.Period, 'periods', 'id', 'Event_id');
 };
 
-export default Event;
+module.exports = Event;

@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -15,7 +15,7 @@ const Category = thinky.createModel('Category', {
     enforce_type   : 'strict'
 });
 
-Category.pre('save', function (next) {
+Category.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -24,9 +24,9 @@ Category.ensureIndex('name');
 Category.ensureIndex('createdAt');
 Category.ensureIndex('editedAt');
 
-Category.associate = models => {
+Category.associate = (models) => {
     models.Category.hasAndBelongsToMany(models.Article, 'articles', 'id', 'id');
     models.Category.hasAndBelongsToMany(models.Point, 'points', 'id', 'id');
 };
 
-export default Category;
+module.exports = Category;

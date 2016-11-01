@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -22,7 +22,7 @@ const User = thinky.createModel('User', {
     enforce_type   : 'strict'
 });
 
-User.pre('save', function (next) {
+User.pre('save', function preSave(next) {
     this.editedAt = new Date();
 
     this.firstname = this.firstname.toLowerCase();
@@ -39,7 +39,7 @@ User.ensureIndex('mail');
 User.ensureIndex('createdAt');
 User.ensureIndex('editedAt');
 
-User.associate = models => {
+User.associate = (models) => {
     models.User.hasAndBelongsToMany(models.GroupPeriod, 'groupPeriods', 'id', 'id');
     models.User.hasAndBelongsToMany(models.Right, 'rights', 'id', 'id');
     models.User.hasMany(models.MeanOfLogin, 'meansOfLogin', 'id', 'User_id');
@@ -51,4 +51,4 @@ User.associate = models => {
     models.User.hasMany(models.Transfer, 'transfersMade', 'id', 'Sender_id');
 };
 
-export default User;
+module.exports = User;

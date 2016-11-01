@@ -1,10 +1,12 @@
-import assert from 'assert';
+/* eslint-disable func-names */
+
+const assert = require('assert');
 
 /* global unirest, q */
 
 describe('Searching', () => {
     describe('Correct search query', () => {
-        it('should search correctly', done => {
+        it('should search correctly', (done) => {
             const search = {
                 field     : 'name',
                 startsWith: 'Ice Tea'
@@ -38,20 +40,22 @@ describe('Searching', () => {
 
             let orQ = '';
 
-            [or1, or2, or3, or4, or5].forEach(or => { orQ += `&or[]=${q(or)}`; });
+            [or1, or2, or3, or4, or5].forEach((or) => {
+                orQ += `&or[]=${q(or)}`;
+            });
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name`)
-                .end(response => {
+                .end((response) => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
-                    response.body.forEach(article => {
+                    response.body.forEach((article) => {
                         assert.equal(true, reg.test(article.name) || article.name === 'Mars');
                     });
                     done();
                 });
         });
 
-        it('should support numeric conditions (gt, lt, ge, le)', done => {
+        it('should support numeric conditions (gt, lt, ge, le)', (done) => {
             const search = {
                 field  : 'name',
                 matches: '.*'
@@ -83,19 +87,21 @@ describe('Searching', () => {
             };
 
             let orQ = '';
-            [or1, or2, or3, or4, or5].forEach(or => { orQ += `&or[]=${q(or)}`; });
+            [or1, or2, or3, or4, or5].forEach((or) => {
+                orQ += `&or[]=${q(or)}`;
+            });
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name&sort=dsc`)
-                .end(response => {
+                .end((response) => {
                     assert.equal(200, response.code);
-                    response.body.forEach(article => {
+                    response.body.forEach((article) => {
                         assert.equal(0, article.alcohol);
                     });
                     done();
                 });
         });
 
-        it('should support limit, embed, etc.', done => {
+        it('should support limit, embed, etc.', (done) => {
             const search = q({
                 field     : 'name',
                 startsWith: 'Ice Tea'
@@ -117,10 +123,10 @@ describe('Searching', () => {
 
             unirest.get(`https://localhost:3006/articles/search?q=${search}&or[]=${or}&or[]=${or2}` +
                         `&limit=9&embed=${e}&offset=1&orderBy=name&sort=asc`)
-                .end(response => {
+                .end((response) => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
-                    response.body.forEach(article => {
+                    response.body.forEach((article) => {
                         assert.equal(true, reg.test(article.name) || article.name === 'Mars');
                         assert.equal('object', typeof article.purchases);
                     });
@@ -129,7 +135,7 @@ describe('Searching', () => {
                 });
         });
 
-        it('should support an array of queries', done => {
+        it('should support an array of queries', (done) => {
             const q1 = q({
                 field  : 'name',
                 matches: '^Ice'
@@ -141,10 +147,10 @@ describe('Searching', () => {
             });
 
             unirest.get(`https://localhost:3006/articles/search?q[]=${q1}&q[]=${q2}`)
-                .end(response => {
+                .end((response) => {
                     assert.equal(200, response.code);
                     const reg = /^Ice Tea/;
-                    response.body.forEach(article => {
+                    response.body.forEach((article) => {
                         assert.equal(true, reg.test(article.name) || article.name === 'Mars');
                         assert.equal('object', typeof article.purchases);
                     });
@@ -155,16 +161,16 @@ describe('Searching', () => {
     });
 
     describe('Incorrect search query', () => {
-        it('should refuse when no condition is specified', done => {
+        it('should refuse when no condition is specified', (done) => {
             unirest.get('https://localhost:3006/articles/search')
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
 
                     done();
                 });
         });
 
-        it('should refuse when a wrong condition is specified', done => {
+        it('should refuse when a wrong condition is specified', (done) => {
             // equals is wrong
             const search = {
                 field : 'name',
@@ -172,29 +178,29 @@ describe('Searching', () => {
             };
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}`)
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
 
                     done();
                 });
         });
 
-        it('should refuse when passing an invalid search object', done => {
+        it('should refuse when passing an invalid search object', (done) => {
             unirest.get('https://localhost:3006/articles/search?q=abc')
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
 
                     done();
                 });
         });
 
-        it('should refuse when no field is specified', done => {
+        it('should refuse when no field is specified', (done) => {
             const search = {
                 eq: 'Mars'
             };
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}`)
-                .end(response => {
+                .end((response) => {
                     assert.equal(400, response.code);
                     done();
                 });

@@ -1,4 +1,4 @@
-import thinky from '../lib/thinky';
+const thinky = require('../lib/thinky');
 
 const type = thinky.type;
 
@@ -17,7 +17,7 @@ const MeanOfPayment = thinky.createModel('MeanOfPayment', {
     enforce_type   : 'strict'
 });
 
-MeanOfPayment.pre('save', function (next) {
+MeanOfPayment.pre('save', function preSave(next) {
     this.editedAt = new Date();
     next();
 });
@@ -27,4 +27,4 @@ MeanOfPayment.ensureIndex('editedAt');
 
 MeanOfPayment.associate = () => {};
 
-export default MeanOfPayment;
+module.exports = MeanOfPayment;

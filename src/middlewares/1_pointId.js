@@ -1,4 +1,4 @@
-import APIError from '../errors/APIError';
+const APIError = require('../errors/APIError');
 
 /**
  * Retrieve the point id from the SSL certificate fingerprint
@@ -6,7 +6,7 @@ import APIError from '../errors/APIError';
  * @param {Response} res  Express response
  * @param {Function} next Next middleware
  */
-export default function pointId (req, res, next) {
+module.exports = (req, res, next) => {
     const fingerprint = req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
 
     const Device = req.app.locals.models.Device;
@@ -25,7 +25,7 @@ export default function pointId (req, res, next) {
             }
         })
         .run()
-        .then(devices => {
+        .then((devices) => {
             /* istanbul ignore if */
             if (devices.length === 0 || devices[0].periodPoints.length === 0) {
                 return next(new APIError(404, 'Device not found', fingerprint));
@@ -37,7 +37,7 @@ export default function pointId (req, res, next) {
 
             let minPeriod = Infinity;
 
-            periodPoints.forEach(periodPoint => {
+            periodPoints.forEach((periodPoint) => {
                 const diff = periodPoint.period.end - periodPoint.period.start;
 
                 if (diff < minPeriod) {
@@ -57,4 +57,4 @@ export default function pointId (req, res, next) {
 
             return next();
         });
-}
+};

@@ -1,6 +1,6 @@
-import config   from '../config';
-import { pad2 } from './utils';
-import winston  from 'winston';
+const config   = require('../config');
+const { pad2 } = require('./utils');
+const winston  = require('winston');
 
 const MAX_LOG_FILE_SIZE = 10 * 1000 * 1000;
 
@@ -8,7 +8,7 @@ const MAX_LOG_FILE_SIZE = 10 * 1000 * 1000;
  * Create a log timestamp
  * @return {String} Current datetime
  */
-function timestamp () {
+function timestamp() {
     const now = new Date();
     const date = `${pad2(now.getFullYear())}/${pad2(now.getMonth())}/${pad2(now.getDate())}`;
     const time = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
@@ -21,7 +21,7 @@ function timestamp () {
  * @param  {Module} moduleToUse The current module (accessible with `module`)
  * @return {Object} A winston logger
  */
-export default moduleToUse => {
+module.exports = (moduleToUse) => {
     const path = moduleToUse.filename
         .split('/')
         .slice(-2)

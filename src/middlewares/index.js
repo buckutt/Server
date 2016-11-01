@@ -1,5 +1,5 @@
-import fs   from 'fs';
-import path from 'path';
+const fs   = require('fs');
+const path = require('path');
 
 const middlewares = {};
 
@@ -8,7 +8,7 @@ fs
     .filter(f => (f.slice(0, -3) !== 'index' && f.slice(-3) === '.js'))
     .sort()
     .forEach((f, i) => {
-        middlewares[i] = require(path.join(__dirname, f)).default;
+        middlewares[i] = require(path.join(__dirname, f));
     });
 
-export default middlewares;
+module.exports = middlewares;

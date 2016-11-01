@@ -1,9 +1,11 @@
-import assert   from 'assert';
-import fs       from 'fs';
-import unirest  from 'unirest';
-import syncExec from 'sync-exec';
-import moment   from 'moment';
-import app      from '../src/app';
+/* eslint-disable func-names */
+
+const assert   = require('assert');
+const fs       = require('fs');
+const unirest  = require('unirest');
+const syncExec = require('sync-exec');
+const moment   = require('moment');
+const app      = require('../src/app');
 
 describe('Should start the test application', () => {
     before(function (done) {
@@ -30,7 +32,7 @@ describe('Should start the test application', () => {
             .then(done);
     });
 
-    it('should refuse if no ssl certificate is present', done => {
+    it('should refuse if no ssl certificate is present', (done) => {
         unirest.request('https://localhost:3006/', {
             cert              : null,
             key               : null,
@@ -64,7 +66,7 @@ unirest.request = unirest.request.defaults(options);
 global.unirest = unirest;
 global.q       = obj => encodeURIComponent(JSON.stringify(obj));
 
-['get', 'post', 'put', 'delete'].forEach(method => {
+['get', 'post', 'put', 'delete'].forEach((method) => {
     const previous_ = unirest[method];
     unirest[method] = (...args) => previous_(...args)
         .type('json')
