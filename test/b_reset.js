@@ -39,7 +39,6 @@ describe('Before tests', () => {
         let userId;
         let noRightsUserId;
         let sellerUserId;
-        let pointId;
         let deviceId;
         let periodId;
         let outdatedPeriodId;
@@ -158,6 +157,8 @@ describe('Before tests', () => {
             periodId         = res.generated_keys[0];
             outdatedPeriodId = res.generated_keys[1];
 
+            process.env.PeriodId = periodId;
+
             return r.table('Point').insert([{
                 name     : 'Foyer',
                 createdAt: new Date(),
@@ -171,10 +172,37 @@ describe('Before tests', () => {
             }]);
         })
         .then((res) => {
-            pointId = res.generated_keys[0];
+            process.env.FoyerId = res.generated_keys[0];
+
+            return r.table('Fundation').insert({
+                name   : 'UNG',
+                website: 'http://ung.utt.fr',
+                mail   : 'ung@utt.fr'
+            });
         })
-        .then(() =>
-            r.table('Right').insert([{
+        .then((res) => {
+            process.env.UNGId = res.generated_keys[0];
+
+            return r.table('Price').insert([
+                {
+                    amount      : 60,
+                    Period_id   : periodId,
+                    Point_id    : process.env.FoyerId,
+                    Fundation_id: process.env.UNGId
+                },
+                {
+                    amount      : 100,
+                    Period_id   : periodId,
+                    Point_id    : process.env.FoyerId,
+                    Fundation_id: process.env.UNGId
+                }
+            ]);
+        })
+        .then((res) => {
+            process.env.PriceId          = res.generated_keys[0];
+            process.env.PromotionPriceId = res.generated_keys[1];
+
+            return r.table('Right').insert([{
                 name     : 'admin',
                 createdAt: new Date(),
                 editedAt : new Date(),
@@ -186,23 +214,23 @@ describe('Before tests', () => {
                 editedAt : new Date(),
                 isRemoved: false,
                 Period_id: outdatedPeriodId,
-                Point_id : pointId
+                Point_id : process.env.FoyerId
             }, {
                 name     : 'seller',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
                 Period_id: periodId,
-                Point_id : pointId
+                Point_id : process.env.FoyerId
             }, {
                 name     : 'reloader',
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
                 Period_id: periodId,
-                Point_id : pointId
-            }])
-        )
+                Point_id : process.env.FoyerId
+            }]);
+        })
         .then(res =>
             r.table('Right_User').insert([{
                 Right_id: res.generated_keys[0],
@@ -233,7 +261,7 @@ describe('Before tests', () => {
         .then(() =>
             r.table('PeriodPoint').insert({
                 Period_id: periodId,
-                Point_id : pointId,
+                Point_id : process.env.FoyerId,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false

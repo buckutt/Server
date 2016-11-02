@@ -119,7 +119,8 @@ router.post('/services/basket', (req, res, next) => {
             // Reloads
             const reload = new models.Reload({
                 credit   : item.credit,
-                trace    : item.trace || 'Reload',
+                type     : item.type || 'reload',
+                trace    : item.trace || '',
                 Point_id : req.Point_id,
                 Buyer_id : item.Buyer_id,
                 Seller_id: item.Seller_id

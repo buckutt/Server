@@ -7,13 +7,10 @@ const assert = require('assert');
 let IceTeaPeche;
 let KinderDelice;
 let Formule1Euro;
-let UNG;
-let Foyer;
 let GJ;
 let TC;
 
 process.env.GJId           = '';
-process.env.FoyerId        = '';
 process.env.KinderDeliceId = '';
 process.env.IceTeaPecheId  = '';
 process.env.Formule1EuroId = '';
@@ -104,12 +101,11 @@ describe('Create', function () {
         it('should create Fundation', (done) => {
             unirest.post('https://localhost:3006/fundations')
                 .send({
-                    name   : 'UNG',
-                    website: 'http://ung.utt.fr',
-                    mail   : 'ung@utt.fr'
+                    name   : 'Foo',
+                    website: 'http://foo.fr',
+                    mail   : 'foo@bar.fr'
                 })
                 .end((response) => {
-                    UNG = response.body;
                     assert.equal(200, response.code);
                     assert.equal('string', typeof response.body.id);
                     done();
@@ -227,14 +223,11 @@ describe('Create', function () {
         it('should create Point', (done) => {
             unirest.post('https://localhost:3006/points')
                 .send({
-                    name: 'Foyer'
+                    name: 'Foo'
                 })
                 .end((response) => {
-                    Foyer = response.body;
                     assert.equal(200, response.code);
                     assert.equal('string', typeof response.body.id);
-
-                    process.env.FoyerId = Foyer.id;
 
                     done();
                 });
@@ -271,6 +264,7 @@ describe('Create', function () {
         it('should create Reloads', (done) => {
             unirest.post('https://localhost:3006/reloads')
                 .send({
+                    type  : 'cash',
                     trace : 'Ticket caisse n°123',
                     credit: 50
                 })
@@ -338,15 +332,20 @@ describe('Create', function () {
             };
             unirest.post(`https://localhost:3006/purchases?embed=${q(e)}`)
                 .send({
-                    Fundation_id: UNG.id,
-                    Point_id    : Foyer.id,
+                    Fundation_id: process.env.UNGId,
+                    Point_id    : process.env.FoyerId,
                     Buyer_id    : GJ.id,
                     Seller_id   : TC.id,
                     Promotion_id: Formule1Euro.id,
                     articles    : [
                         IceTeaPeche.id,
                         KinderDelice.id
-                    ]
+                    ],
+                    articlesAmount: [
+                        { id: IceTeaPeche.id, price: process.env.PriceId, vat: 6 },
+                        { id: KinderDelice.id, price: process.env.PriceId, vat: 6 }
+                    ],
+                    Price_id: process.env.PromotionPriceId
                 })
                 .end((response) => {
                     assert.equal(200, response.code);

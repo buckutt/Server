@@ -10,15 +10,16 @@ describe('Basket', () => {
             .send([
                 {
                     Buyer_id    : process.env.GJId,
-                    Fundation_id: process.env.FoyerId,
+                    Point_id    : process.env.FoyerId,
                     Promotion_id: null,
                     Seller_id   : process.env.GJId,
+                    Price_id    : process.env.PriceId,
                     cost        : 50,
                     type        : 'purchase',
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
-                            price: 'article-price-id',
+                            price: process.env.PriceId,
                             vat  : 0
                         }
                     ]
@@ -62,21 +63,22 @@ describe('Basket', () => {
             .send([
                 {
                     Buyer_id    : process.env.GJId,
-                    Fundation_id: process.env.FoyerId,
+                    Point_id    : process.env.FoyerId,
                     Promotion_id: process.env.Formule1EuroId,
+                    Price_id    : process.env.PromotionPriceId,
                     Seller_id   : process.env.GJId,
                     cost        : 100,
                     type        : 'purchase',
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
-                            price: 'article-price-id',
-                            vat  : 0
+                            price: process.env.PriceId,
+                            vat  : 6
                         },
                         {
                             id   : process.env.IceTeaPecheId,
-                            price: 'article-price-id',
-                            vat  : 0
+                            price: process.env.PriceId,
+                            vat  : 6
                         }
                     ]
                 }
@@ -93,21 +95,22 @@ describe('Basket', () => {
             .send([
                 {
                     Buyer_id    : process.env.GJId,
-                    Fundation_id: process.env.FoyerId,
+                    Point_id    : process.env.FoyerId,
                     Promotion_id: process.env.Formule1EuroId,
+                    Price_id    : process.env.PromotionPriceId,
                     Seller_id   : process.env.GJId,
                     cost        : 100,
                     type        : 'purchase',
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
-                            price: 'article-price-id',
-                            vat  : 0
+                            price: process.env.PriceId,
+                            vat  : 6
                         },
                         {
                             id   : process.env.IceTeaPecheId,
-                            price: 'article-price-id',
-                            vat  : 0
+                            price: process.env.PriceId,
+                            vat  : 6
                         }
                     ]
                 },
@@ -120,15 +123,16 @@ describe('Basket', () => {
                 },
                 {
                     Buyer_id    : process.env.GJId,
-                    Fundation_id: process.env.FoyerId,
+                    Point_id    : process.env.FoyerId,
                     Promotion_id: null,
                     Seller_id   : process.env.GJId,
+                    Price_id    : process.env.PriceId,
                     cost        : 50,
                     type        : 'purchase',
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
-                            price: 'article-price-id',
+                            price: process.env.PriceId,
                             vat  : 0
                         }
                     ]
@@ -163,7 +167,7 @@ describe('Basket', () => {
             .send([
                 {
                     Buyer_id    : process.env.GJId,
-                    Fundation_id: process.env.FoyerId,
+                    Point_id    : process.env.FoyerId,
                     Promotion_id: null,
                     Seller_id   : process.env.GJId,
                     cost        : 10000,

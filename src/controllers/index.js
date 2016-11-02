@@ -1,7 +1,7 @@
-const path         = require('path');
-const express      = require('express');
-const { walkSync } = require('fs-walk');
-const middlewares  = require('../middlewares');
+const path        = require('path');
+const fs          = require('fs');
+const express     = require('express');
+const middlewares = require('../middlewares');
 
 const router = new express.Router('/');
 
@@ -11,14 +11,16 @@ const router = new express.Router('/');
 Object.keys(middlewares).forEach(key => router.use(middlewares[key]));
 
 /**
- * Recursively use every subrouters
+ * Recursively use every subrouters, services first
  */
-walkSync(__dirname, (basedir, f) => {
-    if (!(f.slice(0, -3) !== 'index' && f.slice(-3) === '.js')) {
-        return;
-    }
+fs
+    .readdirSync(path.join(__dirname, 'services'))
+    .filter(f => f.slice(-3) === '.js' && f.slice(0, -3) !== 'index')
+    .forEach(f => router.use(require(path.join(__dirname, 'services', f))));
 
-    router.use(require(path.join(basedir, f)));
-});
+fs
+    .readdirSync(path.join(__dirname))
+    .filter(f => f.slice(-3) === '.js' && f.slice(0, -3) !== 'index')
+    .forEach(f => router.use(require(path.join(__dirname, f))));
 
 module.exports = router;

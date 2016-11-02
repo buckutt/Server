@@ -28,7 +28,8 @@ function pad2(n) {
 function pp(obj) {
     return util.inspect(obj, {
         showHidden: true,
-        colors    : true
+        colors    : true,
+        depth     : 4
     });
 }
 

@@ -9,7 +9,12 @@ describe('Update', () => {
         it('should update correctly the model', (done) => {
             unirest.get('https://localhost:3006/articles')
                 .end((response) => {
-                    unirest.put(`https://localhost:3006/articles/${response.body[0].id}/`)
+                    // Kinder Delice is used in treasury
+                    const id = (response.body[0].name === 'Kinder Delice') ?
+                        response.body[1].id :
+                        response.body[0].id;
+
+                    unirest.put(`https://localhost:3006/articles/${id}/`)
                         .send({
                             name: 'Updated name'
                         })

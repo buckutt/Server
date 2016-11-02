@@ -207,7 +207,47 @@ const seeder = {
         const periodPointEternityForEEtop2Foyer = new models.PeriodPoint({});
 
         /* Prices */
-        const price50 = new models.Price({
+        const price50A = new models.Price({
+            amount: 50
+        });
+
+        const price50B = new models.Price({
+            amount: 50
+        });
+
+        const price50C = new models.Price({
+            amount: 50
+        });
+
+        const price50D = new models.Price({
+            amount: 50
+        });
+
+        const price50E = new models.Price({
+            amount: 50
+        });
+
+        const price50F = new models.Price({
+            amount: 50
+        });
+
+        const price50G = new models.Price({
+            amount: 50
+        });
+
+        const price50H = new models.Price({
+            amount: 50
+        });
+
+        const price50I = new models.Price({
+            amount: 50
+        });
+
+        const price50J = new models.Price({
+            amount: 50
+        });
+
+        const price50K = new models.Price({
             amount: 50
         });
 
@@ -333,7 +373,17 @@ const seeder = {
         };
 
         const prices = {
-            price50,
+            price50A,
+            price50B,
+            price50C,
+            price50D,
+            price50E,
+            price50F,
+            price50G,
+            price50H,
+            price50I,
+            price50J,
+            price50K,
             price100F1E,
             price1003C,
             price250
@@ -403,7 +453,7 @@ const seeder = {
         const arr = [];
 
         /* Articles - Relationships : cateogries, point, price, sets, promotion */
-        data.articles.articleKinderDelice.prices     = [data.prices.price50];
+        data.articles.articleKinderDelice.prices     = [data.prices.price50A];
         data.articles.articleKinderDelice.sets       = [data.sets.setBarresf1e];
         data.articles.articleKinderDelice.categories = [data.categories.categoryBarres.id];
         arr.push(data.articles.articleKinderDelice.saveAll({
@@ -412,7 +462,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleMars.prices     = [data.prices.price50];
+        data.articles.articleMars.prices     = [data.prices.price50B];
         data.articles.articleMars.sets       = [data.sets.setBarresf1e];
         data.articles.articleMars.categories = [data.categories.categoryBarres.id];
         arr.push(data.articles.articleMars.saveAll({
@@ -421,7 +471,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleKinderCountry.prices     = [data.prices.price50];
+        data.articles.articleKinderCountry.prices     = [data.prices.price50C];
         data.articles.articleKinderCountry.sets       = [data.sets.setBarresf1e];
         data.articles.articleKinderCountry.categories = [data.categories.categoryBarres.id];
         arr.push(data.articles.articleKinderCountry.saveAll({
@@ -430,7 +480,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleIceTeaPeche.prices     = [data.prices.price50];
+        data.articles.articleIceTeaPeche.prices     = [data.prices.price50D];
         data.articles.articleIceTeaPeche.sets       = [data.sets.setCanettesf1e];
         data.articles.articleIceTeaPeche.categories = [data.categories.categoryCanettes.id];
         arr.push(data.articles.articleIceTeaPeche.saveAll({
@@ -439,14 +489,14 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleEau.prices     = [data.prices.price50];
+        data.articles.articleEau.prices     = [data.prices.price50E];
         data.articles.articleEau.categories = [data.categories.categoryGeneral.id];
         arr.push(data.articles.articleEau.saveAll({
             categories: true,
             prices    : true
         }));
 
-        data.articles.articleIceTeaMangue.prices     = [data.prices.price50];
+        data.articles.articleIceTeaMangue.prices     = [data.prices.price50F];
         data.articles.articleIceTeaMangue.sets       = [data.sets.setCanettesf1e];
         data.articles.articleIceTeaMangue.categories = [data.categories.categoryCanettes.id];
         arr.push(data.articles.articleIceTeaMangue.saveAll({
@@ -455,7 +505,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleLiptonic.prices     = [data.prices.price50];
+        data.articles.articleLiptonic.prices     = [data.prices.price50G];
         data.articles.articleLiptonic.sets       = [data.sets.setCanettesf1e];
         data.articles.articleLiptonic.categories = [data.categories.categoryCanettes.id];
         arr.push(data.articles.articleLiptonic.saveAll({
@@ -464,7 +514,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleSchweppes.prices     = [data.prices.price50];
+        data.articles.articleSchweppes.prices     = [data.prices.price50H];
         data.articles.articleSchweppes.sets       = [data.sets.setCanettesf1e];
         data.articles.articleSchweppes.categories = [data.categories.categoryCanettes.id];
         arr.push(data.articles.articleSchweppes.saveAll({
@@ -473,7 +523,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleSchweppesAgrum.prices     = [data.prices.price50];
+        data.articles.articleSchweppesAgrum.prices     = [data.prices.price50I];
         data.articles.articleSchweppesAgrum.sets       = [data.sets.setCanettesf1e];
         data.articles.articleSchweppesAgrum.categories = [data.categories.categoryCanettes.id];
         arr.push(data.articles.articleSchweppesAgrum.saveAll({
@@ -482,7 +532,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleCocaCola.prices     = [data.prices.price50];
+        data.articles.articleCocaCola.prices     = [data.prices.price50J];
         data.articles.articleCocaCola.sets       = [data.sets.setCanettesf1e];
         data.articles.articleCocaCola.categories = [data.categories.categoryCanettes.id];
         arr.push(data.articles.articleCocaCola.saveAll({
@@ -491,7 +541,7 @@ const seeder = {
             sets      : true
         }));
 
-        data.articles.articleCrepe.prices     = [data.prices.price50];
+        data.articles.articleCrepe.prices     = [data.prices.price50K];
         data.articles.articleCrepe.categories = [data.categories.categoryGeneral.id];
         arr.push(data.articles.articleCrepe.saveAll({
             categories: true,
@@ -531,7 +581,7 @@ const seeder = {
         data.groupPeriods.groupPeriodAlwaysInGroup.users  = [data.users.userGJ];
         arr.push(data.groupPeriods.groupPeriodAlwaysInGroup.saveAll({
             period: true,
-            users: true
+            users : true
         }));
 
         /* MeansOfLogin - Relationships : user */
@@ -559,7 +609,17 @@ const seeder = {
             data.categories.categoryBarres
         ];
         data.points.pointFoyer.prices = [
-            data.prices.price50,
+            data.prices.price50A,
+            data.prices.price50B,
+            data.prices.price50C,
+            data.prices.price50D,
+            data.prices.price50E,
+            data.prices.price50F,
+            data.prices.price50G,
+            data.prices.price50H,
+            data.prices.price50I,
+            data.prices.price50J,
+            data.prices.price50K,
             data.prices.price100F1E,
             data.prices.price1003C,
             data.prices.price250
@@ -571,19 +631,91 @@ const seeder = {
         }));
 
         /* Prices - Relationships : fundation, group, period, articles, promotion */
-        data.prices.price50.Fundation_id = data.fundations.fundationFoyer.id;
-        data.prices.price50.Group_id     = data.groups.groupCotisants.id;
-        data.prices.price50.Period_id    = data.periods.periodEternity.id;
-        data.prices.price50.articles = [
-            data.articles.articleMars,
-            data.articles.articleKinderCountry,
-            data.articles.articleIceTeaPeche,
-            data.articles.articleEau,
-            data.articles.articleIceTeaMangue,
-            data.articles.articleLiptonic,
-            data.articles.articleSchweppes
-        ];
-        arr.push(data.prices.price50.saveAll({
+        data.prices.price50A.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50A.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50A.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50A.articles     = [data.articles.articleKinderDelice];
+        arr.push(data.prices.price50A.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50B.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50B.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50B.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50B.articles     = [data.articles.articleMars];
+        arr.push(data.prices.price50B.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50C.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50C.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50C.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50C.articles     = [data.articles.articleKinderCountry];
+        arr.push(data.prices.price50A.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50D.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50D.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50D.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50D.articles     = [data.articles.articleIceTeaPeche];
+        arr.push(data.prices.price50D.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50E.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50E.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50E.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50E.articles     = [data.articles.articleEau];
+        arr.push(data.prices.price50E.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50F.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50F.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50F.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50F.articles     = [data.articles.articleIceTeaMangue];
+        arr.push(data.prices.price50F.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50G.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50G.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50G.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50G.articles     = [data.articles.articleLiptonic];
+        arr.push(data.prices.price50G.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50H.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50H.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50H.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50H.articles     = [data.articles.articleSchweppes];
+        arr.push(data.prices.price50H.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50I.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50I.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50I.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50I.articles     = [data.articles.articleSchweppesAgrum];
+        arr.push(data.prices.price50I.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50J.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50J.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50J.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50J.articles     = [data.articles.articleCocaCola];
+        arr.push(data.prices.price50J.saveAll({
+            articles: true
+        }));
+
+        data.prices.price50K.Fundation_id = data.fundations.fundationFoyer.id;
+        data.prices.price50K.Group_id     = data.groups.groupCotisants.id;
+        data.prices.price50K.Period_id    = data.periods.periodEternity.id;
+        data.prices.price50K.articles     = [data.articles.articleCrepe];
+        arr.push(data.prices.price50K.saveAll({
             articles: true
         }));
 
@@ -600,7 +732,7 @@ const seeder = {
         data.prices.price250.Fundation_id = data.fundations.fundationFoyer.id;
         data.prices.price250.Group_id     = data.groups.groupCotisants.id;
         data.prices.price250.Period_id    = data.periods.periodEternity.id;
-        data.prices.price250.articles    = [data.articles.articleBeer];
+        data.prices.price250.articles     = [data.articles.articleBeer];
         arr.push(data.prices.price250.saveAll({
             articles: true
         }));

@@ -19,3 +19,12 @@ function id(req, res, next, value) {
 }
 
 module.exports = id;
+
+/**
+ * Check if string is unique id
+ * @param  {String} str Input string
+ * @return {Boolean} True if string is unique id
+ */
+module.exports.isUUID = function isUUID(str) {
+    return uuid.test(str);
+};
