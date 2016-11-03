@@ -133,7 +133,7 @@ const seeder = {
         });
 
         /* GroupPeriods */
-        const groupPeriodAlwaysInGroup = new models.GroupPeriod();
+        const groupPeriodAlwaysInGroup = new models.GroupPeriod({});
 
         /* MeanOfLogin */
         const molGJEtuCard = new models.MeanOfLogin({
@@ -577,7 +577,7 @@ const seeder = {
         }));
 
         /* GroupPeriods - Relationships : group, period, users */
-        data.groupPeriods.groupPeriodAlwaysInGroup.period = [data.period.periodEternity];
+        data.groupPeriods.groupPeriodAlwaysInGroup.period = data.periods.periodEternity;
         data.groupPeriods.groupPeriodAlwaysInGroup.users  = [data.users.userGJ];
         arr.push(data.groupPeriods.groupPeriodAlwaysInGroup.saveAll({
             period: true,
