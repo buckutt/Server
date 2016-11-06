@@ -21,7 +21,7 @@
         ],
 
         // Disable last comma
-        comma-dangle: ["error", "never"],
+        "comma-dangle": ["error", "never"],
 
         // Align object keys
         "key-spacing": ["error", {

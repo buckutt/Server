@@ -28,7 +28,7 @@ app.locals.models = models;
 app.use(cors({
     allowedHeaders: ['content-type', 'Authorization'],
     credentials   : true,
-    exposedHeaders: ['device', 'point', 'event'],
+    exposedHeaders: ['device', 'point', 'pointName', 'event'],
     origin        : true
 }));
 app.use(morgan('dev'));
@@ -61,7 +61,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
     res
         .status(err.status || 500)
-        .send(err.toJSON() || JSON.stringify(err))
+        .send(err.toJSON ? err.toJSON() : JSON.stringify(err))
         .end();
 });
 

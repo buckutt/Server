@@ -21,7 +21,8 @@ module.exports = (req, res, next) => {
             periodPoints: {
                 period: {
                     event: true
-                }
+                },
+                point: true
             }
         })
         .run()
@@ -46,13 +47,14 @@ module.exports = (req, res, next) => {
                     minPeriod    = diff;
 
                     req.device = device;
-                    req.point  = periodPoint.period;
+                    req.point  = periodPoint.point;
                     req.event  = periodPoint.period.event;
                 }
             });
 
             res.header('event', req.Event_id);
             res.header('point', req.Point_id);
+            res.header('pointName', req.point.name);
             res.header('device', device.id);
 
             return next();
