@@ -1,4 +1,4 @@
-global.models = require('../build/models').default; // eslint-disable-line import/no-unresolved
+global.models = require('../src/models');
 
 global.log = (r) => {
     console.log(r);
