@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
 
                 if (diff < minPeriod) {
                     req.Point_id = periodPoint.Point_id;
-                    req.Event_id = periodPoint.Event_id;
+                    req.Event_id = periodPoint.period.Event_id;
                     minPeriod    = diff;
 
                     req.device = device;
@@ -53,6 +53,7 @@ module.exports = (req, res, next) => {
             });
 
             res.header('event', req.Event_id);
+            res.header('eventName', req.event.name);
             res.header('point', req.Point_id);
             res.header('pointName', req.point.name);
             res.header('device', device.id);

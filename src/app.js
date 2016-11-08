@@ -28,7 +28,7 @@ app.locals.models = models;
 app.use(cors({
     allowedHeaders: ['content-type', 'Authorization'],
     credentials   : true,
-    exposedHeaders: ['device', 'point', 'pointName', 'event'],
+    exposedHeaders: ['device', 'point', 'pointName', 'event', 'eventName'],
     origin        : true
 }));
 app.use(morgan('dev'));
