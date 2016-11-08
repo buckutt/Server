@@ -68,24 +68,23 @@ module.exports = function token(req, res, next) {
             req.user = user;
 
             req.user.rights = req.user.rights
-                .map((right) => {
+                .filter((right) => {
                     // If pin is not allowed with this right, pass
                     if (connectType === 'pin' && pinLoggingAllowed.indexOf(right.name) === -1) {
-                        return null;
+                        return false;
                     }
 
                     if (right.period.start <= now && right.period.end > now) {
                         if (right.point) {
-                            return (right.point.id === req.Point_id) ? right : null;
+                            return (right.point.id === req.Point_id);
                         }
 
-                        return right;
+                        return true;
                     }
 
                     // This right should not be added as it is over
-                    return null;
-                })
-                .filter(right => right !== null);
+                    return false;
+                });
 
             return next();
         })

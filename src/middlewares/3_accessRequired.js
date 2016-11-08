@@ -18,7 +18,7 @@ module.exports = (req, res, next) => {
     }
 
     const rights = req.user.rights || [];
-    let url    = req.path;
+    let url      = req.path;
     const method = req.method;
 
     let handled = false;
