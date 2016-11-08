@@ -99,6 +99,15 @@ const seeder = {
             showCategories  : false
         });
 
+        /* Events */
+        const foyerEvent = new models.Event({
+            name: 'Foyer permanent',
+            config: {
+                minReload    : 0.5 * 1000,
+                maxPerAccount: 100 * 1000
+            }
+        });
+
         /* Fundations */
         const fundationUng = new models.Fundation({
             name   : 'UNG',
@@ -328,6 +337,10 @@ const seeder = {
             deviceEeetop2
         };
 
+        const events = {
+            foyerEvent
+        };
+
         const fundations = {
             fundationUng,
             fundationFoyer,
@@ -411,6 +424,7 @@ const seeder = {
         const all = Object.values(articles)
             .concat(Object.values(categories))
             .concat(Object.values(devices))
+            .concat(Object.values(events))
             .concat(Object.values(fundations))
             .concat(Object.values(groups))
             .concat(Object.values(groupPeriods))
@@ -429,6 +443,7 @@ const seeder = {
             articles,
             categories,
             devices,
+            events,
             fundations,
             groups,
             groupPeriods,
@@ -566,6 +581,17 @@ const seeder = {
         data.devices.deviceEeetop2.periodPoints = [data.periodPoints.periodPointEternityForEEtop2Foyer];
         arr.push(data.devices.deviceEeetop2.saveAll({
             periodPoints: true
+        }));
+
+        /* Events - Relationships : periods */
+        data.events.foyerEvent.periods = [
+            data.periods.periodEternity,
+            data.periods.periodPrevious,
+            data.periods.periodAfter,
+            data.periods.periodNow
+        ];
+        arr.push(data.events.foyerEvent.saveAll({
+            periods: true
         }));
 
         /* Fundations - Relationships : prices, purchases */
