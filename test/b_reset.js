@@ -134,15 +134,17 @@ describe('Before tests', () => {
                 isRemoved: false
             })
         )
-        .then(res =>
-            r.table('Period').insert([{
+        .then(res => {
+            process.env.EventFoyerId = res.generated_keys[0];
+
+            return r.table('Period').insert([{
                 name     : 'Surrounding',
                 start    : new Date(Date.now() - (1000 * 60 * 60 * 24 * 30)),
                 end      : new Date(Date.now() + (1000 * 60 * 60 * 24 * 30)),
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                Event_id : res.generated_keys[0]
+                Event_id : process.env.EventFoyerId
             }, {
                 name     : 'Never',
                 start    : new Date(Date.now() - (1000 * 60 * 60 * 24 * 30 * 2)),
@@ -150,9 +152,9 @@ describe('Before tests', () => {
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
-                Event_id : res.generated_keys[0]
+                Event_id : process.env.EventFoyerId
             }])
-        )
+        })
         .then((res) => {
             periodId         = res.generated_keys[0];
             outdatedPeriodId = res.generated_keys[1];

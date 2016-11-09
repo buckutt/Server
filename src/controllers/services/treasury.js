@@ -40,6 +40,12 @@ router.get('/services/treasury/purchases', (req, res, next) => {
         }
     }
 
+    if (req.query.event) {
+        initialQuery = initialQuery.filter(doc =>
+            doc('price')('period')('Event_id').eq(req.query.event)
+        );
+    }
+
     if (req.query.point) {
         initialQuery = initialQuery.filter(doc =>
             doc('Point_id').eq(req.query.point)

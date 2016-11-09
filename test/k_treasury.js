@@ -67,6 +67,14 @@ describe('Treasury', () => {
                         done();
                     });
             });
+
+            it('should support basic treasury list with event', (done) => {
+                unirest.get(`https://localhost:3006/services/treasury/purchases?event=${process.env.EventFoyerId}`)
+                    .end((response) => {
+                        assert.equal(2, response.body.length);
+                        done();
+                    });
+            });
         });
 
         it('should refuse if dates are not parsable', (done) => {
