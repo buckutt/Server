@@ -1,6 +1,6 @@
 # Buckless-Server
 [![dependencies Status](https://david-dm.org/buckless/server/status.png)](https://david-dm.org/buckless/server)
-[![Build Status](https://travis-ci.org/buckless/Server.svg?branch=master)](https://travis-ci.org/buckless/Server)
+[![Build Status](https://travis-ci.org/buckless/server.svg?branch=master)](https://travis-ci.org/buckless/server)
 [![Coverage Status](https://coveralls.io/repos/github/buckless/Server/badge.svg?branch=master)](https://coveralls.io/github/buckless/Server?branch=master)  
 
 Buckless is an electronic payment system.
