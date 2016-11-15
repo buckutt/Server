@@ -134,7 +134,7 @@ describe('Before tests', () => {
                 isRemoved: false
             })
         )
-        .then(res => {
+        .then((res) => {
             process.env.EventFoyerId = res.generated_keys[0];
 
             return r.table('Period').insert([{
@@ -153,7 +153,7 @@ describe('Before tests', () => {
                 editedAt : new Date(),
                 isRemoved: false,
                 Event_id : process.env.EventFoyerId
-            }])
+            }]);
         })
         .then((res) => {
             periodId         = res.generated_keys[0];

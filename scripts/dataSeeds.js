@@ -101,7 +101,7 @@ const seeder = {
 
         /* Events */
         const foyerEvent = new models.Event({
-            name: 'Foyer permanent',
+            name  : 'Foyer permanent',
             config: {
                 minReload    : 0.5 * 1000,
                 maxPerAccount: 100 * 1000

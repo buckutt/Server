@@ -23,7 +23,7 @@ module.exports = (req, res, next) => {
 
     let handled = false;
 
-    rights.forEach((right) => {
+    for (const right of rights) {
         // Admin/Treasurer : he does whatever he wants
         if (authorize.all.indexOf(right.name) > -1) {
             handled = true;
@@ -48,7 +48,7 @@ module.exports = (req, res, next) => {
 
             return next();
         }
-    });
+    }
 
     if (!handled) {
         return next(new APIError(401, 'Unauthorized', 'No right to do that'));
