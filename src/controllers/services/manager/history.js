@@ -64,8 +64,6 @@ router.get('/services/manager/history', (req, res) => {
                 };
             });
 
-            history = history.concat(history);
-
             return reloadQuery.run();
         })
         .then(result => {
