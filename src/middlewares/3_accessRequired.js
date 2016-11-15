@@ -13,7 +13,11 @@ const disableAuth = false;
 module.exports = (req, res, next) => {
     const authorize = config.rights;
 
-    if (req.url === '/services/login' || disableAuth) {
+    if (config.rights.openUrls.indexOf(req.url) > -1 || disableAuth) {
+        return next();
+    }
+
+    if ((req.user && config.rights.loggedUrls.indexOf(req.url) > -1) || disableAuth) {
         return next();
     }
 

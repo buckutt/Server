@@ -17,8 +17,8 @@ const disableAuth = false;
 module.exports = function token(req, res, next) {
     const secret = config.app.secret;
 
-    // Login : no token required
-    if (req.url === '/services/login' || disableAuth) {
+    // OpenUrls : no token required
+    if (config.rights.openUrls.indexOf(req.url) > -1 || disableAuth) {
         return next();
     }
 

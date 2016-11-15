@@ -52,6 +52,12 @@
                 "/services/reload"
             ]
         },
+        "openUrls": [
+            "/services/login"
+        ],
+        "loggedUrls": [
+            "/services/manager/history"
+        ],
         "pinLoggingAllowed": ["seller"]
     }
 }

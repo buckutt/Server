@@ -40,6 +40,28 @@ describe('Login', () => {
             });
     });
 
+    it('should accept logged paths when the user is logged', (done) => {
+        unirest.post('https://localhost:3006/services/login')
+            .send({
+                meanOfLogin: 'etuMail',
+                data       : 'norights@buckless.fr',
+                password   : 'buckless'
+            })
+            .end((response) => {
+                process.env.NoRightsToken = response.body.user.token;
+
+                assert.equal(200, response.code);
+
+                unirest.get('https://localhost:3006/services/manager/history')
+                    .header('Authorization', `Bearer ${response.body.token}`)
+                    .end((response2) => {
+                        assert.equal(200, response2.code);
+
+                        done();
+                    });
+            });
+    });
+
     let sellerToken;
     it('should allow user when they have specific (not admin) rights', (done) => {
         unirest.post('https://localhost:3006/services/login')
@@ -140,8 +162,9 @@ describe('Login', () => {
                 assert.equal('string', typeof user.id);
                 assert.equal('string', typeof token);
 
-                // Set token globally
-                process.env.TOKEN = token;
+                // Set token and logged user id globally
+                process.env.TOKEN    = token;
+                process.env.LoggedId = user.id;
 
                 const rightsDecoded = jwt.decode(token);
 
