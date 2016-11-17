@@ -65,7 +65,7 @@ describe('History', () => {
                                 console.log(response2.body);
                                 assert.equal(200, response2.code);
 
-                                response2.body.forEach(history => {
+                                response2.body.forEach((history) => {
                                     switch (history.type) {
                                         case 'transfer':
                                             if (history.amount > 0) {
