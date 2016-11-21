@@ -1,13 +1,16 @@
 {
-    "log" : {
-        "console" : "debug",
-        "file" : "debug"
+    "log": {
+        "console": "debug",
+        "file": "debug"
     },
-    "http" : {
-        "port" : 3006
+    "http": {
+        "port": 3006
     },
-    "app" : {
-        "name" : "buckless_testServer"
+    "app": {
+        "name": "buckless_testServer"
     },
-    "db" : "bucklessServer_test"
+    "db": {
+        "host": "localhost",
+        "name": "bucklessServer_example"
+    }
 }

@@ -24,7 +24,6 @@ app.locals.models = models;
 /**
  * Middlewares
  */
-
 app.use(cors({
     allowedHeaders: ['content-type', 'Authorization'],
     credentials   : true,
@@ -35,10 +34,10 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
+
 /**
  * Routes
  */
-
 app.use(controllers);
 
 /**

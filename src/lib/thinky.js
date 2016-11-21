@@ -4,7 +4,7 @@ const logger = require('./log');
 
 const log = logger(module);
 
-const conn = thinky({ db: config.db, silent: true });
+const conn = thinky({ host: config.db.host, db: config.db.name, silent: true });
 
 /* istanbul ignore next */
 conn.r
