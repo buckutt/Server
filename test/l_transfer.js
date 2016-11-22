@@ -32,6 +32,18 @@ describe('Transfers', () => {
                 });
         });
 
+        it('should not transfer if the reciever does not exists', (done) => {
+            unirest.post('https://localhost:3006/services/transfer')
+                .send({
+                    Reciever_id: '00000000-0000-1000-8000-000000000000',
+                    amount     : 150
+                })
+                .end((response) => {
+                    assert.equal(400, response.code);
+                    done();
+                });
+        });
+
         it('should not transfer if sender has not enough money', (done) => {
             unirest.post('https://localhost:3006/services/transfer')
                 .send({

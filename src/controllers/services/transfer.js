@@ -19,8 +19,16 @@ router.post('/services/transfer', (req, res, next) => {
     }
 
     req.app.locals.models.User
-        .get(req.Reciever_id)
+        .filter(thinky.r.row('isRemoved').eq(false))
+        .filter(thinky.r.row('id').eq(req.Reciever_id))
+        .nth(0)
+        .default(null)
+        .execute()
         .then((user) => {
+            if (!user) {
+                return next(new APIError(400, 'Invalid reciever'));
+            }
+
             req.recieverUser = user;
             next();
         });
