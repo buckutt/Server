@@ -69,15 +69,18 @@ const seeder = {
 
         /* Categories */
         const categoryBarres = new models.Category({
-            name: 'Barres'
+            name    : 'Barres',
+            priority: 80
         });
 
         const categoryCanettes = new models.Category({
-            name: 'Canettes'
+            name    : 'Canettes',
+            priority: 80
         });
 
         const categoryGeneral = new models.Category({
-            name: 'Général'
+            name    : 'Général',
+            priority: 100
         });
 
         /* Devices */
