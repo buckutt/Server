@@ -115,7 +115,7 @@ describe('Basket', () => {
                     ]
                 },
                 {
-                    credit   : 50 * 100,
+                    credit   : 50 * 101,
                     trace    : 'card',
                     Buyer_id : process.env.GJId,
                     Seller_id: process.env.GJId,
@@ -140,7 +140,7 @@ describe('Basket', () => {
             ])
             .end((response) => {
                 assert.equal(200, response.code);
-                assert.equal(9850, response.body.newCredit);
+                assert.equal(9900, response.body.newCredit);
                 done();
             });
     });
@@ -260,7 +260,7 @@ describe('Basket', () => {
         });
 
         it('should update user credit', () => {
-            assert.equal(9850, gj.credit);
+            assert.equal(9900, gj.credit);
         });
 
         it('should update purchases', () => {

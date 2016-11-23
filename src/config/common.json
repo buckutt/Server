@@ -18,9 +18,9 @@
    "rights": {
       "all": ["admin"],
       "seller": {
-         "canSell": true,
-         "canReload": false,
-         "read": [
+        "canSell": true,
+        "canReload": false,
+        "read": [
             "/articles",
             "/articles/search",
             "/promotions",
@@ -34,15 +34,15 @@
             "/devices",
             "/devices/search",
             "/users"
-         ],
-         "write": [
+        ],
+        "write": [
             "/services/basket"
-         ]
+        ]
       },
       "reloader": {
-         "canSell": false,
-         "canReload": true,
-         "read": [
+        "canSell": false,
+        "canReload": true,
+        "read": [
             "/users",
             "/usersrights",
             "/usersgroups",
@@ -50,17 +50,19 @@
             "/devices",
             "/reloadtypes",
             "/meanofloginsusers"
-         ],
-         "write": [
+        ],
+        "write": [
             "/services/reload"
-         ]
+        ]
       },
       "openUrls": [
-          "/services/login"
+            "/services/login"
       ],
       "loggedUrls": [
-          "/services/manager/changepin",
-          "/services/manager/history"
+            "/services/manager/changepin",
+            "/services/manager/history",
+            "/services/manager/searchuser",
+            "/services/manager/transfer"
       ],
       "pinLoggingAllowed": ["seller"]
    }

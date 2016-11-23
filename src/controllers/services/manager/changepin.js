@@ -19,18 +19,18 @@ router.put('/services/manager/changepin', (req, res, next) => {
 
     bcrypt.compareAsync(req.body.currentPin.toString(), req.user.pin)
         .then(match =>
-             new Promise((resolve, reject) => {
-                 if (match) {
-                     return resolve();
-                 }
+            new Promise((resolve, reject) => {
+                if (match) {
+                    return resolve();
+                }
 
-                 reject(new APIError(401, 'PIN is wrong'));
-             })
+                reject(new APIError(401, 'PIN is wrong'));
+            })
         )
         .then(() =>
-             models.User
-                .get(req.user.id)
-                .run()
+            models.User
+               .get(req.user.id)
+               .run()
         )
         .then((user) => {
             user.pin = req.body.pin;
