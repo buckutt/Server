@@ -18,7 +18,7 @@ module.exports = function token(req, res, next) {
     const secret = config.app.secret;
 
     // OpenUrls : no token required
-    if (config.rights.openUrls.indexOf(req.url) > -1 || disableAuth) {
+    if (config.rights.openUrls.indexOf(req.path) > -1 || disableAuth) {
         return next();
     }
 
@@ -75,7 +75,7 @@ module.exports = function token(req, res, next) {
                     }
 
                     if (right.period.start <= now && right.period.end > now) {
-                        if (right.point) {
+                        if (right.name !== 'admin' && right.point) {
                             return (right.point.id === req.Point_id);
                         }
 

@@ -54,42 +54,31 @@ describe('History', () => {
                 }
             ])
             .end(() => {
-                unirest.post('https://localhost:3006/services/transfer')
-                    .send({
-                        Reciever_id: process.env.LoggedId,
-                        amount     : 100
-                    })
-                    .end(() => {
-                        unirest.get('https://localhost:3006/services/manager/history')
-                            .end((response2) => {
-                                console.log(response2.body);
-                                assert.equal(200, response2.code);
+                unirest.get('https://localhost:3006/services/manager/history')
+                    .end((response2) => {
+                        console.log(response2.body);
+                        assert.equal(200, response2.code);
 
-                                response2.body.forEach((history) => {
-                                    switch (history.type) {
-                                        case 'transfer':
-                                            if (history.amount > 0) {
-                                                assert.equal(100, history.amount);
-                                            } else {
-                                                assert.equal(-100, history.amount);
-                                            }
-                                            break;
-                                        case 'reload':
-                                            assert.equal(5000, history.amount);
-                                            break;
-                                        case 'purchase':
-                                            assert.equal(-60, history.amount);
-                                            break;
-                                        case 'promotion':
-                                            assert.equal(-100, history.amount);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                });
+                        response2.body.forEach((history) => {
+                            switch (history.type) {
+                                case 'transfer':
+                                    assert.equal(20, Math.abs(history.amount));
+                                    break;
+                                case 'reload':
+                                    assert.equal(5000, history.amount);
+                                    break;
+                                case 'purchase':
+                                    assert.equal(-60, history.amount);
+                                    break;
+                                case 'promotion':
+                                    assert.equal(-100, history.amount);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        });
 
-                                done();
-                            });
+                        done();
                     });
             });
     });

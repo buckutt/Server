@@ -97,7 +97,7 @@ describe('Treasury', () => {
 
                         assert.equal(2, body.length);
                         assert.equal(50, body[0].reduction);
-                        assert.equal(10000, body[1].reduction);
+                        assert.equal(10050, body[1].reduction);
 
                         done();
                     });
@@ -112,7 +112,7 @@ describe('Treasury', () => {
 
                         assert.equal(2, body.length);
                         assert.equal(50, body[0].reduction);
-                        assert.equal(10000, body[1].reduction);
+                        assert.equal(10050, body[1].reduction);
 
                         done();
                     });
@@ -124,7 +124,7 @@ describe('Treasury', () => {
                         const body = response.body.sort((a, b) => a.group.localeCompare(b.group));
 
                         assert.equal(1, body.length);
-                        assert.equal(10000, body[0].reduction);
+                        assert.equal(10050, body[0].reduction);
 
                         done();
                     });

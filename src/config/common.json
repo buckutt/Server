@@ -1,64 +1,69 @@
 {
-    "log" : {
-        "console" : "debug",
-        "file" : "none"
-    },
-    "http" : {
-        "host" : "127.0.0.1",
-        "port" : 3000
-    },
-    "app" : {
-        "name" : "bucklessServer",
-        "secret" : "NgWlfDWCbX4mPuxau1FmG3TPLHm7iglEA3mp1f8nrlT7zKDn8ZZAwWQOqUArvQBFfMEbFSAMnUHzgQW1FkczTiZYjPZWqdseNtk2"
-    },
-    "db" : "bucklessServer_example",
-    "rights" : {
-        "all"     : ["admin"],
-        "seller"  : {
-            "canSell": true,
-            "canReload": false,
-            "read" : [
-                "/articles",
-                "/articles/search",
-                "/promotions",
-                "/promotions/search",
-                "/sets",
-                "/sets/search",
-                "/meansoflogin",
-                "/meansoflogin/search",
-                "/meansofpayment",
-                "/meansofpayment/search",
-                "/devices",
-                "/devices/search",
-                "/users"
-            ],
-            "write": [
-                "/services/basket"
-            ]
-        },
-        "reloader": {
-            "canSell": false,
-            "canReload": true,
-            "read" : [
-                "/users",
-                "/usersrights",
-                "/usersgroups",
-                "/devicespoints",
-                "/devices",
-                "/reloadtypes",
-                "/meanofloginsusers"
-            ],
-            "write": [
-                "/services/reload"
-            ]
-        },
-        "openUrls": [
+   "log": {
+      "console": "debug",
+      "file": "none"
+   },
+   "http": {
+      "host": "127.0.0.1",
+      "port": 3000
+   },
+   "app": {
+      "name": "bucklessServer",
+      "secret": "NgWlfDWCbX4mPuxau1FmG3TPLHm7iglEA3mp1f8nrlT7zKDn8ZZAwWQOqUArvQBFfMEbFSAMnUHzgQW1FkczTiZYjPZWqdseNtk2"
+   },
+   "db": {
+      "host": "localhost",
+      "name": "bucklessServer_example"
+   },
+   "rights": {
+      "all": ["admin"],
+      "seller": {
+        "canSell": true,
+        "canReload": false,
+        "read": [
+            "/articles",
+            "/articles/search",
+            "/promotions",
+            "/promotions/search",
+            "/sets",
+            "/sets/search",
+            "/meansoflogin",
+            "/meansoflogin/search",
+            "/meansofpayment",
+            "/meansofpayment/search",
+            "/devices",
+            "/devices/search",
+            "/users"
+        ],
+        "write": [
+            "/services/basket"
+        ]
+      },
+      "reloader": {
+        "canSell": false,
+        "canReload": true,
+        "read": [
+            "/users",
+            "/usersrights",
+            "/usersgroups",
+            "/devicespoints",
+            "/devices",
+            "/reloadtypes",
+            "/meanofloginsusers"
+        ],
+        "write": [
+            "/services/reload"
+        ]
+      },
+      "openUrls": [
             "/services/login"
-        ],
-        "loggedUrls": [
+      ],
+      "loggedUrls": [
             "/services/manager/changepin",
-            "/services/manager/history"
-        ],
-        "pinLoggingAllowed": ["seller"]
-    }
+            "/services/manager/history",
+            "/services/manager/searchuser",
+            "/services/manager/transfer"
+      ],
+      "pinLoggingAllowed": ["seller"]
+   }
 }

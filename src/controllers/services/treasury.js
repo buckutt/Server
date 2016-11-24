@@ -1,4 +1,5 @@
 const express    = require('express');
+const thinky     = require('../../lib/thinky');
 const APIError   = require('../../errors/APIError');
 const { isUUID } = require('../../lib/idParser');
 
@@ -7,14 +8,16 @@ const router = new express.Router();
 router.get('/services/treasury/purchases', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Purchase.getJoin({
-        price: {
-            period  : true,
-            articles: true
-        },
-        articles : true,
-        promotion: true
-    });
+    let initialQuery = models.Purchase
+        .filter(thinky.r.row('isRemoved').eq(false))
+        .getJoin({
+            price: {
+                period  : true,
+                articles: true
+            },
+            articles : true,
+            promotion: true
+        });
 
     if (req.query.period) {
         if (isUUID(req.query.period)) {
@@ -57,7 +60,6 @@ router.get('/services/treasury/purchases', (req, res, next) => {
             doc('price')('Fundation_id').eq(req.query.fundation)
         );
     }
-
 
     initialQuery = initialQuery
         .group(purchase => purchase('price')('id'))
@@ -125,7 +127,8 @@ router.get('/services/treasury/purchases', (req, res, next) => {
 router.get('/services/treasury/reloads', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Reload;
+    let initialQuery = models.Reload
+        .filter(thinky.r.row('isRemoved').eq(false));
 
     if (req.query.point) {
         if (isUUID(req.query.point)) {

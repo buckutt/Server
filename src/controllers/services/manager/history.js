@@ -10,7 +10,8 @@ router.get('/services/manager/history', (req, res) => {
 
     const purchaseQuery = models.Purchase
         .filter({
-            Buyer_id: req.user.id
+            Buyer_id : req.user.id,
+            isRemoved: false
         })
         .getJoin({
             seller   : true,
@@ -22,7 +23,8 @@ router.get('/services/manager/history', (req, res) => {
 
     const reloadQuery = models.Reload
         .filter({
-            Buyer_id: req.user.id
+            Buyer_id : req.user.id,
+            isRemoved: false
         })
         .getJoin({
             seller: true,
@@ -31,7 +33,8 @@ router.get('/services/manager/history', (req, res) => {
 
     const transferFromQuery = models.Transfer
         .filter({
-            Reciever_id: req.user.id
+            Reciever_id: req.user.id,
+            isRemoved  : false
         })
         .getJoin({
             sender: true
@@ -39,7 +42,8 @@ router.get('/services/manager/history', (req, res) => {
 
     const transferToQuery = models.Transfer
         .filter({
-            Sender_id: req.user.id
+            Sender_id: req.user.id,
+            isRemoved: false
         })
         .getJoin({
             reciever: true
@@ -119,9 +123,9 @@ router.get('/services/manager/history', (req, res) => {
                  })
             );
 
-            history = history.concat(transfersTo);
-
-            history = history.sort((a, b) => b.date - a.date);
+            history = history
+                .concat(transfersTo)
+                .sort((a, b) => b.date - a.date);
 
             res
                 .status(200)
