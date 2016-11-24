@@ -597,16 +597,14 @@ const seeder = {
         /* Fundations - Relationships : prices, purchases */
 
         /* Groups - Relationships : groupPeriods, prices */
-        data.groups.groupCotisants.groupPeriods = [data.groupPeriods.groupPeriodAlwaysInGroup];
-        arr.push(data.groups.groupCotisants.saveAll({
-            groupPeriods: true
-        }));
 
         /* GroupPeriods - Relationships : group, period, users */
+        data.groupPeriods.groupPeriodAlwaysInGroup.group = data.groups.groupCotisants;
         data.groupPeriods.groupPeriodAlwaysInGroup.period = data.periods.periodEternity;
         data.groupPeriods.groupPeriodAlwaysInGroup.users  = [data.users.userGJ];
         arr.push(data.groupPeriods.groupPeriodAlwaysInGroup.saveAll({
             period: true,
+            group : true,
             users : true
         }));
 
