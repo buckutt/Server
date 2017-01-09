@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const jwt    = require('jsonwebtoken');
-const config = require('../src/config');
+const config = require('../config');
 
 /* global unirest */
 

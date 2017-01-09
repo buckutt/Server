@@ -1,7 +1,7 @@
 const jwt      = require('jsonwebtoken');
 const Promise  = require('bluebird');
 const APIError = require('../errors/APIError');
-const config   = require('../config');
+const config   = require('../../config');
 
 Promise.promisifyAll(jwt);
 

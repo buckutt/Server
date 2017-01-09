@@ -1,5 +1,5 @@
 const thinky = require('thinky');
-const config = require('../config');
+const config = require('../../config');
 const logger = require('./log');
 
 const log = logger(module);

@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const express      = require('express');
 const https        = require('https');
 const morgan       = require('morgan');
-const config       = require('./config');
+const config       = require('../config');
 const controllers  = require('./controllers');
 const models       = require('./models');
 const startSSE     = require('./sseServer');
@@ -65,25 +65,27 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 });
 
 app.start = () => {
-    let key;
-    let cert;
-    let ca;
+    const sslFilesPath = {
+        key : './ssl/server-key.pem',
+        cert: './ssl/server-crt.pem',
+        ca  : './ssl/ca-crt.pem'
+    };
 
-    /* istanbul ignore else */
-    if (process.env.NODE_ENV === 'test') {
-        key  = './ssl/test/server-key.pem';
-        cert = './ssl/test/server-crt.pem';
-        ca   = './ssl/test/ca-crt.pem';
-    } else {
-        key  = './ssl/server-key.pem';
-        cert = './ssl/server-crt.pem';
-        ca   = './ssl/ca-crt.pem';
+    // If no cert generated (`scripts/sslConfig`), use the default ones, i.e `ssl/test`
+    /* istanbul ignore if */
+    if (!fs.existsSync(sslFilesPath.key) || !fs.existsSync(sslFilesPath.cert) || !fs.existsSync(sslFilesPath.ca)) {
+        if (!config.env === 'test') {
+            log.warn('SSL files not present, using test ones.');
+        }
+        sslFilesPath.key  = sslFilesPath.key.replace('./ssl/', './ssl/test/');
+        sslFilesPath.cert = sslFilesPath.cert.replace('./ssl/', './ssl/test/');
+        sslFilesPath.ca   = sslFilesPath.ca.replace('./ssl/', './ssl/test/');
     }
 
     const server = https.createServer({
-        key               : fs.readFileSync(key),
-        cert              : fs.readFileSync(cert),
-        ca                : fs.readFileSync(ca),
+        key               : fs.readFileSync(sslFilesPath.key),
+        cert              : fs.readFileSync(sslFilesPath.cert),
+        ca                : fs.readFileSync(sslFilesPath.ca),
         requestCert       : true,
         rejectUnauthorized: false
     }, app);

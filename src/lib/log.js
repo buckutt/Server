@@ -1,4 +1,4 @@
-const config   = require('../config');
+const config   = require('../../config');
 const { pad2 } = require('./utils');
 const winston  = require('winston');
 

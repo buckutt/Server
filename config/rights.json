@@ -1,20 +1,4 @@
 {
-   "log": {
-      "console": "debug",
-      "file": "none"
-   },
-   "http": {
-      "host": "127.0.0.1",
-      "port": 3000
-   },
-   "app": {
-      "name": "bucklessServer",
-      "secret": "NgWlfDWCbX4mPuxau1FmG3TPLHm7iglEA3mp1f8nrlT7zKDn8ZZAwWQOqUArvQBFfMEbFSAMnUHzgQW1FkczTiZYjPZWqdseNtk2"
-   },
-   "db": {
-      "host": "localhost",
-      "name": "bucklessServer_example"
-   },
    "rights": {
       "all": ["admin"],
       "seller": {

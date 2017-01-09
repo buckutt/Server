@@ -1,9 +1,9 @@
 node_modules/
-build/
 rethinkdb_data/
 coverage/
-npm-debug.log
+*.log
+config/*.json
+!config/rights.json
+!config/test.json
 ssl/*
 !ssl/example
-*.log
-

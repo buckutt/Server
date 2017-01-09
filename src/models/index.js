@@ -1,5 +1,5 @@
 const fs     = require('fs');
-const config = require('../config');
+const path   = require('path');
 const thinky = require('../lib/thinky');
 
 const models = {
@@ -7,11 +7,11 @@ const models = {
 };
 
 fs
-    .readdirSync(`${config.root}/models/`)
+    .readdirSync(__dirname)
     .filter(file => file.slice(-3) === '.js')
     .filter(file => file !== 'index.js')
     .forEach((file) => {
-        const model = require(`${config.root}/models/${file}`);
+        const model = require(path.join(__dirname, file));
         models[model.getTableName()] = model;
     });
 
