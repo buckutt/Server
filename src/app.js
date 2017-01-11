@@ -76,7 +76,6 @@ app.start = () => {
     if (!fs.existsSync('./ssl/server-key.pem') ||
         !fs.existsSync('./ssl/server-crt.pem') ||
         !fs.existsSync('./ssl/ca-crt.pem')) {
-
         const sslConfigScript = path.join(__dirname, '..', 'scripts', 'sslConfig');
 
         const sslConfig = spawnSync('node', [ sslConfigScript ], {
