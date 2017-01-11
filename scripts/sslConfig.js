@@ -4,6 +4,37 @@ const inquirer     = require('inquirer');
 const childProcess = require('child_process');
 const Promise      = require('bluebird');
 const status       = require('elegant-status');
+const randomstring = require('randomstring');
+
+let prompter;
+
+if (process.env.RANDOM_SSL_PASSWORD) {
+    const chalPassword = randomstring.generate();
+    const outPassword  = randomstring.generate();
+
+    prompter = Promise.resolve({
+        chalPassword,
+        outPassword
+    });
+
+    console.log('----');
+    console.log('[ challenge password ]', chalPassword);
+    console.log('[ output password ]', outPassword);
+    console.log('----');
+} else {
+    prompter = inquirer.prompt([
+        {
+            type   : 'password',
+            name   : 'chalPassword',
+            message: 'Define challenge password :'
+        },
+        {
+            type   : 'password',
+            name   : 'outPassword',
+            message: 'Define output password :'
+        }
+    ]);
+}
 
 Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
@@ -22,19 +53,7 @@ try {
     throw new Error(e);
 }
 
-inquirer.prompt([
-    {
-        type   : 'password',
-        name   : 'chalPassword',
-        message: 'Define challenge password :'
-    },
-    {
-        type   : 'password',
-        name   : 'outPassword',
-        message: 'Define output password :'
-    }
-])
-.then((answer) => {
+prompter.then((answer) => {
     write = status('Updating files...');
 
     try {

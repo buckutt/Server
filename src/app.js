@@ -71,12 +71,7 @@ app.start = () => {
         ca  : './ssl/ca-crt.pem'
     };
 
-    // If no cert generated (`scripts/sslConfig`), use the default ones, i.e `ssl/test`
-    /* istanbul ignore if */
-    if (!fs.existsSync(sslFilesPath.key) || !fs.existsSync(sslFilesPath.cert) || !fs.existsSync(sslFilesPath.ca)) {
-        if (!config.env === 'test') {
-            log.warn('SSL files not present, using test ones.');
-        }
+    if (config.env === 'test') {
         sslFilesPath.key  = sslFilesPath.key.replace('./ssl/', './ssl/test/');
         sslFilesPath.cert = sslFilesPath.cert.replace('./ssl/', './ssl/test/');
         sslFilesPath.ca   = sslFilesPath.ca.replace('./ssl/', './ssl/test/');

@@ -41,6 +41,7 @@
     "morgan": "1.7.0",
     "nconf": "^0.8.4",
     "qs": "^6.1.0",
+    "randomstring": "^1.1.5",
     "rimraf": "^2.5.2",
     "source-map-support": "^0.4.0",
     "sse": "github:gjuchault/sse.js",

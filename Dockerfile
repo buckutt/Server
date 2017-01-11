@@ -7,7 +7,7 @@ CMD ["npm", "start"]
 WORKDIR /usr/src/buckless-server
 
 RUN apk update && \
-    apk add --no-cache git openssh && \
+    apk add --no-cache git openssh openssl && \
     mkdir -p /usr/src/buckless-server
 
 COPY package.json /usr/src/buckless-server/
@@ -15,3 +15,5 @@ COPY package.json /usr/src/buckless-server/
 RUN npm install
 
 COPY . /usr/src/buckless-server/
+
+RUN RANDOM_SSL_PASSWORD=1 npm run sslConfig

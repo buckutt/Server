@@ -12,7 +12,7 @@ nconf
     .file({ file: path.join(__dirname, 'process.env.json') });
 
 // Load environment config file
-const envName = nconf.get('NODE_ENV') || 'docker';
+const envName = nconf.get('NODE_ENV') || 'prod';
 const env     = require(path.join(__dirname, envName));
 const rights  = require(path.join(__dirname, 'rights'));
 const config  = _.merge(rights, env);
