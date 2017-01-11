@@ -15,5 +15,3 @@ COPY package.json /usr/src/buckless-server/
 RUN npm install
 
 COPY . /usr/src/buckless-server/
-
-RUN RANDOM_SSL_PASSWORD=1 npm run sslConfig

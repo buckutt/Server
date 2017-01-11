@@ -1,18 +1,20 @@
-const fs           = require('fs');
-const cors         = require('cors');
-const bodyParser   = require('body-parser');
-const compression  = require('compression');
-const cookieParser = require('cookie-parser');
-const express      = require('express');
-const https        = require('https');
-const morgan       = require('morgan');
-const config       = require('../config');
-const controllers  = require('./controllers');
-const models       = require('./models');
-const startSSE     = require('./sseServer');
-const logger       = require('./lib/log');
-const { pp }       = require('./lib/utils');
-const APIError     = require('./errors/APIError');
+const fs            = require('fs');
+const path          = require('path');
+const { spawnSync } = require('child_process');
+const cors          = require('cors');
+const bodyParser    = require('body-parser');
+const compression   = require('compression');
+const cookieParser  = require('cookie-parser');
+const express       = require('express');
+const https         = require('https');
+const morgan        = require('morgan');
+const config        = require('../config');
+const controllers   = require('./controllers');
+const models        = require('./models');
+const startSSE      = require('./sseServer');
+const logger        = require('./lib/log');
+const { pp }        = require('./lib/utils');
+const APIError      = require('./errors/APIError');
 
 const log = logger(module);
 
@@ -70,6 +72,22 @@ app.start = () => {
         cert: './ssl/server-crt.pem',
         ca  : './ssl/ca-crt.pem'
     };
+
+    if (!fs.existsSync('./ssl/server-key.pem') ||
+        !fs.existsSync('./ssl/server-crt.pem') ||
+        !fs.existsSync('./ssl/ca-crt.pem')) {
+
+        const sslConfigScript = path.join(__dirname, '..', 'scripts', 'sslConfig');
+
+        const sslConfig = spawnSync('node', [ sslConfigScript ], {
+            env: {
+                RANDOM_SSL_PASSWORD: 1
+            },
+            shell: true
+        });
+
+        console.log(sslConfig.stdout.toString());
+    }
 
     if (config.env === 'test') {
         sslFilesPath.key  = sslFilesPath.key.replace('./ssl/', './ssl/test/');
