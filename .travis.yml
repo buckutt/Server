@@ -1,20 +1,30 @@
 language: node_js
 sudo: false
+
+services:
+  - docker
+
 node_js:
-  - '7'
-  - '6'
+  - 7
 
 addons:
-  rethinkdb: '2'
+  rethinkdb: 2
 
 install:
-  - "npm install -g mocha gulp"
-  - "npm install"
-  - "rethinkdb&"
+  - npm install -g mocha gulp
+  - npm install
+  - rethinkdb&
 
 script:
-  - "npm run test:coverage"
-  - "npm run lint"
+  - npm run test:coverage
+  - npm run lint
 
 after_script:
-  - "npm run coveralls"
+  - npm run coveralls
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker build -t buckless/server .;
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push buckless/server;
+    fi
