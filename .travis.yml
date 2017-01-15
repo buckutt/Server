@@ -8,12 +8,11 @@ node_js:
   - 7
 
 addons:
-  rethinkdb: 2
+  rethinkdb: 2.3
 
 install:
   - npm install -g mocha gulp
   - npm install
-  - rethinkdb&
 
 script:
   - npm run test:coverage
