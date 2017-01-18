@@ -13,6 +13,7 @@ addons:
 install:
   - npm install -g mocha gulp
   - npm install
+  - npm run addTestDevice
 
 script:
   - npm run test:coverage

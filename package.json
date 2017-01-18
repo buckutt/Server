@@ -9,7 +9,6 @@
   ],
   "license": "MIT",
   "scripts": {
-    "postinstall": "npm run addTestDevice",
     "cleardb": "rimraf rethinkdb_data",
     "test": "npm run test:coverage",
     "test:nocoverage": "node scripts/test",
