@@ -16,7 +16,7 @@ CN                     = localhost
 emailAddress           = certs@example.com
 
 [ req_attributes ]
-challengePassword      = password
+challengePassword      = test
 
 [ v3_ca ]
 authorityInfoAccess = @issuer_info

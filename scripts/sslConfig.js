@@ -1,30 +1,77 @@
 const path         = require('path');
 const fs           = require('fs-extra');
 const inquirer     = require('inquirer');
-const childProcess = require('child_process');
-const Promise      = require('bluebird');
+const execSync     = require('child_process').execSync;
 const logger       = require('../src/lib/log');
 const randomstring = require('randomstring');
 
 const log = logger(module);
 
-let prompter;
+function copyFromTemplate() {
+    log.info('Copying files...');
 
-if (process.env.RANDOM_SSL_PASSWORD) {
-    const chalPassword = randomstring.generate();
-    const outPassword  = randomstring.generate();
+    try {
+        fs.copySync('./ssl/templates/ca.cnf', './ssl/certificates/ca.cnf');
+        fs.copySync('./ssl/templates/server.cnf', './ssl/certificates/server.cnf');
+    } catch (e) {
+        throw new Error(e);
+    }
+}
 
-    prompter = Promise.resolve({
-        chalPassword,
-        outPassword
-    });
+function updateFiles(chalPassword, outPassword) {
+    log.info('Updating files...');
 
-    console.log('----');
-    console.log('[ challenge password ]', chalPassword);
-    console.log('[ output password ]', outPassword);
-    console.log('----');
-} else {
-    prompter = inquirer.prompt([
+    try {
+        const server = fs.readFileSync('./ssl/certificates/server.cnf', 'utf8')
+            .replace(/(challengePassword\s*= )(\w*)/, `$1${chalPassword}`);
+        const ca     = fs.readFileSync('./ssl/certificates/ca.cnf', 'utf8')
+            .replace(/(challengePassword\s*= )(\w*)/, `$1${chalPassword}`)
+            .replace(/(output_password\s*= )(\w*)/, `$1${outPassword}`);
+
+        fs.writeFileSync('./ssl/certificates/server.cnf', server, 'utf8');
+        fs.writeFileSync('./ssl/certificates/ca.cnf', ca, 'utf8');
+    } catch (e) {
+        throw e;
+    }
+}
+
+function generateCertificate(outPassword) {
+    log.info('Generating certificates...');
+    const cwd = path.join(__dirname, '..', 'ssl', 'certificates');
+
+    try {
+        /* eslint-disable max-len */
+        execSync('openssl req -new -x509 -days 9999 -config ca.cnf -keyout ca-key.pem -out ca-crt.pem', { cwd });
+        execSync('openssl genrsa -out server-key.pem 4096', { cwd });
+        execSync('openssl req -new -config server.cnf -key server-key.pem -out server-csr.pem', { cwd });
+        execSync(`openssl x509 -req -extfile server.cnf -days 999 -passin "pass:${outPassword}" -in server-csr.pem -CA ca-crt.pem -CAkey ca-key.pem -CAcreateserial -out server-crt.pem`, { cwd });
+        /* eslint-enable max-len */
+    } catch (e) {
+        throw e;
+    }
+}
+
+function sslConfig(chalPassword_, outPassword_, randomPassword) {
+    let chalPassword = chalPassword_;
+    let outPassword = outPassword_;
+
+    if (randomPassword) {
+        chalPassword = randomstring.generate();
+        outPassword  = randomstring.generate();
+    }
+
+    copyFromTemplate();
+    updateFiles(chalPassword, outPassword);
+    generateCertificate(outPassword);
+
+    return { chalPassword, outPassword };
+}
+
+module.exports = sslConfig;
+
+// Entry point
+if (require.main === module) {
+    const prompter = inquirer.prompt([
         {
             type   : 'password',
             name   : 'chalPassword',
@@ -36,52 +83,11 @@ if (process.env.RANDOM_SSL_PASSWORD) {
             message: 'Define output password :'
         }
     ]);
+
+    prompter
+        .then(answer => sslConfig(answer.chalPassword, answer.outPassword))
+        .then((pass) => {
+            log.info(`[ chalPassword ] ${pass.chalPassword}`);
+            log.info(`[ outPassword ] ${pass.outPassword}`);
+        });
 }
-
-Promise.promisifyAll(childProcess);
-const exec = childProcess.execAsync;
-
-// status
-log.info('Copying files...');
-
-try {
-    fs.copySync('./ssl/example/ca.cnf', './ssl/ca.cnf');
-    fs.copySync('./ssl/example/server.cnf', './ssl/server.cnf');
-} catch (e) {
-    throw new Error(e);
-}
-
-prompter.then((answer) => {
-    log.info('Updating files...');
-
-    try {
-        const server = fs.readFileSync('./ssl/server.cnf', 'utf8')
-            .replace(/(challengePassword\s*= )(\w*)/, `$1${answer.chalPassword}`);
-        const ca     = fs.readFileSync('./ssl/ca.cnf', 'utf8')
-            .replace(/(challengePassword\s*= )(\w*)/, `$1${answer.chalPassword}`)
-            .replace(/(output_password\s*= )(\w*)/, `$1${answer.outPassword}`);
-
-        fs.writeFileSync('./ssl/server.cnf', server, 'utf8');
-        fs.writeFileSync('./ssl/ca.cnf', ca, 'utf8');
-    } catch (e) {
-        return Promise.reject(new Error(e));
-    }
-
-    log.info('Generating certificates...');
-
-    const cwd = path.join(__dirname, '..', 'ssl');
-
-    /* eslint-disable max-len */
-    return exec('openssl req -new -x509 -days 9999 -config ca.cnf -keyout ca-key.pem -out ca-crt.pem', { cwd })
-        .then(() => exec('openssl genrsa -out server-key.pem 4096', { cwd }))
-        .then(() => exec('openssl req -new -config server.cnf -key server-key.pem -out server-csr.pem', { cwd }))
-        .then(() => exec(`openssl x509 -req -extfile server.cnf -days 999 -passin "pass:${answer.outPassword}" -in server-csr.pem -CA ca-crt.pem -CAkey ca-key.pem -CAcreateserial -out server-crt.pem`, { cwd }));
-    /* eslint-enable max-len */
-})
-.then(() => {
-    process.exit(0);
-})
-.catch((err) => {
-    console.log(err);
-    process.exit(1);
-});

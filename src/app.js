@@ -1,20 +1,21 @@
-const fs            = require('fs');
-const path          = require('path');
-const { spawnSync } = require('child_process');
-const cors          = require('cors');
-const bodyParser    = require('body-parser');
-const compression   = require('compression');
-const cookieParser  = require('cookie-parser');
-const express       = require('express');
-const https         = require('https');
-const morgan        = require('morgan');
-const config        = require('../config');
-const controllers   = require('./controllers');
-const models        = require('./models');
-const startSSE      = require('./sseServer');
-const logger        = require('./lib/log');
-const { pp }        = require('./lib/utils');
-const APIError      = require('./errors/APIError');
+const fs             = require('fs');
+const cors           = require('cors');
+const bodyParser     = require('body-parser');
+const compression    = require('compression');
+const cookieParser   = require('cookie-parser');
+const express        = require('express');
+const https          = require('https');
+const morgan         = require('morgan');
+const config         = require('../config');
+const controllers    = require('./controllers');
+const models         = require('./models');
+const startSSE       = require('./sseServer');
+const logger         = require('./lib/log');
+const { pp }         = require('./lib/utils');
+const APIError       = require('./errors/APIError');
+const sslConfig      = require('../scripts/sslConfig');
+const baseSeed       = require('../scripts/seed');
+const addAdminDevice = require('../scripts/addAdminDevice');
 
 const log = logger(module);
 
@@ -68,46 +69,49 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
 app.start = () => {
     const sslFilesPath = {
-        key : './ssl/server-key.pem',
-        cert: './ssl/server-crt.pem',
-        ca  : './ssl/ca-crt.pem'
+        key : './ssl/certificates/server-key.pem',
+        cert: './ssl/certificates/server-crt.pem',
+        ca  : './ssl/certificates/ca-crt.pem'
     };
 
-    if (!fs.existsSync('./ssl/server-key.pem') ||
-        !fs.existsSync('./ssl/server-crt.pem') ||
-        !fs.existsSync('./ssl/ca-crt.pem')) {
-        const sslConfigScript = path.join(__dirname, '..', 'scripts', 'sslConfig');
+    let initialPromise = () => Promise.resolve();
 
-        const sslConfig = spawnSync('node', [ sslConfigScript ], {
-            env: {
-                RANDOM_SSL_PASSWORD: 1
-            },
-            shell: true
+    /* istanbul ignore if */
+    if (!fs.existsSync('./ssl/certificates/server-key.pem') ||
+        !fs.existsSync('./ssl/certificates/server-crt.pem') ||
+        !fs.existsSync('./ssl/certificates/ca-crt.pem')) {
+        log.info('No SSL certificates found, generating new ones...');
+        const result = sslConfig(null, null, true);
+        log.info(`[ chalPassword ] ${result.chalPassword}`);
+        log.info(`[ outPassword ] ${result.outPassword}`);
+
+        log.info('Seeding database...');
+        initialPromise = () => baseSeed().then(() => {
+            log.info('Creating admin device...');
+            return addAdminDevice();
         });
-
-        console.log(sslConfig.stdout.toString());
     }
 
-    if (config.env === 'test') {
-        sslFilesPath.key  = sslFilesPath.key.replace('./ssl/', './ssl/test/');
-        sslFilesPath.cert = sslFilesPath.cert.replace('./ssl/', './ssl/test/');
-        sslFilesPath.ca   = sslFilesPath.ca.replace('./ssl/', './ssl/test/');
-    }
+    return initialPromise().then(() => {
+        if (config.env === 'test') {
+            sslFilesPath.key  = sslFilesPath.key.replace('certificates', 'templates');
+            sslFilesPath.cert = sslFilesPath.cert.replace('certificates', 'templates');
+            sslFilesPath.ca   = sslFilesPath.ca.replace('certificates', 'templates');
+        }
 
-    const server = https.createServer({
-        key               : fs.readFileSync(sslFilesPath.key),
-        cert              : fs.readFileSync(sslFilesPath.cert),
-        ca                : fs.readFileSync(sslFilesPath.ca),
-        requestCert       : true,
-        rejectUnauthorized: false
-    }, app);
+        const server = https.createServer({
+            key               : fs.readFileSync(sslFilesPath.key),
+            cert              : fs.readFileSync(sslFilesPath.cert),
+            ca                : fs.readFileSync(sslFilesPath.ca),
+            requestCert       : true,
+            rejectUnauthorized: false
+        }, app);
 
-    return new Promise((resolve, reject) => {
-        models.loadModels().then(() => {
+        return models.loadModels().then(() => new Promise((resolve, reject) => {
             log.info('Models loaded');
 
             server.listen(config.http.port, config.http.hostname, (err) => {
-                /* istanbul ignore if */
+                    /* istanbul ignore if */
                 if (err) {
                     return reject(err);
                 }
@@ -116,7 +120,7 @@ app.start = () => {
                 startSSE(server, app);
                 resolve();
             });
-        });
+        }));
     });
 };
 

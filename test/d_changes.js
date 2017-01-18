@@ -14,8 +14,8 @@ const fs          = require('fs');
  */
 function _EventSource(url, options) {
     return new EventSource(url, Object.assign({
-        cert              : fs.readFileSync('ssl/test/test-crt.pem'),
-        key               : fs.readFileSync('ssl/test/test-key.pem'),
+        cert              : fs.readFileSync('ssl/templates//test-crt.pem'),
+        key               : fs.readFileSync('ssl/templates//test-key.pem'),
         strictSSL         : false,
         rejectUnauthorized: false,
         headers           : {

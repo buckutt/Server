@@ -71,18 +71,20 @@ models.r
         try {
             fs.mkdirsSync(`./ssl/${deviceName}`);
 
-            outPassword  = fs.readFileSync('./ssl/ca.cnf', 'utf8').match(/output_password\s* = (\w*)/)[1];
-            chalPassword = fs.readFileSync('./ssl/server.cnf', 'utf8').match(/challengePassword\s* = (\w*)/)[1];
-            client       = fs.readFileSync('./ssl/example/client1.cnf', 'utf8')
+            outPassword  = fs.readFileSync('./ssl/certificates/ca.cnf', 'utf8')
+                .match(/output_password\s* = (\w*)/)[1];
+            chalPassword = fs.readFileSync('./ssl/certificates/server.cnf', 'utf8')
+                .match(/challengePassword\s* = (\w*)/)[1];
+            client       = fs.readFileSync('./ssl/certificates/example/client1.cnf', 'utf8')
                 .replace(/(challengePassword\s*= )(\w*)/, `$1${chalPassword}`)
                 .replace(/(CN\s*= )(\w*)/, `$1${deviceName}`);
 
-            fs.writeFileSync(`./ssl/${deviceName}/${deviceName}.cnf`, client, 'utf8');
+            fs.writeFileSync(`./ssl/certificates/${deviceName}/${deviceName}.cnf`, client, 'utf8');
         } catch (e) {
             return Promise.reject(new Error(e));
         }
 
-        const cwd = path.join(__dirname, '..', 'ssl', deviceName);
+        const cwd = path.join(__dirname, '..', 'ssl', 'certificates', deviceName);
 
         /* eslint-disable max-len */
         return exec(`openssl genrsa -out ${deviceName}-key.pem 4096`, { cwd })
@@ -92,7 +94,7 @@ models.r
             .then(() => exec(`openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"`, { cwd }));
         /* eslint-enable max-len */
     })
-    .then(() => exec(`openssl x509 -fingerprint -in ./ssl/${deviceName}/${deviceName}-crt.pem`))
+    .then(() => exec(`openssl x509 -fingerprint -in ./ssl/certificates/${deviceName}/${deviceName}-crt.pem`))
     .then((out) => {
         const fingerprint = out.match(/Fingerprint=(.*)/)[1].replace(/:/g, '');
 
@@ -104,7 +106,7 @@ models.r
         return models.PeriodPoint.filter({ Period_id: periodId, Point_id: pointId }).getJoin({ devices: true }).run()
             .then((res) => {
                 if (res.length === 0) {
-                    periodPoint = new models.PeriodPoint({});
+                    periodPoint         = new models.PeriodPoint({});
                     periodPoint.devices = [device];
                 } else {
                     periodPoint = res[0];

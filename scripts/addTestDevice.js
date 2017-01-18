@@ -12,10 +12,10 @@ const exec = childProcess.execAsync;
 const testPassword = 'test';
 
 // Create directory
-const cwd = path.join(__dirname, '..', 'ssl', 'test');
+const cwd = path.join(__dirname, '..', 'ssl', 'templates');
 
 try {
-    fs.mkdirsSync('./ssl/test');
+    fs.mkdirsSync('./ssl/certificates/templates');
 } catch (e) {
     console.error(e);
     process.exit(1);
@@ -27,15 +27,15 @@ function copyServer() {
 
     try {
         const server = fs
-            .readFileSync('./ssl/example/server.cnf', 'utf8')
+            .readFileSync('./ssl/templates/server.cnf', 'utf8')
             .replace(/(challengePassword\s*= )(\w*)/, `$1${testPassword}`);
         const ca = fs
-            .readFileSync('./ssl/example/ca.cnf', 'utf8')
+            .readFileSync('./ssl/templates/ca.cnf', 'utf8')
             .replace(/(challengePassword\s*= )(\w*)/, `$1${testPassword}`)
             .replace(/(output_password\s*= )(\w*)/, `$1${testPassword}`);
 
-        fs.writeFileSync('./ssl/test/server.cnf', server, 'utf8');
-        fs.writeFileSync('./ssl/test/ca.cnf', ca, 'utf8');
+        fs.writeFileSync('./ssl/templates/server.cnf', server, 'utf8');
+        fs.writeFileSync('./ssl/templates/ca.cnf', ca, 'utf8');
     } catch (e) {
         console.error(e);
         process.exit(1);
@@ -61,11 +61,12 @@ function copyClient() {
     log.info('Copying client files...');
 
     try {
-        const client = fs.readFileSync('./ssl/example/client1.cnf', 'utf8')
+        const client = fs
+            .readFileSync('./ssl/templates/client1.cnf', 'utf8')
             .replace(/(challengePassword\s*= )(\w*)/, `$1${testPassword}`)
             .replace(/(CN\s*= )(\w*)/, '$1test');
 
-        fs.writeFileSync('./ssl/test/test.cnf', client, 'utf8');
+        fs.writeFileSync('./ssl/templates/test.cnf', client, 'utf8');
     } catch (e) {
         console.error(e);
         process.exit(1);

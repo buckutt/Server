@@ -18,11 +18,13 @@
     "start": "node src/app",
     "startdb": "rethinkdb&",
     "stopdb": "killall rethinkdb -s SIGINT",
-    "seed": "node scripts/dataSeeds",
+    "dev:seed": "node scripts/dataSeeds",
     "lint": "eslint . --fix",
     "sslConfig": "node scripts/sslConfig",
     "addDevice": "node scripts/addDevice",
-    "addTestDevice": "rimraf ssl/test && node scripts/addTestDevice",
+    "addTestDevice": "node scripts/addTestDevice",
+    "addAdminDevice": "node scripts/addAdminDevice",
+    "seed": "node scripts/seed",
     "databaseAccess": "node -r ./scripts/databaseAccess"
   },
   "dependencies": {

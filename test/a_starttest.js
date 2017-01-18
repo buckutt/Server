@@ -11,7 +11,7 @@ describe('Should start the test application', () => {
     before(function (done) {
         this.timeout(0);
 
-        let sslDateResult = syncExec('openssl x509 -noout -enddate -in ssl/test/test-crt.pem').stdout;
+        let sslDateResult = syncExec('openssl x509 -noout -enddate -in ssl/templates//test-crt.pem').stdout;
         sslDateResult = sslDateResult.split('=').pop();
 
         let date = moment(sslDateResult, ['MMM D HH:mm:ss YYYY', 'MMM  D HH:mm:ss YYYY']);
@@ -49,9 +49,9 @@ describe('Should start the test application', () => {
     });
 });
 
-const certFile = fs.readFileSync('ssl/test/test-crt.pem');
-const keyFile  = fs.readFileSync('ssl/test/test-key.pem');
-const caFile   = fs.readFileSync('ssl/test/ca-crt.pem');
+const certFile = fs.readFileSync('ssl/templates//test-crt.pem');
+const keyFile  = fs.readFileSync('ssl/templates//test-key.pem');
+const caFile   = fs.readFileSync('ssl/templates//ca-crt.pem');
 
 const options  = {
     cert              : certFile,

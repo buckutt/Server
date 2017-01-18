@@ -6,5 +6,4 @@ config/*.json
 !config/rights.json
 !config/test.json
 !config/prod.json
-ssl/*
-!ssl/example
+ssl/certificates

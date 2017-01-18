@@ -21,7 +21,7 @@ const start = (p, cb) => {
 };
 
 const cmd = (withCoverage) ?
-    `cross-env NODE_ENV=test node ${istanbul} cover ${mocha} -- --sort --bail --timeout 5000` :
+    `cross-env NODE_ENV=test node ${istanbul} cover ${mocha} -x "scripts/**" -- --sort --bail --timeout 5000` :
     `cross-env NODE_ENV=test node ${mocha} --sort --bail --timeout 5000`;
 
 start(cmd, (testCode) => {
