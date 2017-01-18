@@ -11,7 +11,6 @@ const controllers    = require('./controllers');
 const models         = require('./models');
 const startSSE       = require('./sseServer');
 const logger         = require('./lib/log');
-const { pp }         = require('./lib/utils');
 const APIError       = require('./errors/APIError');
 const sslConfig      = require('../scripts/sslConfig');
 const baseSeed       = require('../scripts/seed');
@@ -33,7 +32,7 @@ app.use(cors({
     exposedHeaders: ['device', 'point', 'pointName', 'event', 'eventName'],
     origin        : true
 }));
-app.use(morgan('dev'));
+app.use(morgan(config.log.morganStyle, { stream: logger.stream }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(compression());
@@ -58,7 +57,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     if (!(err instanceof APIError)) {
         console.log(err.stack);
     } else {
-        log.error(pp(err));
+        log.error(err.message);
     }
 
     res

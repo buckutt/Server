@@ -22,11 +22,17 @@ function timestamp() {
  * @return {Object} A winston logger
  */
 module.exports = (moduleToUse) => {
-    const path = moduleToUse.filename
-        .split('/')
-        .slice(-2)
-        .join('/')
-        .split('.js')[0];
+    let path;
+
+    if (typeof moduleToUse === 'string') {
+        path = moduleToUse;
+    } else {
+        path = moduleToUse.filename
+            .split('/')
+            .slice(-2)
+            .join('/')
+            .split('.js')[0];
+    }
 
     const logger = new winston.Logger({ transports: [] });
 
@@ -55,4 +61,10 @@ module.exports = (moduleToUse) => {
     }
 
     return logger;
+};
+
+module.exports.stream = {
+    write(message) {
+        module.exports('express').debug(message);
+    }
 };

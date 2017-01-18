@@ -16,6 +16,7 @@ const router = new express.Router();
 router.delete('/:model/:id', (req, res, next) => {
     const queryLog = `${req.Model}.get(${req.params.id}).getJoin(${req.query.embed})`;
     log.info(queryLog);
+
     // First, get the model
     req.Model
         .get(req.params.id)
