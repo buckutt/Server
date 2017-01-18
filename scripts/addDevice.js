@@ -3,8 +3,10 @@ const fs           = require('fs-extra');
 const inquirer     = require('inquirer');
 const childProcess = require('child_process');
 const Promise      = require('bluebird');
-const status       = require('elegant-status');
+const logger       = require('../src/lib/log');
 const models       = require('../src/models');
+
+const log = logger(module);
 
 Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
@@ -14,10 +16,6 @@ let points     = [];
 let deviceName = '';
 let pointId;
 let periodId;
-
-// status
-let generate;
-let insert;
 
 models.r
     .table('Period')
@@ -66,9 +64,9 @@ models.r
         let outPassword  = '';
         let chalPassword = '';
 
-        const copy = status('Copying files...');
+        log.info('Copying files...');
 
-        generate = status('Generating certificates...');
+        log.info('Generating certificates...');
 
         try {
             fs.mkdirsSync(`./ssl/${deviceName}`);
@@ -80,9 +78,7 @@ models.r
                 .replace(/(CN\s*= )(\w*)/, `$1${deviceName}`);
 
             fs.writeFileSync(`./ssl/${deviceName}/${deviceName}.cnf`, client, 'utf8');
-            copy(true);
         } catch (e) {
-            copy(false);
             return Promise.reject(new Error(e));
         }
 
@@ -96,17 +92,11 @@ models.r
             .then(() => exec(`openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"`, { cwd }));
         /* eslint-enable max-len */
     })
-    .catch((e) => {
-        generate(false);
-        return Promise.reject(new Error(e));
-    })
     .then(() => exec(`openssl x509 -fingerprint -in ./ssl/${deviceName}/${deviceName}-crt.pem`))
     .then((out) => {
         const fingerprint = out.match(/Fingerprint=(.*)/)[1].replace(/:/g, '');
 
-        generate(true);
-
-        insert = status('Inserting into database...');
+        log.info('Inserting into database...');
 
         let periodPoint;
         const device = new models.Device({ name: deviceName, fingerprint });
@@ -132,18 +122,12 @@ models.r
         .then((point) => {
             periodPoint.point = point;
             return periodPoint.saveAll();
-        })
-        .catch((e) => {
-            insert(false);
-            return Promise.reject(new Error(e));
         });
     })
     .then(() => {
-        insert(true);
         process.exit(0);
     })
     .catch((err) => {
-        generate(false);
-        console.log(err.stack);
+        console.log(err);
         process.exit(1);
     });

@@ -3,8 +3,10 @@ const fs           = require('fs-extra');
 const inquirer     = require('inquirer');
 const childProcess = require('child_process');
 const Promise      = require('bluebird');
-const status       = require('elegant-status');
+const logger       = require('../src/lib/log');
 const randomstring = require('randomstring');
+
+const log = logger(module);
 
 let prompter;
 
@@ -40,21 +42,17 @@ Promise.promisifyAll(childProcess);
 const exec = childProcess.execAsync;
 
 // status
-const copy = status('Copying files...');
-let generate;
-let write;
+log.info('Copying files...');
 
 try {
     fs.copySync('./ssl/example/ca.cnf', './ssl/ca.cnf');
     fs.copySync('./ssl/example/server.cnf', './ssl/server.cnf');
-    copy(true);
 } catch (e) {
-    copy(false);
     throw new Error(e);
 }
 
 prompter.then((answer) => {
-    write = status('Updating files...');
+    log.info('Updating files...');
 
     try {
         const server = fs.readFileSync('./ssl/server.cnf', 'utf8')
@@ -65,13 +63,11 @@ prompter.then((answer) => {
 
         fs.writeFileSync('./ssl/server.cnf', server, 'utf8');
         fs.writeFileSync('./ssl/ca.cnf', ca, 'utf8');
-        write(true);
     } catch (e) {
-        write(false);
         return Promise.reject(new Error(e));
     }
 
-    generate = status('Generating certificates...');
+    log.info('Generating certificates...');
 
     const cwd = path.join(__dirname, '..', 'ssl');
 
@@ -83,11 +79,9 @@ prompter.then((answer) => {
     /* eslint-enable max-len */
 })
 .then(() => {
-    generate(true);
     process.exit(0);
 })
 .catch((err) => {
-    generate(false);
-    console.log(err.stack);
+    console.log(err);
     process.exit(1);
 });
