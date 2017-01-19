@@ -85,10 +85,14 @@ app.start = () => {
         log.info(`[ outPassword ] ${result.outPassword}`);
 
         log.info('Seeding database...');
-        initialPromise = () => baseSeed().then(() => {
-            log.info('Creating admin device...');
-            return addAdminDevice();
-        });
+        initialPromise = () => baseSeed()
+            .then(() => {
+                log.info('Creating admin device...');
+                return addAdminDevice();
+            })
+            .then((adminPassword) => {
+                log.info(`[ Admin .p12 password] ${adminPassword}`)
+            });
     }
 
     return initialPromise().then(() => {

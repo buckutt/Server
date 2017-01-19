@@ -64,8 +64,7 @@ function setDeviceConfig(out) {
         .then((point) => {
             periodPoint.point = point;
             return periodPoint.saveAll();
-        })
-        .catch(e => Promise.reject(e));
+        });
 }
 
 function copyClient() {
@@ -113,7 +112,8 @@ function genClient() {
 function addAdminDevice() {
     return Promise.resolve(copyClient())
         .then(() => genClient())
-        .then(out => setDeviceConfig(out));
+        .then(out => setDeviceConfig(out))
+        .then(() => adminPassword);
 }
 
 module.exports = addAdminDevice;
@@ -122,11 +122,11 @@ module.exports = addAdminDevice;
 if (require.main === module) {
     addAdminDevice()
         .then(() => {
-            console.log(`[ admin p12 password ] ${adminPassword}`);
+            log.info(`[ admin p12 password ] ${adminPassword}`);
             process.exit(0);
         })
         .catch((e) => {
-            console.log(e);
+            log.error(e);
             process.exit(1);
         });
 }
