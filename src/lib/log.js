@@ -47,12 +47,13 @@ module.exports = (moduleToUse) => {
         });
     }
 
+    /* istanbul ignore if */
     if (config.log.file !== 'none') {
         logger.add(winston.transports.File, {
             timestamp,
             name       : 'file',
             level      : config.log.file,
-            filename   : 'server.log',
+            filename   : 'log/server.log',
             maxsize    : MAX_LOG_FILE_SIZE,
             prettyPrint: false,
             colorize   : false,

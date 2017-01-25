@@ -1,4 +1,7 @@
 const models = require('../src/models');
+const logger = require('../src/lib/log');
+
+const log = logger(module);
 
 // Shim for values
 Object.values = obj => Object.keys(obj).map(key => obj[key]);
@@ -61,11 +64,11 @@ module.exports = seed;
 if (require.main === module) {
     seed()
         .then(() => {
-            console.log('Inserted documents');
+            log.info('Inserted documents');
             process.exit(0);
         })
         .catch((e) => {
-            console.log(e);
+            log.error(e);
             process.exit(1);
         });
 }

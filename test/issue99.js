@@ -44,7 +44,6 @@ describe('Issue #99', () => {
 
                 unirest.get(`https://localhost:3006/rights/${rid}?embed=${embed}`)
                     .end((response2) => {
-                        console.log('INITIAL', initial);
                         assert.equal(initial + 1, response2.body.users.length);
 
                         unirest.delete(`https://localhost:3006/rights/${rid}/users/${process.env.GJId}`)

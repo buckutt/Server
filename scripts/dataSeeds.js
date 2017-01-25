@@ -1,4 +1,7 @@
 const models = require('../src/models');
+const logger = require('../src/lib/log');
+
+const log = logger(module);
 
 // Shim for values
 Object.values = obj => Object.keys(obj).map(key => obj[key]);
@@ -810,20 +813,25 @@ const seeder = {
     }
 };
 
-models.loadModels().then(() => {
-    const raw = seeder.raw();
+// Entry point
+if (require.main === module) {
+    models.loadModels().then(() => {
+        const raw = seeder.raw();
 
-    Promise
-        .all(raw.all.map(document => document.save()))
-        .then(() => {
-            console.log('Inserted documents');
-            return Promise.all(seeder.rels(raw.data));
-        })
-        .then(() => seeder.post(raw.data))
-        .then(() => {
-            console.log('Inserted relationships. Press Ctrl+C to exit');
-        })
-        .catch((err) => {
-            console.log(err.stack);
-        });
-});
+        Promise
+            .all(raw.all.map(document => document.save()))
+            .then(() => {
+                log.info('Inserted documents');
+                return Promise.all(seeder.rels(raw.data));
+            })
+            .then(() => seeder.post(raw.data))
+            .then(() => {
+                log.info('Inserted relationships');
+                process.exit(0);
+            })
+            .catch((err) => {
+                log.error(err.stack);
+                process.exit(1);
+            });
+    });
+}

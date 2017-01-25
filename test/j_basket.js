@@ -26,7 +26,6 @@ describe('Basket', () => {
                 }
             ])
             .end((response) => {
-                console.log('ERR IS', response.body);
                 assert.equal(200, response.code);
                 assert.equal(100, response.body.newCredit);
                 done();
@@ -272,7 +271,7 @@ describe('Basket', () => {
         });
 
         it('should update reloads', () => {
-            console.log(gj.reloads);
+            assert.equal(3, gj.reloads.length);
         });
     });
 });

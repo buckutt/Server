@@ -1,9 +1,10 @@
 node_modules/
 rethinkdb_data/
 coverage/
-*.log
+log/
 config/*.json
 !config/rights.json
 !config/test.json
 !config/prod.json
+!config/dev.json
 ssl/certificates

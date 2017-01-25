@@ -1,8 +1,8 @@
 {
     "log": {
         "console": "debug",
-        "file": "info",
-        "morganStyle": "combined"
+        "file": "none",
+        "morganStyle": "dev"
     },
     "http": {
         "host": "0.0.0.0",
@@ -13,7 +13,7 @@
         "secret": "NgWlfDWCbX4mPuxau1FmG3TPLHm7iglEA3mp1f8nrlT7zKDn8ZZAwWQOqUArvQBFfMEbFSAMnUHzgQW1FkczTiZYjPZWqdseNtk2"
     },
     "db": {
-        "host": "database",
-        "name": "buckless_server"
+        "host": "localhost",
+        "name": "buckless_dev"
     }
 }

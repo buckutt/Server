@@ -92,7 +92,14 @@ module.exports = (httpServer, app) => {
                 });
             })
             .catch((err) => {
-                log.error(err.message);
+                /* istanbul ignore if */
+                if (!(err instanceof APIError)) {
+                    // Internal error
+                    log.error(err.stack);
+                } else {
+                    log.error(err.message);
+                }
+
                 return client.send(`Error: ${err.message}`);
             });
     });

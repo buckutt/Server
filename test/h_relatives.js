@@ -75,7 +75,6 @@ describe('Relatives', () => {
             unirest.post(`https://localhost:3006/groups/${gid}/foo`)
                 .send({ id: gid })
                 .end((response2) => {
-                    console.log(response2.body);
                     assert.equal(404, response2.code);
 
                     done();

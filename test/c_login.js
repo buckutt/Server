@@ -210,8 +210,6 @@ describe('Login', () => {
                 assert.equal(200, response.code);
                 assert.equal(true, response.body.hasOwnProperty('user'));
 
-                console.log(response.body.user);
-
                 const user  = response.body.user;
                 const token = response.body.token;
 

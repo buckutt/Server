@@ -21,8 +21,6 @@ describe('Should start the test application', () => {
             .add(moment().utcOffset(), 'minutes')
             .utcOffset(0);
 
-        console.log(`[Checking SSL Date] ${date.toString()}`);
-
         if (date.isBefore(moment())) {
             throw new Error('Test SSL certificates are outdated');
         }

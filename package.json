@@ -9,22 +9,17 @@
   ],
   "license": "MIT",
   "scripts": {
-    "cleardb": "rimraf rethinkdb_data",
-    "test": "npm run test:coverage",
-    "test:nocoverage": "node scripts/test",
-    "test:coverage": "cross-env NODE_ENV=test node scripts/test --coverage",
-    "coveralls": "cat ./coverage/lcov.info | coveralls",
     "start": "node src/app",
-    "startdb": "rethinkdb&",
-    "stopdb": "killall rethinkdb -s SIGINT",
-    "dev:seed": "node scripts/dataSeeds",
+    "test": "npm run test:coverage",
+    "test:nocoverage": "cross-env NODE_ENV=test node scripts/test",
+    "test:coverage": "cross-env NODE_ENV=test node scripts/test --coverage",
+    "dev:seed": "cross-env NODE_ENV=dev node scripts/dataSeeds",
     "lint": "eslint . --fix",
     "sslConfig": "node scripts/sslConfig",
     "addDevice": "node scripts/addDevice",
     "addTestDevice": "node scripts/addTestDevice",
     "addAdminDevice": "node scripts/addAdminDevice",
-    "seed": "node scripts/seed",
-    "databaseAccess": "node -r ./scripts/databaseAccess"
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
     "bcryptjs": "^2.3.0",
