@@ -231,7 +231,7 @@ describe('Basket', () => {
                 }
             ])
             .end((response) => {
-                assert.equal(200, response.code);
+                assert.equal(400, response.code);
                 done();
             });
     });

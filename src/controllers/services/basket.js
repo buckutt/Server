@@ -77,6 +77,17 @@ router.post('/services/basket', (req, res, next) => {
 
     queryLog += `User ${req.buyer.id} `;
 
+    const newCredit = req.buyer.credit - totalCost;
+
+    if (isNaN(newCredit)) {
+        return res
+            .status(400)
+            .json({
+                newCredit: req.buyer.credit
+            })
+            .end();
+    }
+
     req.body.forEach((item) => {
         if (item.type === 'purchase') {
             // Purchases
@@ -129,17 +140,6 @@ router.post('/services/basket', (req, res, next) => {
             reloads.push(reload.save());
         }
     });
-
-    const newCredit = req.buyer.credit - totalCost;
-
-    if (isNaN(newCredit)) {
-        return res
-            .status(200)
-            .json({
-                newCredit: req.buyer.credit
-            })
-            .end();
-    }
 
     queryLog += `and update credit to ${newCredit}`;
     const updateCredit = thinky.r.table('User')
