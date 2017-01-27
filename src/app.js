@@ -11,6 +11,7 @@ const controllers    = require('./controllers');
 const models         = require('./models');
 const startSSE       = require('./sseServer');
 const logger         = require('./lib/log');
+const thinky         = require('./lib/thinky');
 const APIError       = require('./errors/APIError');
 const sslConfig      = require('../scripts/sslConfig');
 const baseSeed       = require('../scripts/seed');
@@ -45,7 +46,6 @@ app.use(controllers);
 /**
  * Error handling
  */
-
 // 404
 app.use((req, res, next) => {
     next(new APIError(404, 'Not Found'));
@@ -73,29 +73,35 @@ app.start = () => {
         ca  : './ssl/certificates/ca-crt.pem'
     };
 
-    let initialPromise = () => Promise.resolve();
+    let startingQueue = thinky.dbReady()
+        .then(() => models.loadModels());
 
     /* istanbul ignore if */
     if (!fs.existsSync('./ssl/certificates/server-key.pem') ||
         !fs.existsSync('./ssl/certificates/server-crt.pem') ||
         !fs.existsSync('./ssl/certificates/ca-crt.pem')) {
-        log.info('No SSL certificates found, generating new ones...');
-        const result = sslConfig(null, null, true);
-        log.info(`[ chalPassword ] ${result.chalPassword}`);
-        log.info(`[ outPassword ] ${result.outPassword}`);
+        startingQueue
+            .then(() => {
+                log.info('No SSL certificates found, generating new ones...');
+                const result = sslConfig(null, null, true);
+                log.info(`[ chalPassword ] ${result.chalPassword}`);
+                log.info(`[ outPassword ] ${result.outPassword}`);
+            })
+            .then(() => {
+                log.info('Seeding database...');
 
-        log.info('Seeding database...');
-        initialPromise = () => baseSeed()
+                return baseSeed();
+            })
             .then(() => {
                 log.info('Creating admin device...');
                 return addAdminDevice();
             })
             .then((adminPassword) => {
-                log.info(`[ Admin .p12 password] ${adminPassword}`)
+                log.info(`[ admin .p12 password ] ${adminPassword}`)
             });
     }
 
-    return initialPromise().then(() => {
+    return startingQueue.then(() => {
         if (config.env === 'test') {
             sslFilesPath.key  = sslFilesPath.key.replace('certificates', 'templates');
             sslFilesPath.cert = sslFilesPath.cert.replace('certificates', 'templates');
@@ -110,9 +116,7 @@ app.start = () => {
             rejectUnauthorized: false
         }, app);
 
-        return models.loadModels().then(() => new Promise((resolve, reject) => {
-            log.info('Models loaded');
-
+        return new Promise((resolve, reject) => {
             server.listen(config.http.port, config.http.hostname, (err) => {
                     /* istanbul ignore if */
                 if (err) {
@@ -121,9 +125,10 @@ app.start = () => {
 
                 log.info('Server is listening %s:%d', config.http.host, config.http.port);
                 startSSE(server, app);
+
                 resolve();
             });
-        }));
+        });
     });
 };
 

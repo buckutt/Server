@@ -55,7 +55,7 @@ const seeder = () => {
 };
 
 function seed() {
-    return models.loadModels().then(() => Promise.all(seeder().map(document => document.save())));
+    return Promise.all(seeder().map(document => document.save()));
 }
 
 module.exports = seed;
