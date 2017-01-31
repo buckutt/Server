@@ -23,6 +23,15 @@ const seeder = () => {
         name: 'Chèque'
     });
 
+    /* Events */
+    const eventDefault = new models.Event({
+        name : 'Défaut',
+        config: {
+            minReload    : 100,
+            maxPerAccount: 10000
+        }
+    });
+
     /* Periods */
     const periodEternity = new models.Period({
         name : 'Éternité',
@@ -34,6 +43,10 @@ const seeder = () => {
     const pointInternet = new models.Point({
         name: 'Internet'
     });
+
+    const events = {
+        eventDefault
+    };
 
     const periods = {
         periodEternity
@@ -49,22 +62,60 @@ const seeder = () => {
         meanofpaymentCheque
     };
 
-    return Object.values(periods)
+    const all = Object.values(events)
+        .concat(Object.values(periods))
         .concat(Object.values(points))
         .concat(Object.values(meansOfPayment));
+
+    const data = {
+        events,
+        periods,
+        points,
+        meansOfPayment
+    };
+
+    return {
+        data,
+        all
+    };
 };
 
+function seeds(all) {
+    return Promise.all(all.map(document => document.save()));
+}
+
+function rels(data) {
+    const arr = [];
+
+    /* Periods - Relationships : event */
+    data.periods.periodEternity.Event_id = data.events.eventDefault.id;
+    arr.push(data.periods.periodEternity.save());
+
+    return Promise.all(arr);
+}
+
 function seed() {
-    return Promise.all(seeder().map(document => document.save()));
+    const raw = seeder();
+
+    return seeds(raw.all)
+        .then(() => rels(raw.data));
 }
 
 module.exports = seed;
 
 // Entry point
 if (require.main === module) {
-    seed()
+    const raw = seeder();
+
+    seeds(raw.all)
         .then(() => {
             log.info('Inserted documents');
+
+            return rels(raw.data);
+        })
+        .then(() => {
+            log.info('Inserted relationships');
+
             process.exit(0);
         })
         .catch((e) => {
