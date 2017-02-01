@@ -44,6 +44,29 @@ const seeder = () => {
         name: 'Internet'
     });
 
+    /* Users */
+    const defaultAdmin = new models.User({
+        firstname  : 'Admin',
+        lastname   : 'Admin',
+        nickname   : 'Admin',
+        pin        : '$2a$12$zkBo1ZCnnRuGYo6TC7fpgOYb8zACrnSJSTUrFdrPwMKQ/1s4xOauO',
+        password   : '$2a$12$wPVfP2StwfdJ.IfPVdXfZOGCiDvQDYRnTrLzrtE8gDP1mEmrS0lj6',
+        mail       : 'admin@buckless.com',
+        credit     : 0,
+        isTemporary: false
+    });
+
+    /* MeanOfLogin */
+    const defaultMol = new models.MeanOfLogin({
+        type: 'etuMail',
+        data: 'admin@buckless.com'
+    });
+
+    /* Rights */
+    const rightAdmin = new models.Right({
+        name: 'admin'
+    });
+
     const events = {
         eventDefault
     };
@@ -62,16 +85,34 @@ const seeder = () => {
         meanofpaymentCheque
     };
 
+    const users = {
+        defaultAdmin
+    };
+
+    const meansOfLogin = {
+        defaultMol
+    };
+
+    const rights = {
+        rightAdmin
+    };
+
     const all = Object.values(events)
         .concat(Object.values(periods))
         .concat(Object.values(points))
-        .concat(Object.values(meansOfPayment));
+        .concat(Object.values(meansOfPayment))
+        .concat(Object.values(users))
+        .concat(Object.values(meansOfLogin))
+        .concat(Object.values(rights));
 
     const data = {
         events,
         periods,
         points,
-        meansOfPayment
+        meansOfPayment,
+        users,
+        meansOfLogin,
+        rights
     };
 
     return {
@@ -87,9 +128,20 @@ function seeds(all) {
 function rels(data) {
     const arr = [];
 
+    /* MeansOfLogin - Relationships : user */
+    data.meansOfLogin.defaultMol.User_id = data.users.defaultAdmin.id;
+    arr.push(data.meansOfLogin.defaultMol.save());
+
     /* Periods - Relationships : event */
     data.periods.periodEternity.Event_id = data.events.eventDefault.id;
     arr.push(data.periods.periodEternity.save());
+
+    /* Rights - Relationships : period, users */
+    data.rights.rightAdmin.Period_id = data.periods.periodEternity.id;
+    data.rights.rightAdmin.users     = [data.users.defaultAdmin];
+    arr.push(data.rights.rightAdmin.saveAll({
+        users: true
+    }));
 
     return Promise.all(arr);
 }
