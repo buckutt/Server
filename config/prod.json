@@ -1,7 +1,21 @@
 {
     "log": {
-        "console": "debug",
-        "file": "info",
+        "console": {
+            "level": "debug"
+        },
+        "file": {
+            "level": "info"
+        },
+        "graylog": {
+            "level": "debug",
+            "gelfPro": {
+                "adapterName": "tcp",
+                "adapterOptions": {
+                    "host": "logs.buckless.com",
+                    "port": 12900
+                }
+            }
+        },
         "morganStyle": "combined"
     },
     "http": {

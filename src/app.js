@@ -73,7 +73,7 @@ app.start = () => {
         ca  : './ssl/certificates/ca-crt.pem'
     };
 
-    let startingQueue = thinky.dbReady()
+    const startingQueue = thinky.dbReady()
         .then(() => models.loadModels());
 
     /* istanbul ignore if */
@@ -97,7 +97,7 @@ app.start = () => {
                 return addAdminDevice();
             })
             .then((adminPassword) => {
-                log.info(`[ admin .p12 password ] ${adminPassword}`)
+                log.info(`[ admin .p12 password ] ${adminPassword}`);
             });
     }
 

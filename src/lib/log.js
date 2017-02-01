@@ -1,6 +1,8 @@
-const config   = require('../../config');
-const { pad2 } = require('./utils');
-const winston  = require('winston');
+const mkdirp            = require('mkdirp');
+const winston           = require('winston');
+const WinstonTcpGraylog = require('winston-tcp-graylog');
+const config            = require('../../config');
+const { pad2 }          = require('./utils');
 
 const MAX_LOG_FILE_SIZE = 10 * 1000 * 1000;
 
@@ -34,32 +36,53 @@ module.exports = (moduleToUse) => {
             .split('.js')[0];
     }
 
-    const logger = new winston.Logger({ transports: [] });
+    const transports = [];
 
     if (config.log.console !== 'none') {
-        logger.add(winston.transports.Console, {
+        const consoleTransport = new winston.transports.Console({
             timestamp,
-            level      : config.log.console,
+            level      : config.log.console.level,
             name       : 'console',
             prettyPrint: true,
             colorize   : true,
             label      : path
         });
+
+        transports.push(consoleTransport);
     }
 
     /* istanbul ignore if */
     if (config.log.file !== 'none') {
-        logger.add(winston.transports.File, {
+        mkdirp.sync('./log');
+
+        const fileTransport = new winston.transports.File({
             timestamp,
             name       : 'file',
-            level      : config.log.file,
-            filename   : 'log/server.log',
+            level      : config.log.file.level,
+            filename   : './log/server.log',
             maxsize    : MAX_LOG_FILE_SIZE,
             prettyPrint: false,
             colorize   : false,
             label      : path
         });
+
+        transports.push(fileTransport);
     }
+
+    // Graylog2
+    /* istanbul ignore if */
+    if (config.log.graylog && config.log.graylog.gelfPro) {
+        const graylogTransport = new WinstonTcpGraylog(config.log.graylog);
+
+        graylogTransport.on('error', () => {
+            // internal WinstonTcpGraylog problems
+            console.error('Warning: Graylog connection lost');
+        });
+
+        transports.push(graylogTransport);
+    }
+
+    const logger = new winston.Logger({ transports });
 
     return logger;
 };

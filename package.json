@@ -13,6 +13,7 @@
     "test": "npm run test:coverage",
     "test:nocoverage": "cross-env NODE_ENV=test node scripts/test",
     "test:coverage": "cross-env NODE_ENV=test node scripts/test --coverage",
+    "dev": "cross-env NODE_ENV=dev nodemon src/app.js",
     "dev:seed": "cross-env NODE_ENV=dev node scripts/dataSeeds",
     "lint": "eslint . --fix",
     "sslConfig": "node scripts/sslConfig",
@@ -43,7 +44,8 @@
     "sse": "github:gjuchault/sse.js",
     "sync-exec": "^0.6.2",
     "thinky": "^2.2.4",
-    "winston": "^2.1.1"
+    "winston": "^2.1.1",
+    "winston-tcp-graylog": "^1.0.10"
   },
   "devDependencies": {
     "coveralls": "^2.11.6",
@@ -55,6 +57,7 @@
     "inquirer": "github:SBoudrias/Inquirer.js",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",
+    "nodemon": "^1.11.0",
     "unirest": "github:mashape/unirest-nodejs"
   }
 }
