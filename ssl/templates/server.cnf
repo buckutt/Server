@@ -12,7 +12,7 @@ ST                     = MA
 L                      = Boston
 O                      = Example Co
 OU                     = techops
-CN                     = localhost
+CN                     = *.buckless.com
 emailAddress           = certs@example.com
 
 [ req_attributes ]

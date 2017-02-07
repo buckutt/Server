@@ -5,6 +5,7 @@ const compression    = require('compression');
 const cookieParser   = require('cookie-parser');
 const express        = require('express');
 const https          = require('https');
+const http           = require('http');
 const morgan         = require('morgan');
 const config         = require('../config');
 const controllers    = require('./controllers');
@@ -68,8 +69,8 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
 
 app.start = () => {
     const sslFilesPath = {
-        key : './ssl/certificates/server-key.pem',
-        cert: './ssl/certificates/server-crt.pem',
+        key : './ssl/certificates/server/server-key.pem',
+        cert: './ssl/certificates/server/server-crt.pem',
         ca  : './ssl/certificates/ca-crt.pem'
     };
 
@@ -77,8 +78,8 @@ app.start = () => {
         .then(() => models.loadModels());
 
     /* istanbul ignore if */
-    if (!fs.existsSync('./ssl/certificates/server-key.pem') ||
-        !fs.existsSync('./ssl/certificates/server-crt.pem') ||
+    if (!fs.existsSync('./ssl/certificates/server/server-key.pem') ||
+        !fs.existsSync('./ssl/certificates/server/server-crt.pem') ||
         !fs.existsSync('./ssl/certificates/ca-crt.pem')) {
         startingQueue
             .then(() => {
@@ -103,12 +104,12 @@ app.start = () => {
 
     return startingQueue.then(() => {
         if (config.env === 'test') {
-            sslFilesPath.key  = sslFilesPath.key.replace('certificates', 'templates');
-            sslFilesPath.cert = sslFilesPath.cert.replace('certificates', 'templates');
+            sslFilesPath.key  = sslFilesPath.key.replace('certificates/server', 'templates');
+            sslFilesPath.cert = sslFilesPath.cert.replace('certificates/server', 'templates');
             sslFilesPath.ca   = sslFilesPath.ca.replace('certificates', 'templates');
         }
 
-        const server = https.createServer({
+        const server = process.env.NODE_ENV === 'prod' ? http.createServer(app) : https.createServer({
             key               : fs.readFileSync(sslFilesPath.key),
             cert              : fs.readFileSync(sslFilesPath.cert),
             ca                : fs.readFileSync(sslFilesPath.ca),

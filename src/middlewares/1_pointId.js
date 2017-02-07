@@ -7,14 +7,12 @@ const APIError = require('../errors/APIError');
  * @param {Function} next Next middleware
  */
 module.exports = (req, res, next) => {
-    const fingerprint = req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
-
     const Device = req.app.locals.models.Device;
 
     let device;
 
     Device
-        .getAll(fingerprint, {
+        .getAll(req.fingerprint, {
             index: 'fingerprint'
         })
         .getJoin({
@@ -29,7 +27,7 @@ module.exports = (req, res, next) => {
         .then((devices) => {
             /* istanbul ignore if */
             if (devices.length === 0 || devices[0].periodPoints.length === 0) {
-                return next(new APIError(404, 'Device not found', fingerprint));
+                return next(new APIError(404, 'Device not found', req.fingerprint));
             }
 
             device = devices[0];
