@@ -89,6 +89,6 @@ module.exports = (moduleToUse) => {
 
 module.exports.stream = {
     write(message) {
-        module.exports('express').debug(message);
+        module.exports('express').info(message);
     }
 };

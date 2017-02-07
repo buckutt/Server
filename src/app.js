@@ -1,22 +1,22 @@
-const fs             = require('fs');
-const cors           = require('cors');
-const bodyParser     = require('body-parser');
-const compression    = require('compression');
-const cookieParser   = require('cookie-parser');
-const express        = require('express');
-const https          = require('https');
-const http           = require('http');
-const morgan         = require('morgan');
-const config         = require('../config');
-const controllers    = require('./controllers');
-const models         = require('./models');
-const startSSE       = require('./sseServer');
-const logger         = require('./lib/log');
-const thinky         = require('./lib/thinky');
-const APIError       = require('./errors/APIError');
-const sslConfig      = require('../scripts/sslConfig');
-const baseSeed       = require('../scripts/seed');
-const addAdminDevice = require('../scripts/addAdminDevice');
+const fs           = require('fs');
+const cors         = require('cors');
+const bodyParser   = require('body-parser');
+const compression  = require('compression');
+const cookieParser = require('cookie-parser');
+const express      = require('express');
+const http         = require('http');
+const https        = require('https');
+const morgan       = require('morgan');
+const config       = require('../config');
+const controllers  = require('./controllers');
+const models       = require('./models');
+const startSSE     = require('./sseServer');
+const logger       = require('./lib/log');
+const thinky       = require('./lib/thinky');
+const APIError     = require('./errors/APIError');
+const sslConfig    = require('../scripts/sslConfig');
+const baseSeed     = require('../scripts/seed');
+const addDevice    = require('../scripts/addDevice').addDevice;
 
 const log = logger(module);
 
@@ -58,7 +58,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     if (!(err instanceof APIError)) {
         log.error(err.stack);
     } else {
-        log.error(err.message);
+        log.error(err.message, err.details);
     }
 
     res
@@ -95,7 +95,8 @@ app.start = () => {
             })
             .then(() => {
                 log.info('Creating admin device...');
-                return addAdminDevice();
+
+                return addDevice({ admin: true });
             })
             .then((adminPassword) => {
                 log.info(`[ admin .p12 password ] ${adminPassword}`);
@@ -103,12 +104,6 @@ app.start = () => {
     }
 
     return startingQueue.then(() => {
-        if (config.env === 'test') {
-            sslFilesPath.key  = sslFilesPath.key.replace('certificates/server', 'templates');
-            sslFilesPath.cert = sslFilesPath.cert.replace('certificates/server', 'templates');
-            sslFilesPath.ca   = sslFilesPath.ca.replace('certificates', 'templates');
-        }
-
         const server = process.env.NODE_ENV === 'prod' ? http.createServer(app) : https.createServer({
             key               : fs.readFileSync(sslFilesPath.key),
             cert              : fs.readFileSync(sslFilesPath.cert),

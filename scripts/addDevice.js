@@ -1,135 +1,208 @@
-const path         = require('path');
 const fs           = require('fs-extra');
-const inquirer     = require('inquirer');
-const childProcess = require('child_process');
+const path         = require('path');
+const execSync     = require('child_process').execSync;
 const Promise      = require('bluebird');
-const logger       = require('../src/lib/log');
+const inquirer     = require('inquirer');
+const randomstring = require('randomstring');
 const models       = require('../src/models');
+const logger       = require('../src/lib/log');
 
 const log = logger(module);
 
-Promise.promisifyAll(childProcess);
-const exec = childProcess.execAsync;
+function createDir(opts) {
+    const cwd = path.join(__dirname, '..', 'ssl', 'certificates', opts.deviceName);
 
-let periods    = [];
-let points     = [];
-let deviceName = '';
-let pointId;
-let periodId;
+    try {
+        fs.mkdirsSync(cwd);
+    } catch (e) {
+        return Promise.reject(e);
+    }
 
-models.r
-    .table('Period')
-    .pluck('id', 'name')
-    .run()
-    .then((res) => {
-        periods = res;
+    return cwd;
+}
 
-        return models.r.table('Point').pluck('id', 'name').run();
-    })
-    .then((res) => {
-        points = res;
+function setDeviceConfig(opts, fingerprint) {
+    const device = new models.Device({ name: opts.deviceName, fingerprint });
+    let periodPoint;
 
-        return inquirer.prompt([
-            {
-                type   : 'input',
-                name   : 'name',
-                message: 'Device name :'
-            },
-            {
-                type   : 'list',
-                name   : 'point',
-                message: 'Default point :',
-                choices: points.map(point => `${point.name} - ${point.id}`)
-            },
-            {
-                type   : 'list',
-                name   : 'period',
-                message: 'Default period :',
-                choices: periods.map(period => `${period.name} - ${period.id}`)
-            },
-            {
-                type   : 'password',
-                name   : 'password',
-                message: 'SSL export password :'
+    log.info('Inserting device in database');
+
+    return models.PeriodPoint
+        .filter({ Period_id: opts.periodId, Point_id: opts.pointId })
+        .getJoin({ devices: true })
+        .run()
+        .then((res) => {
+            if (res.length === 0) {
+                periodPoint         = new models.PeriodPoint({});
+                periodPoint.devices = [device];
+            } else {
+                periodPoint = res[0];
+                periodPoint.devices.push(device);
             }
-        ]);
-    })
-    .then((answer) => {
-        pointId    = answer.point.split(' - ')[1];
-        periodId   = answer.period.split(' - ')[1];
-        deviceName = answer.name;
 
-        let client = '';
+            return models.Period.get(opts.periodId);
+        })
 
-        let outPassword  = '';
-        let chalPassword = '';
-
-        log.info('Copying files...');
-
-        log.info('Generating certificates...');
-
-        try {
-            fs.mkdirsSync(`./ssl/${deviceName}`);
-
-            outPassword  = fs.readFileSync('./ssl/certificates/ca.cnf', 'utf8')
-                .match(/output_password\s* = (\w*)/)[1];
-            chalPassword = fs.readFileSync('./ssl/certificates/server.cnf', 'utf8')
-                .match(/challengePassword\s* = (\w*)/)[1];
-            client       = fs.readFileSync('./ssl/certificates/example/client1.cnf', 'utf8')
-                .replace(/(challengePassword\s*= )(\w*)/, `$1${chalPassword}`)
-                .replace(/(CN\s*= )(\w*)/, `$1${deviceName}`);
-
-            fs.writeFileSync(`./ssl/certificates/${deviceName}/${deviceName}.cnf`, client, 'utf8');
-        } catch (e) {
-            return Promise.reject(new Error(e));
-        }
-
-        const cwd = path.join(__dirname, '..', 'ssl', 'certificates', deviceName);
-
-        /* eslint-disable max-len */
-        return exec(`openssl genrsa -out ${deviceName}-key.pem 4096`, { cwd })
-            .then(() => exec(`openssl req -new -config ${deviceName}.cnf -key ${deviceName}-key.pem -out ${deviceName}-csr.pem`, { cwd }))
-            .then(() => exec(`openssl x509 -req -extfile ${deviceName}.cnf -days 999 -passin "pass:${outPassword}" -in ${deviceName}-csr.pem -CA ../ca-crt.pem -CAkey ../ca-key.pem -CAcreateserial -out ${deviceName}-crt.pem`, { cwd }))
-            .then(() => exec(`openssl verify -CAfile ../ca-crt.pem ${deviceName}-crt.pem`, { cwd }))
-            .then(() => exec(`openssl pkcs12 -export -clcerts -in ${deviceName}-crt.pem -inkey ${deviceName}-key.pem -out ${deviceName}.p12 -password "pass:${answer.password}"`, { cwd }));
-        /* eslint-enable max-len */
-    })
-    .then(() => exec(`openssl x509 -fingerprint -in ./ssl/certificates/${deviceName}/${deviceName}-crt.pem`))
-    .then((out) => {
-        const fingerprint = out.match(/Fingerprint=(.*)/)[1].replace(/:/g, '');
-
-        log.info('Inserting into database...');
-
-        let periodPoint;
-        const device = new models.Device({ name: deviceName, fingerprint });
-
-        return models.PeriodPoint.filter({ Period_id: periodId, Point_id: pointId }).getJoin({ devices: true }).run()
-            .then((res) => {
-                if (res.length === 0) {
-                    periodPoint         = new models.PeriodPoint({});
-                    periodPoint.devices = [device];
-                } else {
-                    periodPoint = res[0];
-                    periodPoint.devices.push(device);
-                }
-
-                return models.Period.get(periodId);
-            }
-        )
         .then((period) => {
             periodPoint.period = period;
 
-            return models.Point.get(pointId);
+            return models.Point.get(opts.pointId);
         })
         .then((point) => {
             periodPoint.point = point;
             return periodPoint.saveAll();
         });
-    })
-    .then(() => {
-        process.exit(0);
-    })
-    .catch((err) => {
-        log.error(err);
-        process.exit(1);
-    });
+}
+
+function copyClient(opts, cwd) {
+    log.info('Copying client files...');
+
+    try {
+        const client = fs.readFileSync('./ssl/templates/client1.cnf', 'utf8')
+            .replace(/(challengePassword\s*= )(\w*)/, `$1${opts.password}`)
+            .replace(/(CN\s*= )(\w*)/, `$1${opts.deviceName}`);
+
+
+        fs.writeFileSync(path.join(cwd, `${opts.deviceName}.cnf`), client, 'utf8');
+    } catch (e) {
+        return Promise.reject(e);
+    }
+}
+
+function genClient(opts) {
+    log.info('Generating client certificates...');
+
+    let outPassword;
+    let out;
+
+    const cwd = createDir(opts);
+    copyClient(opts, cwd);
+
+    try {
+        outPassword = fs.readFileSync('./ssl/certificates/ca.cnf', 'utf8').match(/output_password\s* = (\w*)/)[1];
+    } catch (e) {
+        return Promise.reject(e);
+    }
+
+    try {
+        /* eslint-disable max-len */
+        execSync(`openssl genrsa -out ${opts.deviceName}-key.pem 4096`, { cwd });
+        execSync(`openssl req -new -config ${opts.deviceName}.cnf -key ${opts.deviceName}-key.pem -out ${opts.deviceName}-csr.pem`, { cwd });
+        execSync(`openssl x509 -req -extfile ${opts.deviceName}.cnf -days 999 -passin "pass:${outPassword}" -in ${opts.deviceName}-csr.pem -CA ../ca-crt.pem -CAkey ../ca-key.pem -CAcreateserial -out ${opts.deviceName}-crt.pem`, { cwd });
+        execSync(`openssl verify -CAfile ../ca-crt.pem ${opts.deviceName}-crt.pem`, { cwd });
+        execSync(`openssl pkcs12 -export -clcerts -in ${opts.deviceName}-crt.pem -inkey ${opts.deviceName}-key.pem -out ${opts.deviceName}.p12 -password "pass:${opts.password}"`, { cwd });
+        out = execSync(`openssl x509 -fingerprint -in ./ssl/certificates/${opts.deviceName}/${opts.deviceName}-crt.pem`);
+        /* eslint-enable max-len */
+    } catch (e) {
+        return Promise.reject(e);
+    }
+
+    return {
+        fingerprint: out.toString().match(/Fingerprint=(.*)/)[1].replace(/:/g, ''),
+        fileName   : path.join(cwd, `${opts.deviceName}.p12`)
+    };
+}
+
+function getAdminPeriodPoint(opts) {
+    return models.r
+        .table('Period')
+        .getAll('Éternité', { index: 'name' })
+        .pluck('id')
+        .run()
+        .then((res) => {
+            if (res.length === 0) {
+                return Promise.reject(new Error('Database not seed'));
+            }
+
+            opts.periodId = res[0].id;
+
+            return models.r
+                .table('Point')
+                .getAll('Internet', { index: 'name' })
+                .pluck('id')
+                .run();
+        })
+        .then((res) => {
+            opts.pointId = res[0].id;
+        });
+}
+
+function addDevice(opts) {
+    let initialPromise = Promise.resolve();
+
+    if (opts.admin) {
+        opts.password   = randomstring.generate();
+        opts.deviceName = 'admin';
+
+        initialPromise = getAdminPeriodPoint(opts);
+    }
+
+    return initialPromise
+        .then(() => genClient(opts))
+        .then(fingerprint => setDeviceConfig(opts, fingerprint))
+        .then(() => opts.password);
+}
+
+module.exports = { addDevice, createDir, genClient };
+
+// Entry point
+if (require.main === module) {
+    const opts = {};
+    let periods;
+    let points;
+
+    models.r
+        .table('Period')
+        .pluck('id', 'name')
+        .run()
+        .then((res) => {
+            periods = res;
+
+            return models.r.table('Point').pluck('id', 'name').run();
+        })
+        .then((res) => {
+            points = res;
+
+            return inquirer.prompt([
+                {
+                    type   : 'input',
+                    name   : 'name',
+                    message: 'Device name :'
+                },
+                {
+                    type   : 'list',
+                    name   : 'point',
+                    message: 'Default point :',
+                    choices: points.map(point => `${point.name} - ${point.id}`)
+                },
+                {
+                    type   : 'list',
+                    name   : 'period',
+                    message: 'Default period :',
+                    choices: periods.map(period => `${period.name} - ${period.id}`)
+                },
+                {
+                    type   : 'password',
+                    name   : 'password',
+                    message: 'SSL export password :'
+                }
+            ]);
+        })
+        .then((answer) => {
+            opts.pointId    = answer.point.split(' - ')[1];
+            opts.periodId   = answer.period.split(' - ')[1];
+            opts.deviceName = answer.name;
+            opts.password   = answer.password;
+
+            return addDevice(opts);
+        })
+        .then((password) => {
+            log.info(`[ p12 password ] ${password}`);
+            process.exit(0);
+        })
+        .catch((e) => {
+            log.error(e);
+            process.exit(1);
+        });
+}
+

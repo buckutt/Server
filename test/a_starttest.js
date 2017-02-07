@@ -1,7 +1,6 @@
 /* eslint-disable func-names */
 
 const assert   = require('assert');
-const fs       = require('fs');
 const unirest  = require('unirest');
 const syncExec = require('sync-exec');
 const moment   = require('moment');
@@ -9,7 +8,7 @@ const app      = require('../src/app');
 
 describe('Should start the test application', () => {
     before(function (done) {
-        this.timeout(0);
+        this.timeout(10000);
 
         let sslDateResult = syncExec('openssl x509 -noout -enddate -in ssl/templates//test-crt.pem').stdout;
         sslDateResult = sslDateResult.split('=').pop();
@@ -27,7 +26,7 @@ describe('Should start the test application', () => {
 
         app
             .start()
-            .then(done);
+            .then(() => done());
     });
 
     it('should refuse if no ssl certificate is present', (done) => {
@@ -45,28 +44,4 @@ describe('Should start the test application', () => {
             done();
         });
     });
-});
-
-const certFile = fs.readFileSync('ssl/templates//test-crt.pem');
-const keyFile  = fs.readFileSync('ssl/templates//test-key.pem');
-const caFile   = fs.readFileSync('ssl/templates//ca-crt.pem');
-
-const options  = {
-    cert              : certFile,
-    key               : keyFile,
-    ca                : caFile,
-    strictSSL         : false,
-    rejectUnauthorized: false
-};
-
-unirest.request = unirest.request.defaults(options);
-
-global.unirest = unirest;
-global.q       = obj => encodeURIComponent(JSON.stringify(obj));
-
-['get', 'post', 'put', 'delete'].forEach((method) => {
-    const previous_ = unirest[method];
-    unirest[method] = (...args) => previous_(...args)
-        .type('json')
-        .header('Authorization', `Bearer ${process.env.TOKEN}`);
 });

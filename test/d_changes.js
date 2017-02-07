@@ -9,19 +9,24 @@ const fs          = require('fs');
 /**
  * Event source wrapper to support SSL and CORS
  * @param  {String} url     The base URL
- * @param  {Object} options The options (see EventSource doc on MDN)
  * @return {EventSource} The event source instance
  */
-function _EventSource(url, options) {
-    return new EventSource(url, Object.assign({
-        cert              : fs.readFileSync('ssl/templates//test-crt.pem'),
-        key               : fs.readFileSync('ssl/templates//test-key.pem'),
+function _EventSource(url) {
+    const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
+    const caFile  = fs.readFileSync('ssl/certificates/ca-crt.pem');
+
+    const options = {
+        pfx               : p12File,
+        passphrase        : 'test',
+        ca                : caFile,
         strictSSL         : false,
         rejectUnauthorized: false,
         headers           : {
             origin: 'https://localhost:3006'
         }
-    }, options));
+    };
+
+    return new EventSource(url, options);
 }
 
 describe('Changes', () => {

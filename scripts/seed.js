@@ -25,7 +25,7 @@ const seeder = () => {
 
     /* Events */
     const eventDefault = new models.Event({
-        name : 'Défaut',
+        name  : 'Défaut',
         config: {
             minReload    : 100,
             maxPerAccount: 10000

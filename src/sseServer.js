@@ -33,8 +33,12 @@ module.exports = (httpServer, app) => {
 
         // Skip function as the headers have already been sent
         // That will disable point/device headers (which are not used by changefeeds)
-        res.header = () => {};
-        req.app = app;
+        res.header = () => res;
+        /* istanbul ignore next */
+        res.status = () => res;
+        /* istanbul ignore next */
+        res.end    = msg => client.send(msg);
+        req.app    = app;
 
         // Dynamically resolve middlewares and convert them to Promises
         const middlewares = Object.keys(middlewares_).map(key => bluebird.promisify(middlewares_[key]));
@@ -45,7 +49,6 @@ module.exports = (httpServer, app) => {
                 if (models.length < 1) {
                     throw new APIError(404, 'No model required');
                 }
-
 
                 models.forEach((model) => {
                     const Model = modelParser.modelFromName(req, res, model);

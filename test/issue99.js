@@ -7,9 +7,10 @@ const assert = require('assert');
 describe('Issue #99', () => {
     let rid;
     let initial;
-    const embed = q({ users: true });
 
     it('should add 2 same relationships', (done) => {
+        const embed = q({ users: true });
+
         unirest.get(`https://localhost:3006/rights?embed=${embed}`)
             .end((response) => {
                 rid = response.body[0].id;
@@ -38,6 +39,8 @@ describe('Issue #99', () => {
     });
 
     it('should remove one relationship', (done) => {
+        const embed = q({ users: true });
+
         unirest.delete(`https://localhost:3006/rights/${rid}/users/${process.env.GJId}`)
             .end((response) => {
                 assert.equal(200, response.code);

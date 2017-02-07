@@ -1,24 +1,20 @@
 /* eslint-disable func-names */
 
-const Promise  = require('bluebird');
-const syncExec = require('sync-exec');
-const thinky   = require('../src/lib/thinky');
+const Promise   = require('bluebird');
+const fs        = require('fs');
+const unirest   = require('unirest');
+const thinky    = require('../src/lib/thinky');
+const models    = require('../src/models');
+const addDevice = require('../scripts/addDevice');
 
-const sslResult = syncExec('openssl x509 -noout -fingerprint -in ssl/templates//test-crt.pem').stdout;
-
-if (sslResult.indexOf('=') === -1) {
-    console.error('Couldn\'t find test certificate (ssl/templates//test-crt.pem). Start `npm run addTestDevice`');
-    process.exit(1);
-}
-
-const fingerprint = sslResult.split('=')[1].replace(/:/g, '').trim();
-const r           = thinky.r;
+const r         = thinky.r;
 
 describe('Before tests', () => {
-    it('should empty all the databases', function (done) {
+    it('should empty the database', function (done) {
         this.timeout(20 * 1000);
 
-        r.tableList()
+        models.loadModels()
+            .then(() => r.tableList())
             .then((tableList) => {
                 const deletePromises = [];
 
@@ -34,7 +30,7 @@ describe('Before tests', () => {
     });
 
     it('should create one user', function (done) {
-        this.timeout(5000);
+        this.timeout(10000);
 
         let userId;
         let noRightsUserId;
@@ -248,17 +244,19 @@ describe('Before tests', () => {
                 User_id : sellerUserId
             }])
         )
-        .then(() =>
+        .then(() => addDevice.genClient({ password: 'test', deviceName: 'test' }))
+        .then(res =>
             r.table('Device').insert({
-                fingerprint,
-                name     : 'buckless-test',
-                createdAt: new Date(),
-                editedAt : new Date(),
-                isRemoved: false
+                fingerprint: res.fingerprint,
+                name       : 'test',
+                createdAt  : new Date(),
+                editedAt   : new Date(),
+                isRemoved  : false
             })
         )
         .then((res) => {
-            deviceId = res.generated_keys[0];
+            deviceId             = res.generated_keys[0];
+            process.env.deviceId = deviceId;
         })
         .then(() =>
             r.table('PeriodPoint').insert({
@@ -305,6 +303,36 @@ describe('Before tests', () => {
         )
         .then(() => {
             done();
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+    });
+
+    after((done) => {
+        const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
+        const caFile  = fs.readFileSync('ssl/certificates/ca-crt.pem');
+
+        const options = {
+            pfx               : p12File,
+            passphrase        : 'test',
+            ca                : caFile,
+            strictSSL         : false,
+            rejectUnauthorized: false
+        };
+
+        unirest.request = unirest.request.defaults(options);
+
+        global.unirest = unirest;
+        global.q       = obj => encodeURIComponent(JSON.stringify(obj));
+
+        ['get', 'post', 'put', 'delete'].forEach((method) => {
+            const previous_ = unirest[method];
+            unirest[method] = (...args) => previous_(...args)
+                .type('json')
+                .header('Authorization', `Bearer ${process.env.TOKEN}`);
         });
+
+        done();
     });
 });

@@ -27,7 +27,7 @@ module.exports = (req, res, next) => {
         .then((devices) => {
             /* istanbul ignore if */
             if (devices.length === 0 || devices[0].periodPoints.length === 0) {
-                return next(new APIError(404, 'Device not found', req.fingerprint));
+                return next(new APIError(404, 'Device not found', { fingerprint: req.fingerprint }));
             }
 
             device = devices[0];

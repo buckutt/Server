@@ -16,13 +16,12 @@
     "test": "npm run test:coverage",
     "test:nocoverage": "cross-env NODE_ENV=test node scripts/test",
     "test:coverage": "cross-env NODE_ENV=test node scripts/test --coverage",
-    "dev": "cross-env NODE_ENV=dev nodemon src/app.js",
+    "watch": "nodemon src/app.js",
+    "dev": "cross-env NODE_ENV=dev npm run watch",
     "dev:seed": "cross-env NODE_ENV=dev node scripts/dataSeeds",
     "lint": "eslint . --fix",
     "sslConfig": "node scripts/sslConfig",
     "addDevice": "node scripts/addDevice",
-    "addTestDevice": "node scripts/addTestDevice",
-    "addAdminDevice": "node scripts/addAdminDevice",
     "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
