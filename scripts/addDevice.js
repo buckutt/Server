@@ -139,7 +139,7 @@ function addDevice(opts) {
 
     return initialPromise
         .then(() => genClient(opts))
-        .then(fingerprint => setDeviceConfig(opts, fingerprint))
+        .then(res => setDeviceConfig(opts, res.fingerprint))
         .then(() => opts.password);
 }
 
