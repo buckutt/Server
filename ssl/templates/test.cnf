@@ -7,13 +7,13 @@ prompt                 = no
 x509_extensions        = v3_ca
 
 [ req_distinguished_name ]
-C                      = US
-ST                     = MA
-L                      = Boston
-O                      = Example Co
-OU                     = techops
-CN                     = test
-emailAddress           = certs@example.com
+C                      = FR
+ST                     = IDF
+L                      = Paris
+O                      = Buckless
+OU                     = certificates
+CN                     = client1
+emailAddress           = contact@buckless.com
 
 [ req_attributes ]
 challengePassword      = test

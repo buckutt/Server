@@ -8,7 +8,7 @@ database = ca-database.txt
 name_opt = CA_default
 cert_opt = CA_default
 default_crl_days = 9999
-default_md = md5
+default_md = sha512
 
 [ req ]
 default_bits           = 4096
@@ -19,13 +19,13 @@ prompt                 = no
 output_password        = test
 
 [ req_distinguished_name ]
-C                      = US
-ST                     = MA
-L                      = Boston
-O                      = Example Co
-OU                     = techops
+C                      = FR
+ST                     = IDF
+L                      = Paris
+O                      = Buckless
+OU                     = certificates
 CN                     = ca
-emailAddress           = certs@example.com
+emailAddress           = contact@buckless.com
 
 [ req_attributes ]
 challengePassword      = test
