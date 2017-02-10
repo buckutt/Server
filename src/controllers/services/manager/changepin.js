@@ -1,7 +1,7 @@
 const bcrypt_  = require('bcryptjs');
 const express  = require('express');
 const Promise  = require('bluebird');
-const APIError = require('../../../errors/APIError');
+const errors   = require('../../../errors');
 const thinky   = require('../../../lib/thinky');
 
 /**

@@ -1,4 +1,4 @@
-const APIError = require('../errors/APIError');
+const errors   = require('../errors');
 
 /**
  * Retrieve the point id from the SSL certificate fingerprint

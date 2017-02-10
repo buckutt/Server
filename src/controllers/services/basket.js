@@ -1,6 +1,6 @@
 const express  = require('express');
 const Promise  = require('bluebird');
-const APIError = require('../../errors/APIError');
+const errors   = require('../../errors');
 const logger   = require('../../lib/log');
 const thinky   = require('../../lib/thinky');
 const { pp }   = require('../../lib/utils');

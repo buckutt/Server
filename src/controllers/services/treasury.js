@@ -1,6 +1,6 @@
 const express    = require('express');
 const thinky     = require('../../lib/thinky');
-const APIError   = require('../../errors/APIError');
+const errors     = require('../../errors');
 const { isUUID } = require('../../lib/idParser');
 
 const router = new express.Router();

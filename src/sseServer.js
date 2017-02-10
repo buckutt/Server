@@ -4,7 +4,7 @@ const bluebird     = require('bluebird');
 const logger       = require('./lib/log');
 const modelParser  = require('./lib/modelParser');
 const middlewares_ = require('./middlewares');
-const APIError     = require('./errors/APIError');
+const errors       = require('./errors');
 
 const log = logger(module);
 
@@ -33,6 +33,7 @@ module.exports = (httpServer, app) => {
 
         // Skip function as the headers have already been sent
         // That will disable point/device headers (which are not used by changefeeds)
+        // TODO: test following lines by havin no SSL certificate (triggers SSL middleware error)
         res.header = () => res;
         /* istanbul ignore next */
         res.status = () => res;
@@ -47,7 +48,7 @@ module.exports = (httpServer, app) => {
         middlewares.reduce((p, mw) => p.then(() => mw(req, res)), Promise.resolve())
             .then(() => {
                 if (models.length < 1) {
-                    throw new APIError(404, 'No model required');
+                    throw new errors.ModelNotFound();
                 }
 
                 models.forEach((model) => {

@@ -4,7 +4,7 @@ const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
 const thinky      = require('../lib/thinky');
 const { pp }      = require('../lib/utils');
-const APIError    = require('../errors/APIError');
+const errors      = require('../errors');
 
 const log = logger(module);
 const r   = thinky.r;

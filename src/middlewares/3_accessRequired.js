@@ -1,4 +1,4 @@
-const APIError = require('../errors/APIError');
+const errors   = require('../errors');
 const config   = require('../../config');
 
 const disableAuth = false;

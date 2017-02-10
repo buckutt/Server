@@ -6,7 +6,7 @@ const config   = require('../../../config');
 const logger   = require('../../lib/log');
 const thinky   = require('../../lib/thinky');
 const { pp }   = require('../../lib/utils');
-const APIError = require('../../errors/APIError');
+const errors   = require('../../errors');
 
 const bcrypt = Promise.promisifyAll(bcrypt_);
 const log    = logger(module);

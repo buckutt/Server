@@ -3,7 +3,7 @@ const express  = require('express');
 const Promise  = require('bluebird');
 const logger   = require('../../../lib/log');
 const thinky   = require('../../../lib/thinky');
-const APIError = require('../../../errors/APIError');
+const errors   = require('../../../errors');
 
 const log = logger(module);
 

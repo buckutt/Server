@@ -13,7 +13,7 @@ const models       = require('./models');
 const startSSE     = require('./sseServer');
 const logger       = require('./lib/log');
 const thinky       = require('./lib/thinky');
-const APIError     = require('./errors/APIError');
+const errors       = require('./errors');
 const sslConfig    = require('../scripts/sslConfig');
 const baseSeed     = require('../scripts/seed');
 const addDevice    = require('../scripts/addDevice').addDevice;
@@ -42,14 +42,18 @@ app.use(compression());
 /**
  * Routes
  */
+
 app.use(controllers);
 
 /**
  * Error handling
  */
+
 // 404
 app.use((req, res, next) => {
-    next(new APIError(404, 'Not Found'));
+    next(new errors.NotFound({ 
+        url : req.protocol + '://' + req.get('host') + req.originalUrl; 
+    }));
 });
 
 // Internal error
@@ -57,13 +61,12 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     if (!(err instanceof APIError)) {
         log.error(err.stack);
-    } else {
-        log.error(err.message, err.details);
-    }
+        err = new errors.InternalError();
+    } 
 
     res
         .status(err.status || 500)
-        .send(err.toJSON ? err.toJSON() : JSON.stringify(err))
+        .send(err.toJSON())
         .end();
 });
 
