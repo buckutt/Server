@@ -74,14 +74,15 @@ app.start = () => {
         ca  : './ssl/certificates/ca-crt.pem'
     };
 
-    const startingQueue = thinky.dbReady()
+    let startingQueue = thinky.dbReady()
         .then(() => models.loadModels());
 
     /* istanbul ignore if */
     if (!fs.existsSync('./ssl/certificates/server/server-key.pem') ||
         !fs.existsSync('./ssl/certificates/server/server-crt.pem') ||
         !fs.existsSync('./ssl/certificates/ca-crt.pem')) {
-        startingQueue
+
+        startingQueue = startingQueue
             .then(() => {
                 log.info('No SSL certificates found, generating new ones...');
                 const result = sslConfig(null, null, true);
