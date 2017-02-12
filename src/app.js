@@ -1,4 +1,5 @@
 const fs           = require('fs');
+const path         = require('path');
 const cors         = require('cors');
 const bodyParser   = require('body-parser');
 const compression  = require('compression');
@@ -19,6 +20,8 @@ const baseSeed     = require('../scripts/seed');
 const addDevice    = require('../scripts/addDevice').addDevice;
 
 const log = logger(module);
+
+const LOCK_FILE = path.join(__dirname, '..', 'ready.lock');
 
 const app = express();
 
@@ -71,17 +74,16 @@ app.start = () => {
     const sslFilesPath = {
         key : './ssl/certificates/server/server-key.pem',
         cert: './ssl/certificates/server/server-crt.pem',
-        ca  : './ssl/certificates/ca-crt.pem'
+        ca  : './ssl/certificates/ca/ca-crt.pem'
     };
 
     let startingQueue = thinky.dbReady()
         .then(() => models.loadModels());
 
     /* istanbul ignore if */
-    if (!fs.existsSync('./ssl/certificates/server/server-key.pem') ||
-        !fs.existsSync('./ssl/certificates/server/server-crt.pem') ||
-        !fs.existsSync('./ssl/certificates/ca-crt.pem')) {
-
+    if (!fs.existsSync(sslFilesPath.key) ||
+        !fs.existsSync(sslFilesPath.cert) ||
+        !fs.existsSync(sslFilesPath.ca)) {
         startingQueue = startingQueue
             .then(() => {
                 log.info('No SSL certificates found, generating new ones...');
@@ -123,11 +125,29 @@ app.start = () => {
                 log.info('Server is listening %s:%d', config.http.host, config.http.port);
                 startSSE(server, app);
 
+                fs.writeFileSync(LOCK_FILE, '1');
+
                 resolve();
             });
         });
     });
 };
+
+/* istanbul ignore next */
+const clearLock = (status) => {
+    try {
+        fs.unlinkSync(LOCK_FILE);
+    } catch (e) {
+        process.exit(1);
+    }
+
+    process.exit(status || 0);
+};
+
+process.on('exit', clearLock);
+process.on('SIGINT', clearLock);
+process.on('SIGTERM', clearLock);
+process.on('uncaughtException', clearLock);
 
 // Start the application
 /* istanbul ignore if */

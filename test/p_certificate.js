@@ -30,7 +30,7 @@ describe('addDevice', () => {
 
     it('should be a valid p12', (done) => {
         const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
-        const caFile  = fs.readFileSync('ssl/certificates/ca-crt.pem');
+        const caFile  = fs.readFileSync('ssl/certificates/ca/ca-crt.pem');
 
         const options = {
             pfx               : p12File,

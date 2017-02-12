@@ -306,12 +306,12 @@ describe('Before tests', () => {
         })
         .catch((err) => {
             console.log(err);
-        })
+        });
     });
 
     after((done) => {
         const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
-        const caFile  = fs.readFileSync('ssl/certificates/ca-crt.pem');
+        const caFile  = fs.readFileSync('ssl/certificates/ca/ca-crt.pem');
 
         const options = {
             pfx               : p12File,

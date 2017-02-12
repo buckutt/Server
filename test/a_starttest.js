@@ -8,9 +8,9 @@ const app      = require('../src/app');
 
 describe('Should start the test application', () => {
     before(function (done) {
-        this.timeout(10000);
+        this.timeout(30000);
 
-        let sslDateResult = syncExec('openssl x509 -noout -enddate -in ssl/templates//test-crt.pem').stdout;
+        let sslDateResult = syncExec('openssl x509 -noout -enddate -in ssl/templates/test-crt.pem').stdout;
         sslDateResult = sslDateResult.split('=').pop();
 
         let date = moment(sslDateResult, ['MMM D HH:mm:ss YYYY', 'MMM  D HH:mm:ss YYYY']);

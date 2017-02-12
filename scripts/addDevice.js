@@ -79,7 +79,7 @@ function genClient(opts) {
     copyClient(opts, cwd);
 
     try {
-        outPassword = fs.readFileSync('./ssl/certificates/ca.cnf', 'utf8').match(/output_password\s* = (\w*)/)[1];
+        outPassword = fs.readFileSync('./ssl/certificates/ca/ca.cnf', 'utf8').match(/output_password\s* = (\w*)/)[1];
     } catch (e) {
         return Promise.reject(e);
     }
@@ -88,8 +88,8 @@ function genClient(opts) {
         /* eslint-disable max-len */
         execSync(`openssl genrsa -out ${opts.deviceName}-key.pem 4096`, { cwd });
         execSync(`openssl req -new -config ${opts.deviceName}.cnf -key ${opts.deviceName}-key.pem -out ${opts.deviceName}-csr.pem`, { cwd });
-        execSync(`openssl x509 -req -extfile ${opts.deviceName}.cnf -days 999 -passin "pass:${outPassword}" -in ${opts.deviceName}-csr.pem -CA ../ca-crt.pem -CAkey ../ca-key.pem -CAcreateserial -out ${opts.deviceName}-crt.pem`, { cwd });
-        execSync(`openssl verify -CAfile ../ca-crt.pem ${opts.deviceName}-crt.pem`, { cwd });
+        execSync(`openssl x509 -req -extfile ${opts.deviceName}.cnf -days 999 -passin "pass:${outPassword}" -in ${opts.deviceName}-csr.pem -CA ../ca/ca-crt.pem -CAkey ../ca/ca-key.pem -CAcreateserial -out ${opts.deviceName}-crt.pem`, { cwd });
+        execSync(`openssl verify -CAfile ../ca/ca-crt.pem ${opts.deviceName}-crt.pem`, { cwd });
         execSync(`openssl pkcs12 -export -clcerts -in ${opts.deviceName}-crt.pem -inkey ${opts.deviceName}-key.pem -out ${opts.deviceName}.p12 -password "pass:${opts.password}"`, { cwd });
         out = execSync(`openssl x509 -fingerprint -in ./ssl/certificates/${opts.deviceName}/${opts.deviceName}-crt.pem`);
         /* eslint-enable max-len */

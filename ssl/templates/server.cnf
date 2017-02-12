@@ -12,7 +12,7 @@ ST                     = IDF
 L                      = Paris
 O                      = Buckless
 OU                     = certificates
-CN                     = *.buckless.com
+CN                     = api.*.inst.buckless.com
 emailAddress           = contact@buckless.com
 
 [ req_attributes ]

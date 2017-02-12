@@ -7,8 +7,8 @@
  */
 module.exports = (req, res, next) => {
     /* istanbul ignore next */
-    if (req.headers['X-Certificate-Fingerprint']) {
-        req.fingerprint = req.headers['X-Certificate-Fingerprint'];
+    if (req.headers['x-certificate-fingerprint']) {
+        req.fingerprint = req.headers['x-certificate-fingerprint'].toUpperCase();
         return next();
     }
 
