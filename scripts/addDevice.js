@@ -1,11 +1,10 @@
-const fs           = require('fs-extra');
-const path         = require('path');
-const execSync     = require('child_process').execSync;
-const Promise      = require('bluebird');
-const inquirer     = require('inquirer');
-const randomstring = require('randomstring');
-const models       = require('../src/models');
-const logger       = require('../src/lib/log');
+const fs       = require('fs-extra');
+const path     = require('path');
+const execSync = require('child_process').execSync;
+const Promise  = require('bluebird');
+const inquirer = require('inquirer');
+const models   = require('../src/models');
+const logger   = require('../src/lib/log');
 
 const log = logger(module);
 
@@ -131,9 +130,6 @@ function addDevice(opts) {
     let initialPromise = Promise.resolve();
 
     if (opts.admin) {
-        opts.password   = randomstring.generate();
-        opts.deviceName = 'admin';
-
         initialPromise = getAdminPeriodPoint(opts);
     }
 

@@ -8,6 +8,7 @@ const express      = require('express');
 const http         = require('http');
 const https        = require('https');
 const morgan       = require('morgan');
+const randomstring = require('randomstring');
 const config       = require('../config');
 const controllers  = require('./controllers');
 const models       = require('./models');
@@ -99,10 +100,15 @@ app.start = () => {
             .then(() => {
                 log.info('Creating admin device...');
 
-                return addDevice({ admin: true });
+                return addDevice({ admin: true, deviceName: 'admin', password: randomstring.generate() });
             })
             .then((adminPassword) => {
                 log.info(`[ admin .p12 password ] ${adminPassword}`);
+            })
+            .then(() => {
+                log.info('Creating manager certificate...');
+
+                return addDevice({ admin: true, deviceName: 'manager', password: 'manager' });
             });
     }
 
