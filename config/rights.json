@@ -40,7 +40,9 @@
         ]
       },
       "openUrls": [
-            "/services/login"
+            "/services/login",
+            "/services/manager/askpin",
+            "/services/manager/generatepin"
       ],
       "loggedUrls": [
             "/services/manager/changepin",

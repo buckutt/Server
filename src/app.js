@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     if (!(err instanceof APIError)) {
-        log.error(err.stack);
+        log.error(err);
     } else {
         log.error(err.message, err.details);
     }

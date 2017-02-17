@@ -10,6 +10,7 @@ const User = thinky.createModel('User', {
     nickname   : String,
     pin        : String,
     password   : String,
+    recoverKey : type.string().default(''),
     mail       : String,
     credit     : Number,
     isTemporary: type.boolean().default(false),
@@ -36,6 +37,7 @@ User.ensureIndex('firstname');
 User.ensureIndex('lastname');
 User.ensureIndex('nickname');
 User.ensureIndex('mail');
+User.ensureIndex('recoverKey');
 User.ensureIndex('createdAt');
 User.ensureIndex('editedAt');
 
