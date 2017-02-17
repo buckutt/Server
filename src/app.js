@@ -150,17 +150,17 @@ const clearLock = (status) => {
     process.exit(status || 0);
 };
 
-process.on('exit', clearLock);
-process.on('SIGINT', clearLock);
-process.on('SIGTERM', clearLock);
-process.on('uncaughtException', clearLock);
+module.exports = app;
 
 // Start the application
 /* istanbul ignore if */
 if (require.main === module) {
+    process.on('exit', clearLock);
+    process.on('SIGINT', clearLock);
+    process.on('SIGTERM', clearLock);
+    process.on('uncaughtException', clearLock);
+    
     app
         .start()
         .catch(err => log.error(err));
 }
-
-module.exports = app;
