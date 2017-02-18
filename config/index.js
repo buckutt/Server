@@ -12,8 +12,8 @@ nconf
     .file({ file: path.join(__dirname, 'process.env.json') });
 
 // Load environment config file
-const envName = nconf.get('NODE_ENV') || 'prod';
-const env     = require(path.join(__dirname, envName));
+const envName = nconf.get('NODE_ENV') || 'production';
+const env     = require(path.join(__dirname, 'profiles', envName));
 const rights  = require(path.join(__dirname, 'rights'));
 const config  = _.merge(rights, env);
 config.env = envName;

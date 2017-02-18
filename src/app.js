@@ -113,7 +113,7 @@ app.start = () => {
     }
 
     return startingQueue.then(() => {
-        const server = process.env.NODE_ENV === 'prod' ? http.createServer(app) : https.createServer({
+        const server = process.env.NODE_ENV === 'production' ? http.createServer(app) : https.createServer({
             key               : fs.readFileSync(sslFilesPath.key),
             cert              : fs.readFileSync(sslFilesPath.cert),
             ca                : fs.readFileSync(sslFilesPath.ca),
@@ -141,6 +141,10 @@ app.start = () => {
 
 /* istanbul ignore next */
 const clearLock = (status) => {
+    if (status instanceof Error) {
+        log.error(status);
+    }
+
     try {
         fs.unlinkSync(LOCK_FILE);
     } catch (e) {
