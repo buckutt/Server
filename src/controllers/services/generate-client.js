@@ -2,7 +2,7 @@ const path     = require('path');
 const fs       = require('fs');
 const express  = require('express');
 const glob     = require('glob');
-const execSync = require('child_process').execSync;
+const exec    = require('child_process').exec;
 const logger   = require('../../lib/log');
 const APIError = require('../../errors/APIError');
 
@@ -10,9 +10,10 @@ const log = logger(module);
 
 function generateClient() {
     const cwd = path.join(__dirname, 'node_modules', 'buckless-client');
+    const env = { ELECTRON: 1, NODE_ENV: 'production' };
 
     return new Promise((resolve, reject) => {
-        exec('npm run postinstall', { cwd }, (err) => {
+        exec('npm run postinstall', { cwd, env }, (err, stdout) => {
             if (err) {
                 return reject(err);
             }
@@ -34,7 +35,7 @@ const appImages = glob.sync(path.join(__dirname, 'node_modules', 'buckless-clien
 if (appImages.length === 0) {
     generateClient()
         .catch((err) => {
-            logger.error(`Can't generate client : ${err.toString()}`);
+            log.error(`Can't generate client : ${err.toString()}`);
             process.exit(1);
         });
 }
