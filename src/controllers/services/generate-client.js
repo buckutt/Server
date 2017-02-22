@@ -1,26 +1,27 @@
 const path     = require('path');
 const fs       = require('fs');
+const Promise  = require('bluebird');
 const express  = require('express');
 const glob     = require('glob');
-const exec    = require('child_process').exec;
+const exec_    = require('child_process').exec;
 const logger   = require('../../lib/log');
 const APIError = require('../../errors/APIError');
 
 const log = logger(module);
 
+const exec  = Promise.promisify(exec_);
+const read  = Promise.promisify(fs.readFile);
+const write = Promise.promisify(fs.writeFile);
+
 function generateClient() {
-    const cwd = path.join(__dirname, 'node_modules', 'buckless-client');
-    const env = { ELECTRON: 1, NODE_ENV: 'production' };
+    const cwd = path.join(__dirname, '..', '..', '..', 'node_modules', 'buckless-client');
 
-    return new Promise((resolve, reject) => {
-        exec('npm run postinstall', { cwd, env }, (err, stdout) => {
-            if (err) {
-                return reject(err);
-            }
+    const sourceConfig = path.join(__dirname, '..', '..', '..', 'config', 'client.json');
+    const targetConfig = path.join(cwd, 'config', 'production.json');
 
-            resolve();
-        });
-    });
+    return read(sourceConfig)
+        .then(clientConfig => write(targetConfig, clientConfig))
+        .then(() => exec('npm run build:serverPackage', { cwd }));
 }
 
 function sendClient(res, p) {
