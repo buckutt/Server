@@ -1,0 +1,17 @@
+{
+    "NODE_ENV": "\"production\"",
+    "app": {
+        "api": "\"https://server:3000\"",
+        "loginMeanOfLogin": "\"cardId\"",
+        "buyerMeanOfLogin": "\"cardId\"",
+        "desfire"         : {
+            "key"   : "\"0\"",
+            "keyId" : "[4]",
+            "fileId": "[2, 0, 0, 0, 14, 0, 0]",
+            "appId" : "[64, 132, 245]"
+        },
+        "classic": {
+            "fileId": "[255, 243, 0, 5]"
+        }
+    }
+}
