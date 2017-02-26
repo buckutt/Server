@@ -9,6 +9,9 @@ node_js:
 
 addons:
   rethinkdb: 2.3
+  apt:
+    packages:
+      - libpcsclite-dev
 
 install:
   - npm install -g mocha gulp
