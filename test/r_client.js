@@ -1,7 +1,6 @@
 /* eslint-disable func-names */
 
 const assert = require('assert');
-const fs     = require('fs');
 
 /* global unirest */
 
@@ -13,7 +12,7 @@ describe('generate-client', () => {
             .query({ deviceId: 0, password: 'test' })
             .end((response) => {
                 assert.equal(200, response.code);
-                assert(res.body.length > 100);
+                assert(response.body.length > 100);
                 done();
             });
     });
@@ -25,7 +24,7 @@ describe('generate-client', () => {
             .query({ invalidate: 1 })
             .end((response) => {
                 assert.equal(200, response.code);
-                assert(res.body.length > 100);
+                assert(response.body.length > 100);
                 done();
             });
     });

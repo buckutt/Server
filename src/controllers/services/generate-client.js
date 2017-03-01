@@ -50,7 +50,7 @@ const router = new express.Router();
 
 // Generate a client app
 router.get('/services/client', (req, res, next) => {
-    if (!fs.fileExistsSync(APP) || req.query.invalidate || invalidate) {
+    if (!fs.fileExistsSync(APP) || req.query.invalidate) {
         return generateClient()
             .then(() => sendClient(res, APP))
             .catch((err) => next(new APIError(400, 'Can\'t generate client', err)));
