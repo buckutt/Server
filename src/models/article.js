@@ -7,6 +7,7 @@ const Article = thinky.createModel('Article', {
     id       : type.string().optional(),
     name     : String,
     stock    : type.number().default(0),
+    image    : type.string().optional(),
     // Alcohol amount (Alcool unit or just article maximum sells)
     alcohol  : type.number().default(0),
     // Optional VAT tax

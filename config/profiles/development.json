@@ -20,12 +20,20 @@
         "host": "localhost",
         "name": "buckless_dev"
     },
-    "smtp": {
-        "host": "smtp.mailtrap.io",
-        "port": 2525,
-        "auth": {
-            "user": "ed37a3f7039a0e",
-            "pass": "d617720e0b2db0"
+    "mailer": {
+        "smtp": {
+            "host": "smtp.mailtrap.io",
+            "port": 2525,
+            "auth": {
+                "user": "ed37a3f7039a0e",
+                "pass": "d617720e0b2db0"
+            }
         }
+    },
+    "askpin": {
+        "from": "noreply@buckless.com",
+        "subject": "Buckless forgotten PIN",
+        "template": "Hi !\n You seems to have forgotten your pin. Follow <a href=\"{{=it.link}}\">this link</a> to generate a new one !",
+        "managerUrl": "http://b.inst.buckless.com"
     }
 }
