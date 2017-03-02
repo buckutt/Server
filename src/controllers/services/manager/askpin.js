@@ -1,7 +1,9 @@
 const express      = require('express');
 const randomstring = require('randomstring');
+const dots         = require('dot');
 const APIError     = require('../../../errors/APIError');
 const mailer       = require('../../../lib/mailer');
+const config       = require('../../../../config').askpin;
 
 /**
  * Generate mail to send
@@ -10,11 +12,14 @@ const mailer       = require('../../../lib/mailer');
  * @return {Object}      Mail to send
  */
 function generateMessage(mail, key) {
-    const from    = 'noreply@buckless.com';
-    const to      = mail;
-    const subject = 'Votre nouveau pin !';
-    /* TODO: get API url by config */
-    const html    = `<a href="http://manager.b.inst.buckless.com/#!/generate?key=${key}">Cliquez ici</a>`;
+    const from     = config.from;
+    const to       = mail;
+    const subject  = config.subject;
+    const template = dots.template(config.template);
+    console.log(config.template);
+    console.log(template);
+    const html     = template({ link: `${config.managerUrl}/#/generate?key=${key}` });
+    console.log(html);
 
     return { from, to, subject, html };
 }
