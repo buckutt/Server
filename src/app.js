@@ -121,7 +121,7 @@ app.start = () => {
             rejectUnauthorized: false
         }, app);
 
-        ioServer(server, app);
+        socketServer.ioServer(server, app);
 
         return new Promise((resolve, reject) => {
             server.listen(config.http.port, config.http.hostname, (err) => {

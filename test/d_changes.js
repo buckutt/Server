@@ -1,90 +1,90 @@
 /* eslint-disable func-names */
 
-const EventSource = require('eventsource');
-const assert      = require('assert');
-const fs          = require('fs');
+const io     = require('socket.io-client');
+const assert = require('assert');
+const fs     = require('fs');
 
 /* global unirest */
 
+const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
+
 /**
- * Event source wrapper to support SSL and CORS
- * @param  {String} url     The base URL
- * @return {EventSource} The event source instance
+ * ws wrapper to support SSL and CORS
+ * @param  {Object} headers Additional headers
+ * @return {WebSocket} The ws instance
  */
-function _EventSource(url) {
+function ws(headers) {
     const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
     const caFile  = fs.readFileSync('ssl/certificates/ca/ca-crt.pem');
 
-    const options = {
+    const opts = {
         pfx               : p12File,
         passphrase        : 'test',
         ca                : caFile,
         strictSSL         : false,
         rejectUnauthorized: false,
-        headers           : {
-            origin: 'https://localhost:3006'
-        }
+        extraHeaders      : Object.assign({
+            origin: 'https://localhost:3006',
+        }, headers)
     };
 
-    return new EventSource(url, options);
+    return io('https://localhost:3006/changes', opts);
 }
 
 describe('Changes', () => {
     it('should not allow the changefeed when no Authorization header is sent', (done) => {
-        const es = new _EventSource('https://localhost:3006/changes');
+        const socket = new ws();
 
-        es.onmessage = (e) => {
-            assert.equal('Error: No token or scheme provided. Header format is Authorization: Bearer [token]', e.data);
-            es.close();
-            done();
-        };
+        socket.on('connect_error', (err) => {
+            console.log(err);process.exit(1);
+        });
     });
 
     it('should not allow the changefeed when the Authorization header is wrong', (done) => {
-        const es = new _EventSource('https://localhost:3006/changes?authorization=foo');
+        const socket = new ws({ Authorization: 'foo' });
 
-        es.onmessage = (e) => {
-            assert.equal('Error: No token or scheme provided. Header format is Authorization: Bearer [token]', e.data);
-            es.close();
+        socket.onerror = (err) => {
+            assert.ok(err.indexOf('status: 400') > -1);
+            socket.abort();
             done();
         };
     });
 
     it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
-        const es = new _EventSource('https://localhost:3006/changes?authorization=foo%20bar');
+        const socket = new ws({ Authorization: 'foo bar' });
 
-        es.onmessage = (e) => {
-            assert.equal('Error: Scheme is `Bearer`. Header format is Authorization: Bearer [token]', e.data);
-            es.close();
+        socket.onerror = (err) => {
+            assert.ok(err.indexOf('status: 400') > -1);
+            socket.abort();
             done();
         };
     });
 
     it('should not allow a query without a model', (done) => {
-        const token = `authorization=Bearer%20${process.env.TOKEN}`;
+        const socket = new ws(TOKEN_HEADER);
 
-        const query = `${token}`;
+        socket.onmessage = (err) => {
+            console.log('err is', err);
+        }
 
-        const es = new _EventSource(`https://localhost:3006/changes?${query}`);
-
-        es.onmessage = (e) => {
+        socket.onmessage = (e) => {
             assert.equal('Error: No model required', e.data);
-            es.close();
+            socket.close();
             done();
         };
     });
 
     it('should not allow a query on a non-existant model', (done) => {
-        const token = `authorization=Bearer%20${process.env.TOKEN}`;
+        const headers = { Authorization: `Bearer ${process.env.TOKEN}` };
         const model = 'models=foobar';
 
         const query = `${token}&${model}`;
 
-        const es = new _EventSource(`https://localhost:3006/changes?${query}`);
+        const socket = new _EventSource(`https://localhost:3006/changes?${query}`);
 
-        es.onmessage = (e) => {
+        socket.onmessage = (e) => {
             assert.equal('Error: Model not found', e.data);
-            es.close();
+            socket.close();
             done();
         };
     });
@@ -95,11 +95,11 @@ describe('Changes', () => {
 
         const query = `${token}&${model}`;
 
-        const es = new _EventSource(`https://localhost:3006/changes?${query}`);
+        const socket = new _EventSource(`https://localhost:3006/changes?${query}`);
 
-        es.onmessage = (e) => {
+        socket.onmessage = (e) => {
             assert.equal('{"model":"purchases","action":"listen"}', e.data);
-            es.close();
+            socket.close();
             done();
         };
     });
@@ -112,7 +112,7 @@ describe('Changes', () => {
 
         const query = `${token}&${model}`;
 
-        const es = new _EventSource(`https://localhost:3006/changes?${query}`);
+        const socket = new _EventSource(`https://localhost:3006/changes?${query}`);
 
         let mopId;
 
@@ -124,7 +124,7 @@ describe('Changes', () => {
         function checkDone() {
             assert.equal(4, calls);
 
-            es.close();
+            socket.close();
             done();
         }
 
@@ -167,7 +167,7 @@ describe('Changes', () => {
                 });
         }
 
-        es.onmessage = (e) => {
+        socket.onmessage = (e) => {
             calls += 1;
 
             const obj = JSON.parse(e.data);

@@ -6,6 +6,7 @@ const config   = require('../../config');
  * @param {Object} connector HTTP/Socket.IO connector
  */
 module.exports = (connector) => {
+    console.log(connector.user, connector.path);
     const authorize = config.rights;
 
     if (config.rights.openUrls.indexOf(connector.path) > -1 || config.disableAuth) {
