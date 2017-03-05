@@ -12,7 +12,7 @@ const randomstring = require('randomstring');
 const config       = require('../config');
 const controllers  = require('./controllers');
 const models       = require('./models');
-const startSSE     = require('./sseServer');
+const socketServer = require('./socketServer');
 const logger       = require('./lib/log');
 const thinky       = require('./lib/thinky');
 const APIError     = require('./errors/APIError');
@@ -121,6 +121,8 @@ app.start = () => {
             rejectUnauthorized: false
         }, app);
 
+        ioServer(server, app);
+
         return new Promise((resolve, reject) => {
             server.listen(config.http.port, config.http.hostname, (err) => {
                     /* istanbul ignore if */
@@ -129,7 +131,6 @@ app.start = () => {
                 }
 
                 log.info('Server is listening %s:%d', config.http.host, config.http.port);
-                startSSE(server, app);
 
                 fs.writeFileSync(LOCK_FILE, '1');
 

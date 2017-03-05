@@ -15,18 +15,12 @@ module.exports.marshal = function (mw) {
 
             models: req.app.locals.models,
 
-            locals: req.locals,
-
             header(name, value) {
                 res.header(name, value);
             },
 
             getClientFingerprint() {
                 return req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim()
-            },
-
-            response(status, str) {
-                res.status(status).end(str);
             },
 
             next(err) {

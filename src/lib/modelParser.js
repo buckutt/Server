@@ -45,10 +45,4 @@ function modelParser(req, res, next, model) {
 
 module.exports = modelParser;
 
-module.exports.modelFromName = (req, res, modelName) => {
-    if (possibleValues.indexOf(modelName) === -1) {
-        return new APIError(404, 'Model not found');
-    }
-
-    return req.app.locals.models[modelsNames[modelName]];
-};
+module.exports.allModels = Object.keys(modelsNames);

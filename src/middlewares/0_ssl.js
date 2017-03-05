@@ -1,3 +1,5 @@
+const APIError = require('../errors/APIError');
+
 /**
  * Enforce client SSL certificate
  * @param {Object} connector HTTP/Socket.IO connector
@@ -10,7 +12,7 @@ module.exports = (connector) => {
     }
 
     if (!connector.authorized) {
-        return connector.response(401, 'Unauthorized : missing client HTTPS certificate');
+        return connector.next(new APIError(401, 'Unauthorized : missing client HTTPS certificate'));
     }
 
     connector.fingerprint = connector.getClientFingerprint();
