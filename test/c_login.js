@@ -71,6 +71,7 @@ describe('Login', () => {
                 password   : 'buckless'
             })
             .end((response) => {
+                console.log(response.headers);
                 assert.equal(200, response.code);
                 assert.equal(true, response.headers.event.length > 0);
                 assert.equal(true, response.headers.point.length > 0);

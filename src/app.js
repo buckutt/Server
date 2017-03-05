@@ -163,7 +163,7 @@ if (require.main === module) {
     process.on('SIGINT', clearLock);
     process.on('SIGTERM', clearLock);
     process.on('uncaughtException', clearLock);
-    
+
     app
         .start()
         .catch(err => log.error(err));

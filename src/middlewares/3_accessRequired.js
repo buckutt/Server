@@ -1,29 +1,24 @@
 const APIError = require('../errors/APIError');
 const config   = require('../../config');
 
-const disableAuth = false;
-
 /**
  * Check for the current user wether he can do what he wants
- * @param  {Request}  req  Express request
- * @param  {Response} res  Express response
- * @param  {Function} next Next middleware
- * @return {Function} The next middleware
+ * @param {Object} connector HTTP/Socket.IO connector
  */
-module.exports = (req, res, next) => {
+module.exports = (connector) => {
     const authorize = config.rights;
 
-    if (config.rights.openUrls.indexOf(req.path) > -1 || disableAuth) {
-        return next();
+    if (config.rights.openUrls.indexOf(connector.path) > -1 || config.disableAuth) {
+        return connector.next();
     }
 
-    if ((req.user && config.rights.loggedUrls.indexOf(req.path) > -1) || disableAuth) {
-        return next();
+    if ((connector.user && config.rights.loggedUrls.indexOf(connector.path) > -1) || config.disableAuth) {
+        return connector.next();
     }
 
-    const rights = req.user.rights || [];
-    let url      = req.path;
-    const method = req.method;
+    const rights = connector.user.rights || [];
+    let url      = connector.path;
+    const method = connector.method;
 
     let handled = false;
 
@@ -32,7 +27,7 @@ module.exports = (req, res, next) => {
         if (authorize.all.indexOf(right.name) > -1) {
             handled = true;
 
-            return next();
+            return connector.next();
         }
 
         const uuid = /[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -46,15 +41,15 @@ module.exports = (req, res, next) => {
         if (method.toLowerCase() === 'get' && authorize[right.name].read.indexOf(url) > -1) {
             handled = true;
 
-            return next();
+            return connector.next();
         } else if (authorize[right.name].write.indexOf(url) > -1) {
             handled = true;
 
-            return next();
+            return connector.next();
         }
     }
 
     if (!handled) {
-        return next(new APIError(401, 'Unauthorized', 'No right to do that'));
+        return connector.next(new APIError(401, 'Unauthorized', 'No right to do that'));
     }
 };

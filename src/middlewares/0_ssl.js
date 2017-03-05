@@ -1,24 +1,19 @@
 /**
  * Enforce client SSL certificate
- * @param  {Request}  req  Express request
- * @param  {Response} res  Express response
- * @param  {Function} next Next middleware
- * @return {Function} The next middleware
+ * @param {Object} connector HTTP/Socket.IO connector
  */
-module.exports = (req, res, next) => {
+module.exports = (connector) => {
     /* istanbul ignore next */
-    if (req.headers['x-certificate-fingerprint']) {
-        req.fingerprint = req.headers['x-certificate-fingerprint'].toUpperCase();
-        return next();
+    if (connector.headers['x-certificate-fingerprint']) {
+        connector.fingerprint = connector.headers['x-certificate-fingerprint'].toUpperCase();
+        return connector.next();
     }
 
-    if (!req.client.authorized) {
-        return res
-            .status(401)
-            .end('Unauthorized : missing client HTTPS certificate');
+    if (!connector.authorized) {
+        return connector.response(401, 'Unauthorized : missing client HTTPS certificate');
     }
 
-    req.fingerprint = req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
+    connector.fingerprint = connector.getClientFingerprint();
 
-    return next();
+    return connector.next();
 };

@@ -3,12 +3,18 @@ const fs          = require('fs');
 const express     = require('express');
 const middlewares = require('../middlewares');
 
+const { marshal, unmarshal } = require('../middlewares/connectors/http');
+
 const router = new express.Router('/');
 
 /**
  * Use every middlewares
  */
-Object.keys(middlewares).forEach(key => router.use(middlewares[key]));
+Object.keys(middlewares).forEach(key => {
+    return router.use(marshal(middlewares[key]));
+});
+
+router.use(unmarshal);
 
 /**
  * Recursively use every subrouters, manager's services first, then app services
