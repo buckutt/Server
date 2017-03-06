@@ -1,10 +1,5 @@
 module.exports.marshal = function (mw) {
     return function (socket, app) {
-        let result = {
-            err: null,
-            headers: {}
-        };
-
         socket.connector = socket.connector || {
             authorized: socket.client.request.client.authorized,
 
@@ -18,6 +13,11 @@ module.exports.marshal = function (mw) {
 
             models: app.locals.models,
 
+            result: {
+                err: null,
+                headers: {}
+            },
+
             header(name, value) {
                 result.headers[name] = value;
             },
@@ -27,12 +27,13 @@ module.exports.marshal = function (mw) {
             },
 
             next(err) {
-                result.err = err;
+                socket.connector.result.err = err || null;
+                socket.connector.result.foo = 'bar';
             }
         };
 
         mw(socket.connector);
 
-        return result;
+        return socket.connector.result;
     }
 };

@@ -55,15 +55,16 @@ module.exports.ioServer = (httpServer, app) => {
         .forEach(Model => listenForModelChanges(Model, clients));
 
     io.on('connection', (client) => {
-        for (let key of Object.keys(middlewares)) {
-            const result = marshal(middlewares[key])(client, app);
+        client.send('bonjour');
+        // for (let key of Object.keys(middlewares)) {
+        //     const result = marshal(middlewares[key])(client, app);
 
-            if (result.err) {
-                client.emit('error', result);
-                client.disconnect();
-                return;
-            }
-        }
+        //     if (result.err) {
+        //         console.log('EMIT ERR', result.err.message);
+        //         client.send('APIError', result.err.message);
+        //         return;
+        //     }
+        // }
 
         client.on('listen', (models) => {
             clients[client.id] = { client };

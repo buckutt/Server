@@ -6,6 +6,7 @@ const APIError = require('../errors/APIError');
  */
 module.exports = (connector) => {
     if (connector.path === '/socket.io/') {
+        // If request is socket io xhr polling, make socketio directly handle it
         return connector.handleSocket();
     }
 

@@ -35,8 +35,14 @@ describe('Changes', () => {
     it('should not allow the changefeed when no Authorization header is sent', (done) => {
         const socket = new ws();
 
-        socket.on('connect_error', (err) => {
-            console.log(err);process.exit(1);
+        socket.on('connection')
+
+        socket.on('APIError', (msg) => {
+            console.log(msg);done();process.exit(1);
+        });
+
+        socket.on('message', (msg) => {
+            console.log(msg);done();process.exit(1);
         });
     });
 
