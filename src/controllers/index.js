@@ -10,9 +10,9 @@ const router = new express.Router('/');
 /**
  * Use every middlewares
  */
-Object.keys(middlewares).forEach(key => {
-    return router.use(marshal(middlewares[key]));
-});
+for (let key of Object.keys(middlewares)) {
+    router.use(marshal(middlewares[key]));
+}
 
 router.use(unmarshal);
 

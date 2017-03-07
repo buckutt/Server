@@ -19,21 +19,20 @@ module.exports.marshal = function (mw) {
             },
 
             header(name, value) {
-                result.headers[name] = value;
+                socket.connector.result.headers[name] = value;
             },
 
             getClientFingerprint() {
                 return socket.client.request.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
-            },
-
-            next(err) {
-                socket.connector.result.err = err || null;
-                socket.connector.result.foo = 'bar';
             }
         };
 
-        mw(socket.connector);
+        return mw(socket.connector)
+            .catch((err) => {
+                socket.connector.result.err = err;
 
-        return socket.connector.result;
+                return Promise.resolve();
+            })
+            .then(() => socket.connector.result);
     }
 };

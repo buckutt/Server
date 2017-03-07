@@ -51,8 +51,7 @@ describe('PinForgotten', () => {
 
                         user = users[0];
                         key  = user.recoverKey;
-                    })
-                    .catch(err => console.log(err)));
+                    }));
 
             it('should change the pin', (done) => {
                 unirest.put('https://localhost:3006/services/manager/generatepin')

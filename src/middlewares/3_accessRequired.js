@@ -9,11 +9,11 @@ module.exports = (connector) => {
     const authorize = config.rights;
 
     if (config.rights.openUrls.indexOf(connector.path) > -1 || config.disableAuth) {
-        return connector.next();
+        return Promise.resolve();
     }
 
     if ((connector.user && config.rights.loggedUrls.indexOf(connector.path) > -1) || config.disableAuth) {
-        return connector.next();
+        return Promise.resolve();
     }
 
     const rights = connector.user.rights || [];
@@ -27,7 +27,7 @@ module.exports = (connector) => {
         if (authorize.all.indexOf(right.name) > -1) {
             handled = true;
 
-            return connector.next();
+            return Promise.resolve();
         }
 
         const uuid = /[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i;
@@ -41,15 +41,15 @@ module.exports = (connector) => {
         if (method.toLowerCase() === 'get' && authorize[right.name].read.indexOf(url) > -1) {
             handled = true;
 
-            return connector.next();
+            return Promise.resolve();
         } else if (authorize[right.name].write.indexOf(url) > -1) {
             handled = true;
 
-            return connector.next();
+            return Promise.resolve();
         }
     }
 
     if (!handled) {
-        return connector.next(new APIError(401, 'Unauthorized', 'No right to do that'));
+        return Promise.reject(new APIError(401, 'Unauthorized', 'No right to do that'));
     }
 };

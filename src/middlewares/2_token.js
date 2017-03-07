@@ -14,7 +14,7 @@ module.exports = function token(connector) {
 
     // OpenUrls : no token required
     if (config.rights.openUrls.indexOf(connector.path) > -1 || config.disableAuth) {
-        return connector.next();
+        return Promise.resolve();
     }
 
     // Config is invalid
@@ -26,21 +26,21 @@ module.exports = function token(connector) {
     // Missing header
     if (!(connector.headers && connector.headers.authorization)) {
         const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
-        return connector.next(err);
+        return Promise.reject(err);
     }
 
     const parts = connector.headers.authorization.split(' ');
     // Invalid format (`Bearer Token`)
     if (parts.length !== 2) {
         const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
-        return connector.next(err);
+        return Promise.reject(err);
     }
 
     const scheme = parts[0];
     const bearer = parts[1];
     // Invalid format (`Bearer Token`)
     if (scheme.toLowerCase() !== 'bearer') {
-        return connector.next(new APIError(400, 'Scheme is `Bearer`. Header format is Authorization: Bearer [token]'));
+        return Promise.reject(new APIError(400, 'Scheme is `Bearer`. Header format is Authorization: Bearer [token]'));
     }
 
     let connectType;
@@ -48,9 +48,10 @@ module.exports = function token(connector) {
     const pinLoggingAllowed = config.rights.pinLoggingAllowed;
     const now               = Date.now();
 
-    jwt
+    return jwt
         .verifyAsync(bearer, secret)
         .then((decoded) => {
+
             const userId = decoded.id;
             connectType  = decoded.connectType;
 
@@ -83,12 +84,12 @@ module.exports = function token(connector) {
                     return false;
                 });
 
-            return connector.next();
+            return Promise.resolve();
         })
-        .catch(jwt.TokenExpiredError, err =>
-            connector.next(new APIError(401, 'Token expired', err))
+        .catch(jwt.TokenExpiredError, (err) =>
+            Promise.reject(new APIError(401, 'Token expired', err))
         )
-        .catch(jwt.JsonWebTokenError, err =>
-            connector.next(new APIError(401, 'Invalid token', err))
+        .catch(jwt.JsonWebTokenError, (err) =>
+            Promise.reject(new APIError(401, 'Invalid token', err))
         );
 };

@@ -45,4 +45,4 @@ function modelParser(req, res, next, model) {
 
 module.exports = modelParser;
 
-module.exports.allModels = Object.keys(modelsNames).map(n => modelsNames[n]);
+module.exports.modelsNames = modelsNames;

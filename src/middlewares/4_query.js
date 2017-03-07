@@ -26,11 +26,11 @@ module.exports = function query(connector) {
                 try {
                     connector.query[q] = interpolater(connector.query[q]);
                 } catch (e) {
-                    return connector.next(new APIError(400, 'Bad Input', `Invalid query ${q}`));
+                    return Promise.reject(new APIError(400, 'Bad Input', `Invalid query ${q}`));
                 }
             }
         }
     }
 
-    return connector.next();
+    return Promise.resolve();
 };

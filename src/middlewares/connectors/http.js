@@ -25,14 +25,16 @@ module.exports.marshal = function (mw) {
 
             getClientFingerprint() {
                 return req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim()
-            },
-
-            next(err) {
-                next(err);
             }
         };
 
-        return mw(req.connector);
+        mw(req.connector)
+            .then(() => {
+                next()
+            })
+            .catch(err => {
+                next(err)
+            });
     };
 };
 

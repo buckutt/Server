@@ -13,14 +13,14 @@ module.exports = (connector) => {
     /* istanbul ignore next */
     if (connector.headers['x-certificate-fingerprint']) {
         connector.fingerprint = connector.headers['x-certificate-fingerprint'].toUpperCase();
-        return connector.next();
+        return Promise.resolve();
     }
 
     if (!connector.authorized) {
-        return connector.next(new APIError(401, 'Unauthorized : missing client HTTPS certificate'));
+        return Promise.reject(new APIError(401, 'Unauthorized : missing client HTTPS certificate'));
     }
 
     connector.fingerprint = connector.getClientFingerprint();
 
-    return connector.next();
+    return Promise.resolve();
 };

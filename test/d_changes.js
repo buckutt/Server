@@ -6,8 +6,6 @@ const fs     = require('fs');
 
 /* global unirest */
 
-const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
-
 /**
  * ws wrapper to support SSL and CORS
  * @param  {Object} headers Additional headers
@@ -28,182 +26,132 @@ function ws(headers) {
         }, headers)
     };
 
-    return io('https://localhost:3006/changes', opts);
+    return io('https://localhost:3006/', opts);
 }
 
 describe('Changes', () => {
     it('should not allow the changefeed when no Authorization header is sent', (done) => {
         const socket = new ws();
 
-        socket.on('connection')
-
-        socket.on('APIError', (msg) => {
-            console.log(msg);done();process.exit(1);
-        });
-
-        socket.on('message', (msg) => {
-            console.log(msg);done();process.exit(1);
+        socket.on('APIError', (err) => {
+            assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
+            socket.close();
+            done();
         });
     });
 
     it('should not allow the changefeed when the Authorization header is wrong', (done) => {
         const socket = new ws({ Authorization: 'foo' });
 
-        socket.onerror = (err) => {
-            assert.ok(err.indexOf('status: 400') > -1);
-            socket.abort();
+        socket.on('APIError', (err) => {
+            assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
+            socket.close();
             done();
-        };
+        });
     });
 
     it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
         const socket = new ws({ Authorization: 'foo bar' });
 
-        socket.onerror = (err) => {
-            assert.ok(err.indexOf('status: 400') > -1);
-            socket.abort();
+        socket.on('APIError', (err) => {
+            assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]', err);
+            socket.close();
             done();
-        };
+        });
     });
 
-    it('should not allow a query without a model', (done) => {
+    it('should allow with no listenning', (done) => {
+        const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
         const socket = new ws(TOKEN_HEADER);
 
-        socket.onmessage = (err) => {
-            console.log('err is', err);
-        }
-
-        socket.onmessage = (e) => {
-            assert.equal('Error: No model required', e.data);
+        socket.on('connected', () => {
+            assert.ok(true);
             socket.close();
             done();
-        };
-    });
-
-    it('should not allow a query on a non-existant model', (done) => {
-        const headers = { Authorization: `Bearer ${process.env.TOKEN}` };
-        const model = 'models=foobar';
-
-        const query = `${token}&${model}`;
-
-        const socket = new _EventSource(`https://localhost:3006/changes?${query}`);
-
-        socket.onmessage = (e) => {
-            assert.equal('Error: Model not found', e.data);
-            socket.close();
-            done();
-        };
+        });
     });
 
     it('should sends data when the Authorization header is okay', (done) => {
-        const token = `authorization=Bearer%20${process.env.TOKEN}`;
-        const model = 'models=purchases';
+        const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
+        const socket = new ws(TOKEN_HEADER);
 
-        const query = `${token}&${model}`;
+        socket.on('connected', () => {
+            assert.ok(true);
 
-        const socket = new _EventSource(`https://localhost:3006/changes?${query}`);
+            socket.emit('listen', [ 'purchases' ]);
 
-        socket.onmessage = (e) => {
-            assert.equal('{"model":"purchases","action":"listen"}', e.data);
-            socket.close();
-            done();
-        };
+            socket.on('listening', (models) => {
+                assert.deepEqual([ 'Purchase' ], models);
+                socket.close();
+                done();
+            });
+        });
     });
 
     it('should watch for changes', function (done) {
         this.timeout(5000);
 
-        const token = `authorization=Bearer%20${process.env.TOKEN}`;
-        const model = 'models=meansofpayment';
+        const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
+        const socket = new ws(TOKEN_HEADER);
 
-        const query = `${token}&${model}`;
+        socket.on('connected', () => {
+            assert.ok(true);
 
-        const socket = new _EventSource(`https://localhost:3006/changes?${query}`);
+            socket.emit('listen', [ 'meansofpayment' ]);
 
-        let mopId;
+            socket.on('listening', (models) => {
+                assert.deepEqual([ 'MeanOfPayment' ], models);
 
-        let calls = 0;
+                let mopId;
+                let calls = 0;
 
-        /**
-         * Check if all the queries has been feeded to the event source client
-         */
-        function checkDone() {
-            assert.equal(4, calls);
+                /**
+                 * Delete a mean of payment
+                 */
+                function requestDelete() {
+                    unirest.delete(`https://localhost:3006/meansofpayment/${mopId}`)
+                        .end();
+                }
 
-            socket.close();
-            done();
-        }
+                /**
+                 * Update a mean of payment
+                 */
+                function requestUpdate() {
+                    unirest.put(`https://localhost:3006/meansofpayment/${mopId}`)
+                        .send({ slug: 'bar', name: 'Bar' })
+                        .end(() => { setTimeout(requestDelete, 500); });
+                }
 
-        /**
-         * Delete a mean of payment
-         */
-        function requestDelete() {
-            unirest.delete(`https://localhost:3006/meansofpayment/${mopId}`)
-                .end(() => {
-                    setTimeout(checkDone, 500);
+                unirest.post('https://localhost:3006/meansofpayment')
+                    .send({ slug: 'foo', name: 'Foo' })
+                    .end((response) => {
+                        mopId = response.body.id;
+                        setTimeout(requestUpdate, 500);
+                    });
+
+                socket.on('create', (doc) => {
+                    calls += 1;
+                    assert.equal('object', typeof doc);
+                    assert.equal('string', typeof doc.id);
                 });
-        }
 
-        /**
-         * Update a mean of payment
-         */
-        function requestUpdate() {
-            unirest.put(`https://localhost:3006/meansofpayment/${mopId}`)
-                .send({
-                    slug: 'bar',
-                    name: 'Bar'
-                })
-                .end(() => {
-                    setTimeout(requestDelete, 500);
+                socket.on('update', (doc) => {
+                    calls += 1;
+                    assert.equal(mopId, doc.from.id);
+                    assert.equal(mopId, doc.to.id);
+                    assert.equal('Foo', doc.from.name);
+                    assert.equal('Bar', doc.to.name);
                 });
-        }
 
-        /**
-         * Creates a mean of payment
-         */
-        function requestCreate() {
-            unirest.post('https://localhost:3006/meansofpayment')
-                .send({
-                    slug: 'foo',
-                    name: 'Foo'
-                })
-                .end((response) => {
-                    mopId = response.body.id;
-                    setTimeout(requestUpdate, 500);
+                socket.on('delete', (doc) => {
+                    calls += 1;
+                    assert.equal(mopId, doc.id);
+                    assert.equal('Bar', doc.name);
+                    assert.equal(3, calls);
+
+                    done();
                 });
-        }
-
-        socket.onmessage = (e) => {
-            calls += 1;
-
-            const obj = JSON.parse(e.data);
-
-            if (obj.action === 'listen') {
-                assert.equal('string', typeof obj.model);
-                requestCreate();
-                return;
-            }
-
-            if (obj.action === 'create') {
-                assert.equal('string', typeof obj.model);
-                assert.equal('object', typeof obj.doc);
-                assert.equal('string', typeof obj.doc.id);
-                assert.equal(2, calls);
-            }
-
-            if (obj.action === 'update') {
-                assert.equal('string', typeof obj.model);
-                assert.equal('object', typeof obj.doc);
-                assert.equal('string', typeof obj.doc.id);
-                assert.equal('string', typeof obj.from.id);
-                assert.equal(3, calls);
-            }
-
-            if (obj.action === 'delete') {
-                assert.equal('string', typeof obj.model);
-                assert.equal('string', typeof obj.doc.id);
-                assert.equal(4, calls);
-            }
-        };
+            });
+        });
     });
 });

@@ -1,5 +1,5 @@
 const logger                 = require('./lib/log');
-const { allModels }          = require('./lib/modelParser');
+const { modelsNames }        = require('./lib/modelParser');
 const APIError               = require('./errors/APIError');
 const middlewares            = require('./middlewares');
 const { marshal, unmarshal } = require('./middlewares/connectors/socket');
@@ -30,7 +30,7 @@ const broadcast = (clients, action, model, doc) => {
         .map(id => clients[id])
         .filter(client => client.subscriptions.indexOf(model) > -1)
         .forEach((client) => {
-            client.emit(action, doc);
+            client.client.emit(action, doc);
         });
 };
 
@@ -41,38 +41,55 @@ const broadcast = (clients, action, model, doc) => {
  */
 module.exports.ioServer = (httpServer, app) => {
     const io = require('socket.io')(httpServer, {
-        path       : '/changes',
         serveClient: false,
-        wsEngine   : 'uws'
+        engine     : 'uws'
     });
 
     app.locals.io = io;
 
     const clients = {};
 
-    allModels
+    Object.keys(modelsNames)
+        .map(n => modelsNames[n])
         .map(modelName => app.locals.models[modelName])
         .forEach(Model => listenForModelChanges(Model, clients));
 
     io.on('connection', (client) => {
-        client.send('bonjour');
-        // for (let key of Object.keys(middlewares)) {
-        //     const result = marshal(middlewares[key])(client, app);
+        let initialPromise = Promise.resolve();
 
-        //     if (result.err) {
-        //         console.log('EMIT ERR', result.err.message);
-        //         client.send('APIError', result.err.message);
-        //         return;
-        //     }
-        // }
+        for (let key of Object.keys(middlewares)) {
+            initialPromise = initialPromise
+                .then(() => marshal(middlewares[key])(client, app))
+                .then((result) => {
+                    if (result.err) {
+                        return Promise.reject(result.err);
+                    }
+                })
+        }
 
-        client.on('listen', (models) => {
-            clients[client.id] = { client };
-            clients[client.id].subscriptions = models;
-        });
+        initialPromise = initialPromise
+            .then(() => {
+                client.emit('connected');
 
-        client.on('disconnect', () => {
-            delete clients[client.id];
-        });
+                client.on('listen', (models) => {
+                    clients[client.id] = { client };
+                    clients[client.id].subscriptions = models
+                        .map(m => modelsNames[m.toLowerCase()]);
+
+                    client.emit('listening', clients[client.id].subscriptions);
+                });
+
+                client.on('disconnect', () => {
+                    delete clients[client.id];
+                });
+            })
+            .catch((err) => {
+                client.emit('APIError', err.message);
+                log.warn('socket error:', err.message);
+            });
+    });
+
+    io.on('error', (err) => {
+        log.error(err);
     });
 };

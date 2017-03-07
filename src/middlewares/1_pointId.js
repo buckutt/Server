@@ -9,7 +9,7 @@ module.exports = (connector) => {
 
     let device;
 
-    Device
+    return Device
         .getAll(connector.fingerprint, {
             index: 'fingerprint'
         })
@@ -25,7 +25,7 @@ module.exports = (connector) => {
         .then((devices) => {
             /* istanbul ignore if */
             if (devices.length === 0 || devices[0].periodPoints.length === 0) {
-                return connector.next(new APIError(404, 'Device not found', { fingerprint: connector.fingerprint }));
+                return Promise.reject(new APIError(404, 'Device not found', { fingerprint: connector.fingerprint }));
             }
 
             device = devices[0];
@@ -54,10 +54,10 @@ module.exports = (connector) => {
             connector.header('pointName', connector.point.name);
             connector.header('device', device.id);
 
-            return connector.next();
+            return Promise.resolve();
         })
-        .catch((err) => {
+        .catch((err) =>
             /* istanbul ignore next */
-            connector.next(new APIError(500, 'Unknown error', err));
-        });
+            Promise.reject(new APIError(500, 'Unknown error', err))
+        );
 };
