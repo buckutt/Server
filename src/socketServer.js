@@ -1,10 +1,18 @@
-const logger                 = require('./lib/log');
-const { modelsNames }        = require('./lib/modelParser');
-const APIError               = require('./errors/APIError');
-const middlewares            = require('./middlewares');
-const { marshal, unmarshal } = require('./middlewares/connectors/socket');
+const logger          = require('./lib/log');
+const { modelsNames } = require('./lib/modelParser');
+const middlewares     = require('./middlewares');
+const { marshal }     = require('./middlewares/connectors/socket');
 
 const log = logger(module);
+
+const broadcast = (clients, action, model, doc) => {
+    Object.keys(clients)
+        .map(id => clients[id])
+        .filter(client => client.subscriptions.indexOf(model) > -1)
+        .forEach((client) => {
+            client.client.emit(action, doc);
+        });
+};
 
 const listenForModelChanges = (Model, clients) => {
     Model.changes().then((feed) => {
@@ -23,15 +31,6 @@ const listenForModelChanges = (Model, clients) => {
             }
         });
     });
-};
-
-const broadcast = (clients, action, model, doc) => {
-    Object.keys(clients)
-        .map(id => clients[id])
-        .filter(client => client.subscriptions.indexOf(model) > -1)
-        .forEach((client) => {
-            client.client.emit(action, doc);
-        });
 };
 
 /**
@@ -57,14 +56,14 @@ module.exports.ioServer = (httpServer, app) => {
     io.on('connection', (client) => {
         let initialPromise = Promise.resolve();
 
-        for (let key of Object.keys(middlewares)) {
+        for (const key of Object.keys(middlewares)) {
             initialPromise = initialPromise
                 .then(() => marshal(middlewares[key])(client, app))
                 .then((result) => {
                     if (result.err) {
                         return Promise.reject(result.err);
                     }
-                })
+                });
         }
 
         initialPromise = initialPromise

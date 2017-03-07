@@ -51,7 +51,6 @@ module.exports = function token(connector) {
     return jwt
         .verifyAsync(bearer, secret)
         .then((decoded) => {
-
             const userId = decoded.id;
             connectType  = decoded.connectType;
 
@@ -86,10 +85,10 @@ module.exports = function token(connector) {
 
             return Promise.resolve();
         })
-        .catch(jwt.TokenExpiredError, (err) =>
+        .catch(jwt.TokenExpiredError, err =>
             Promise.reject(new APIError(401, 'Token expired', err))
         )
-        .catch(jwt.JsonWebTokenError, (err) =>
+        .catch(jwt.JsonWebTokenError, err =>
             Promise.reject(new APIError(401, 'Invalid token', err))
         );
 };

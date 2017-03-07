@@ -1,5 +1,5 @@
-module.exports.marshal = function (mw) {
-    return function (req, res, next) {
+module.exports.marshal = function marshal(mw) {
+    return function connectorMiddleware(req, res, next) {
         // Connector should be kept throught middlesares to keep req.user, req.fingerprint, etc.
         // That's why it's set inside req.connector
         req.connector = req.connector || {
@@ -24,21 +24,21 @@ module.exports.marshal = function (mw) {
             },
 
             getClientFingerprint() {
-                return req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim()
+                return req.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
             }
         };
 
         mw(req.connector)
             .then(() => {
-                next()
+                next();
             })
-            .catch(err => {
-                next(err)
+            .catch((err) => {
+                next(err);
             });
     };
 };
 
-module.exports.unmarshal = function (req, res, next) {
+module.exports.unmarshal = function unmarshal(req, res, next) {
     req.fingerprint = req.connector.fingerprint;
     req.Point_id    = req.connector.Point_id;
     req.Event_id    = req.connector.Event_id;

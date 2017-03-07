@@ -11,7 +11,7 @@ const fs     = require('fs');
  * @param  {Object} headers Additional headers
  * @return {WebSocket} The ws instance
  */
-function ws(headers) {
+function WS(headers) {
     const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
     const caFile  = fs.readFileSync('ssl/certificates/ca/ca-crt.pem');
 
@@ -22,7 +22,7 @@ function ws(headers) {
         strictSSL         : false,
         rejectUnauthorized: false,
         extraHeaders      : Object.assign({
-            origin: 'https://localhost:3006',
+            origin: 'https://localhost:3006'
         }, headers)
     };
 
@@ -31,7 +31,7 @@ function ws(headers) {
 
 describe('Changes', () => {
     it('should not allow the changefeed when no Authorization header is sent', (done) => {
-        const socket = new ws();
+        const socket = new WS();
 
         socket.on('APIError', (err) => {
             assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
@@ -41,7 +41,7 @@ describe('Changes', () => {
     });
 
     it('should not allow the changefeed when the Authorization header is wrong', (done) => {
-        const socket = new ws({ Authorization: 'foo' });
+        const socket = new WS({ Authorization: 'foo' });
 
         socket.on('APIError', (err) => {
             assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
@@ -51,7 +51,7 @@ describe('Changes', () => {
     });
 
     it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
-        const socket = new ws({ Authorization: 'foo bar' });
+        const socket = new WS({ Authorization: 'foo bar' });
 
         socket.on('APIError', (err) => {
             assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]', err);
@@ -62,7 +62,7 @@ describe('Changes', () => {
 
     it('should allow with no listenning', (done) => {
         const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
-        const socket = new ws(TOKEN_HEADER);
+        const socket = new WS(TOKEN_HEADER);
 
         socket.on('connected', () => {
             assert.ok(true);
@@ -73,15 +73,15 @@ describe('Changes', () => {
 
     it('should sends data when the Authorization header is okay', (done) => {
         const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
-        const socket = new ws(TOKEN_HEADER);
+        const socket = new WS(TOKEN_HEADER);
 
         socket.on('connected', () => {
             assert.ok(true);
 
-            socket.emit('listen', [ 'purchases' ]);
+            socket.emit('listen', ['purchases']);
 
             socket.on('listening', (models) => {
-                assert.deepEqual([ 'Purchase' ], models);
+                assert.deepEqual(['Purchase'], models);
                 socket.close();
                 done();
             });
@@ -92,15 +92,15 @@ describe('Changes', () => {
         this.timeout(5000);
 
         const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
-        const socket = new ws(TOKEN_HEADER);
+        const socket = new WS(TOKEN_HEADER);
 
         socket.on('connected', () => {
             assert.ok(true);
 
-            socket.emit('listen', [ 'meansofpayment' ]);
+            socket.emit('listen', ['meansofpayment']);
 
             socket.on('listening', (models) => {
-                assert.deepEqual([ 'MeanOfPayment' ], models);
+                assert.deepEqual(['MeanOfPayment'], models);
 
                 let mopId;
                 let calls = 0;

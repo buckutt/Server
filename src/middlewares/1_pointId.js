@@ -46,7 +46,7 @@ module.exports = (connector) => {
                     connector.point  = periodPoint.point;
                     connector.event  = periodPoint.period.event;
                 }
-            })
+            });
 
             connector.header('event', connector.Event_id);
             connector.header('eventName', connector.event.name);
@@ -56,7 +56,7 @@ module.exports = (connector) => {
 
             return Promise.resolve();
         })
-        .catch((err) =>
+        .catch(err =>
             /* istanbul ignore next */
             Promise.reject(new APIError(500, 'Unknown error', err))
         );

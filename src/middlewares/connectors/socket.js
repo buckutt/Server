@@ -1,5 +1,5 @@
-module.exports.marshal = function (mw) {
-    return function (socket, app) {
+module.exports.marshal = function marshal(mw) {
+    return function connectorMiddleware(socket, app) {
         socket.connector = socket.connector || {
             authorized: socket.client.request.client.authorized,
 
@@ -14,7 +14,7 @@ module.exports.marshal = function (mw) {
             models: app.locals.models,
 
             result: {
-                err: null,
+                err    : null,
                 headers: {}
             },
 
@@ -34,5 +34,5 @@ module.exports.marshal = function (mw) {
                 return Promise.resolve();
             })
             .then(() => socket.connector.result);
-    }
+    };
 };
