@@ -8,6 +8,7 @@ const log = logger(module);
 const broadcast = (clients, action, model, doc) => {
     Object.keys(clients)
         .map(id => clients[id])
+        .filter(client => Array.isArray(client.subscriptions))
         .filter(client => client.subscriptions.indexOf(model) > -1)
         .forEach((client) => {
             client.client.emit(action, doc);
