@@ -73,6 +73,7 @@ module.exports.ioServer = (httpServer, app) => {
                 client.emit('connected');
 
                 client.on('listen', (models) => {
+                    /* istanbul ignore else */
                     if (Array.isArray(models)) {
                         clients[client.id] = { client };
                         clients[client.id].subscriptions = models
@@ -93,6 +94,7 @@ module.exports.ioServer = (httpServer, app) => {
     });
 
     io.on('error', (err) => {
+        /* istanbul ignore next */
         log.error(err);
     });
 };
