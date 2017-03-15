@@ -24,14 +24,12 @@ module.exports = function token(connector) {
     }
 
     // Missing header
-    if (!(connector.headers && connector.headers.authorization) && !connector.jwt) {
+    if (!(connector.headers && connector.headers.authorization)) {
         const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
         return Promise.reject(err);
     }
 
-    const parts = connector.headers.authorization || connector.jwt;
-    parts = parts.split(' ');
-    
+    const parts = connector.headers.authorization.split(' ');
     // Invalid format (`Bearer Token`)
     if (parts.length !== 2) {
         const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');

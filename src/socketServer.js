@@ -54,24 +54,23 @@ module.exports.ioServer = (httpServer, app) => {
         .map(modelName => app.locals.models[modelName])
         .forEach(Model => listenForModelChanges(Model, clients));
 
-    /**
-     * Workaround for https://github.com/socketio/socket.io-client/issues/976
-     */
     io.on('connection', (client) => {
         let initialPromise = Promise.resolve();
-        client.jwtChecked = false;
-        client.emit('connected');
+        client.authorized = false;
+        client.emit('connected', { connected: true, authorized: false });
 
         setTimeout(() => {
-            if (!client.jwtChecked) {
+            if (!client.authorized) {
                 client.disconnect(true);
             }
         }, 1000); // 1 second to authorize or kill the socket
 
-        client.on('authorize', (jwt) => {
-            client.jwtChecked = true;
-            client.jwt     = jwt;
-
+        /**
+         * Workaround for https://github.com/socketio/socket.io-client/issues/976
+         */
+        client.on('authorize', (data) => {
+            client.authorized = true;
+    
             for (const key of Object.keys(middlewares)) {
                 initialPromise = initialPromise
                     .then(() => marshal(middlewares[key])(client, app))
@@ -84,7 +83,7 @@ module.exports.ioServer = (httpServer, app) => {
 
             initialPromise = initialPromise
                 .then(() => {
-                    client.emit('authorized');
+                    client.emit('connected');
                     
                     client.on('listen', (models) => {
                         clients[client.id] = { client };
