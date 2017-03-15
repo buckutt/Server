@@ -8,29 +8,29 @@ const fs     = require('fs');
 
 /**
  * ws wrapper to support SSL and CORS
- * @param  {Object} opts_ Additional options
+ * @param  {Object} headers Additional headers
  * @return {WebSocket} The ws instance
  */
-function WS(opts_) {
+function WS(headers) {
     const p12File = fs.readFileSync('ssl/certificates/test/test.p12');
     const caFile  = fs.readFileSync('ssl/certificates/ca/ca-crt.pem');
 
-    const opts = Object.assign({
+    const opts = {
         pfx               : p12File,
         passphrase        : 'test',
         ca                : caFile,
         strictSSL         : false,
         rejectUnauthorized: false,
-        extraHeaders      : {
+        extraHeaders      : Object.assign({
             origin: 'https://localhost:3006'
-        }
-    }, opts_);
+        }, headers)
+    };
 
     return io('https://localhost:3006/', opts);
 }
 
 describe('Changes', () => {
-    it('should not allow the changefeed when no Authorization is sent', (done) => {
+    it('should not allow the changefeed when no Authorization header is sent', (done) => {
         const socket = new WS();
 
         socket.on('APIError', (err) => {
@@ -40,102 +40,50 @@ describe('Changes', () => {
         });
     });
 
-    describe('with headers', () => {
-        it('should not allow the changefeed when the Authorization header is wrong', (done) => {
-            const socket = new WS({ extraHeaders: { Authorization: 'foo' } });
+    it('should not allow the changefeed when the Authorization header is wrong', (done) => {
+        const socket = new WS({ Authorization: 'foo' });
 
-            socket.on('APIError', (err) => {
-                assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
-                socket.close();
-                done();
-            });
-        });
-
-        it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
-            const socket = new WS({ extraHeaders: { Authorization: 'foo bar' } });
-
-            socket.on('APIError', (err) => {
-                assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]', err);
-                socket.close();
-                done();
-            });
-        });
-
-        it('should allow with no listening', (done) => {
-            const TOKEN_HEADER = { extraHeaders: { Authorization: `Bearer ${process.env.TOKEN}` } };
-            const socket = new WS(TOKEN_HEADER);
-
-            socket.on('connected', () => {
-                assert.ok(true);
-                socket.close();
-                done();
-            });
-        });
-
-        it('should sends data when the Authorization header is okay', (done) => {
-            const TOKEN_HEADER = { extraHeaders: { Authorization: `Bearer ${process.env.TOKEN}` } };
-            const socket = new WS(TOKEN_HEADER);
-
-            socket.on('connected', () => {
-                assert.ok(true);
-
-                socket.emit('listen', ['purchases']);
-
-                socket.on('listening', (models) => {
-                    assert.deepEqual(['Purchase'], models);
-                    socket.close();
-                    done();
-                });
-            });
+        socket.on('APIError', (err) => {
+            assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
+            socket.close();
+            done();
         });
     });
 
-    describe('with querystring', () => {
-        it('should not allow the changefeed when the Authorization header is wrong', (done) => {
-            const socket = new WS();
+    it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
+        const socket = new WS({ Authorization: 'foo bar' });
 
-            socket.on('APIError', (err) => {
-                assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
+        socket.on('APIError', (err) => {
+            assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]', err);
+            socket.close();
+            done();
+        });
+    });
+
+    it('should allow with no listenning', (done) => {
+        const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
+        const socket = new WS(TOKEN_HEADER);
+
+        socket.on('connected', () => {
+            assert.ok(true);
+            socket.close();
+            done();
+        });
+    });
+
+    it('should sends data when the Authorization header is okay', (done) => {
+        const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
+        const socket = new WS(TOKEN_HEADER);
+
+        socket.on('connected', () => {
+            assert.ok(true);
+
+            socket.emit('listen', ['purchases']);
+
+            socket.on('listening', (models) => {
+                assert.deepEqual(['Purchase'], models);
                 socket.close();
                 done();
-            });
-        });
-
-        it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
-            const socket = new WS({ query: 'authorization=foo bar' });
-
-            socket.on('APIError', (err) => {
-                assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]', err);
-                socket.close();
-                done();
-            });
-        });
-
-        it('should allow with no listening', (done) => {
-            const TOKEN_HEADER = { query: `authorization=Bearer ${process.env.TOKEN}` };
-            const socket = new WS(TOKEN_HEADER);
-
-            socket.on('connected', () => {
-                assert.ok(true);
-                socket.close();
-                done();
-            });
-        });
-
-        it('should sends data when the Authorization header is okay', (done) => {
-            const TOKEN_HEADER = { query: `authorization=Bearer ${process.env.TOKEN}` };
-            const socket = new WS(TOKEN_HEADER);
-
-            socket.on('connected', () => {
-                assert.ok(true);
-
-                socket.emit('listen', ['purchases']);
-
-                socket.on('listening', (models) => {
-                    assert.deepEqual(['Purchase'], models);
-                    socket.close();
-                    done();
-                });
             });
         });
     });
@@ -143,7 +91,7 @@ describe('Changes', () => {
     it('should watch for changes', function (done) {
         this.timeout(5000);
 
-        const TOKEN_HEADER = { extraHeaders: { Authorization: `Bearer ${process.env.TOKEN}` } };
+        const TOKEN_HEADER = { Authorization: `Bearer ${process.env.TOKEN}` };
         const socket = new WS(TOKEN_HEADER);
 
         socket.on('connected', () => {

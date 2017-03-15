@@ -5,7 +5,9 @@ module.exports.marshal = function marshal(mw) {
 
             headers: socket.client.request.headers,
 
-            query: socket.handshake.query,
+            jwt: socket.jwt.token,
+
+            query: {},
 
             path: '/changes',
 
