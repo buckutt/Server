@@ -15,10 +15,6 @@ module.exports.marshal = function marshal(mw) {
 
             models: req.app.locals.models,
 
-            handleSocket() {
-                req.app.locals.io.eio.handleRequest(req, res);
-            },
-
             header(name, value) {
                 res.header(name, value);
             },

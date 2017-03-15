@@ -5,13 +5,13 @@ const { marshal }     = require('./middlewares/connectors/socket');
 
 const log = logger(module);
 
-const broadcast = (clients, action, model, doc) => {
+const broadcast = (clients, action, model, data) => {
     Object.keys(clients)
         .map(id => clients[id])
         .filter(client => Array.isArray(client.subscriptions))
         .filter(client => client.subscriptions.indexOf(model) > -1)
         .forEach((client) => {
-            client.client.emit(action, doc);
+            client.client.emit(action, { model, data });
         });
 };
 
@@ -42,7 +42,8 @@ const listenForModelChanges = (Model, clients) => {
 module.exports.ioServer = (httpServer, app) => {
     const io = require('socket.io')(httpServer, {
         serveClient: false,
-        engine     : 'uws'
+        engine     : 'uws',
+        handlePreflightRequest: false
     });
 
     app.locals.io = io;
@@ -72,11 +73,13 @@ module.exports.ioServer = (httpServer, app) => {
                 client.emit('connected');
 
                 client.on('listen', (models) => {
-                    clients[client.id] = { client };
-                    clients[client.id].subscriptions = models
-                        .map(m => modelsNames[m.toLowerCase()]);
+                    if (Array.isArray(models)) {
+                        clients[client.id] = { client };
+                        clients[client.id].subscriptions = models
+                            .map(m => modelsNames[m.toLowerCase()]);
 
-                    client.emit('listening', clients[client.id].subscriptions);
+                        client.emit('listening', clients[client.id].subscriptions);
+                    }
                 });
 
                 client.on('disconnect', () => {

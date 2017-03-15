@@ -44,7 +44,7 @@
     "qs": "^6.1.0",
     "randomstring": "^1.1.5",
     "rimraf": "^2.5.2",
-    "socket.io": "^1.7.3",
+    "socket.io": "github:buckless/socket.io",
     "source-map-support": "^0.4.0",
     "sse": "github:gjuchault/sse.js",
     "sync-exec": "^0.6.2",
