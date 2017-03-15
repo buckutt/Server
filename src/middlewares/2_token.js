@@ -29,9 +29,9 @@ module.exports = function token(connector) {
         return Promise.reject(err);
     }
 
-    const parts = connector.headers.authorization || connector.jwt;
-    parts = parts.split(' ');
-    
+    let parts = connector.headers.authorization || connector.jwt;
+    parts     = parts.split(' ');
+
     // Invalid format (`Bearer Token`)
     if (parts.length !== 2) {
         const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
