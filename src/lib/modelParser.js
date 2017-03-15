@@ -7,11 +7,11 @@ const modelsNames = {
     events        : 'Event',
     fundations    : 'Fundation',
     groups        : 'Group',
-    groupPeriods  : 'GroupPeriod',
+    groupperiods  : 'GroupPeriod',
     meansoflogin  : 'MeanOfLogin',
     meansofpayment: 'MeanOfPayment',
     periods       : 'Period',
-    periodPoints  : 'PeriodPoint',
+    periodpoints  : 'PeriodPoint',
     points        : 'Point',
     prices        : 'Price',
     promotions    : 'Promotion',
@@ -34,11 +34,11 @@ const possibleValues = Object.keys(modelsNames);
  * @return {Function} The next middleware
  */
 function modelParser(req, res, next, model) {
-    if (possibleValues.indexOf(model) === -1) {
+    if (possibleValues.indexOf(model.toLowerCase()) === -1) {
         return next(new APIError(404, 'Model not found'));
     }
 
-    req.Model = req.app.locals.models[modelsNames[model]];
+    req.Model = req.app.locals.models[modelsNames[model.toLowerCase()]];
 
     return next();
 }
