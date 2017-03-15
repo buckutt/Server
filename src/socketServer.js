@@ -11,10 +11,7 @@ const broadcast = (clients, action, model, doc) => {
         .filter(client => Array.isArray(client.subscriptions))
         .filter(client => client.subscriptions.indexOf(model) > -1)
         .forEach((client) => {
-            client.client.emit(action, {
-                model,
-                object: doc
-            });
+            client.client.emit(action, doc);
         });
 };
 
@@ -88,7 +85,7 @@ module.exports.ioServer = (httpServer, app) => {
             initialPromise = initialPromise
                 .then(() => {
                     client.emit('authorized');
-
+                    
                     client.on('listen', (models) => {
                         clients[client.id] = { client };
                         clients[client.id].subscriptions = models

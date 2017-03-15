@@ -5,7 +5,7 @@ module.exports.marshal = function marshal(mw) {
 
             headers: socket.client.request.headers,
 
-            jwt: socket.jwt.token,
+            jwt: socket.jwt,
 
             query: {},
 
