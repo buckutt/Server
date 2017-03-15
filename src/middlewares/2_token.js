@@ -23,13 +23,13 @@ module.exports = function token(connector) {
         throw new Error('config.app.secret must be set');
     }
 
-    // Missing header
-    if (!(connector.headers && connector.headers.authorization) && !connector.jwt) {
+    // Missing header or querystring
+    if (!(connector.headers && connector.headers.authorization) && !connector.query.authorization) {
         const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
         return Promise.reject(err);
     }
 
-    let parts = connector.headers.authorization || connector.jwt;
+    let parts = connector.headers.authorization || connector.query.authorization;
     parts     = parts.split(' ');
 
     // Invalid format (`Bearer Token`)
@@ -85,6 +85,7 @@ module.exports = function token(connector) {
                     return false;
                 });
 
+            connector.jwtChecked = true;
             return Promise.resolve();
         })
         .catch(jwt.TokenExpiredError, err =>

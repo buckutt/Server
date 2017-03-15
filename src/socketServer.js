@@ -2,6 +2,7 @@ const logger          = require('./lib/log');
 const { modelsNames } = require('./lib/modelParser');
 const middlewares     = require('./middlewares');
 const { marshal }     = require('./middlewares/connectors/socket');
+const APIError        = require('./errors/APIError');
 
 const log = logger(module);
 
@@ -62,50 +63,37 @@ module.exports.ioServer = (httpServer, app) => {
      */
     io.on('connection', (client) => {
         let initialPromise = Promise.resolve();
-        client.jwtChecked = false;
-        client.emit('connected');
 
-        setTimeout(() => {
-            if (!client.jwtChecked) {
-                client.disconnect(true);
-            }
-        }, 1000); // 1 second to authorize or kill the socket
-
-        client.on('authorize', (jwt) => {
-            client.jwtChecked = true;
-            client.jwt     = jwt;
-
-            for (const key of Object.keys(middlewares)) {
-                initialPromise = initialPromise
-                    .then(() => marshal(middlewares[key])(client, app))
-                    .then((result) => {
-                        if (result.err) {
-                            return Promise.reject(result.err);
-                        }
-                    });
-            }
-
+        for (const key of Object.keys(middlewares)) {
             initialPromise = initialPromise
-                .then(() => {
-                    client.emit('authorized');
-
-                    client.on('listen', (models) => {
-                        clients[client.id] = { client };
-                        clients[client.id].subscriptions = models
-                            .map(m => modelsNames[m.toLowerCase()]);
-
-                        client.emit('listening', clients[client.id].subscriptions);
-                    });
-
-                    client.on('disconnect', () => {
-                        delete clients[client.id];
-                    });
-                })
-                .catch((err) => {
-                    client.emit('APIError', err.message);
-                    log.warn('socket error:', err.message);
+                .then(() => marshal(middlewares[key])(client, app))
+                .then((result) => {
+                    if (result.err) {
+                        return Promise.reject(result.err);
+                    }
                 });
-        });
+        }
+
+        initialPromise = initialPromise
+            .then(() => {
+                client.emit('connected');
+
+                client.on('listen', (models) => {
+                    clients[client.id] = { client };
+                    clients[client.id].subscriptions = models
+                        .map(m => modelsNames[m.toLowerCase()]);
+
+                    client.emit('listening', clients[client.id].subscriptions);
+                });
+
+                client.on('disconnect', () => {
+                    delete clients[client.id];
+                });
+            })
+            .catch((err) => {
+                client.emit('APIError', err.message);
+                log.warn('socket error:', err.message);
+            });
     });
 
     io.on('error', (err) => {
