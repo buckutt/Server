@@ -13,7 +13,7 @@ const broadcast = (clients, action, model, doc) => {
         .forEach((client) => {
             client.client.emit(action, {
                 model,
-                data: doc
+                object: doc
             });
         });
 };

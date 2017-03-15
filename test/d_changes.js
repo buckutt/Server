@@ -131,22 +131,22 @@ describe('Changes', () => {
 
                 socket.on('create', (doc) => {
                     calls += 1;
-                    assert.equal('object', typeof doc.data);
-                    assert.equal('string', typeof doc.data.id);
+                    assert.equal('object', typeof doc.object);
+                    assert.equal('string', typeof doc.object.id);
                 });
 
                 socket.on('update', (doc) => {
                     calls += 1;
-                    assert.equal(mopId, doc.data.from.id);
-                    assert.equal(mopId, doc.data.to.id);
-                    assert.equal('Foo', doc.data.from.name);
-                    assert.equal('Bar', doc.data.to.name);
+                    assert.equal(mopId, doc.object.from.id);
+                    assert.equal(mopId, doc.object.to.id);
+                    assert.equal('Foo', doc.object.from.name);
+                    assert.equal('Bar', doc.object.to.name);
                 });
 
                 socket.on('delete', (doc) => {
                     calls += 1;
-                    assert.equal(mopId, doc.data.id);
-                    assert.equal('Bar', doc.data.name);
+                    assert.equal(mopId, doc.object.id);
+                    assert.equal('Bar', doc.object.name);
                     assert.equal(3, calls);
 
                     done();
