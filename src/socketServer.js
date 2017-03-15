@@ -56,52 +56,37 @@ module.exports.ioServer = (httpServer, app) => {
 
     io.on('connection', (client) => {
         let initialPromise = Promise.resolve();
-        client.authorized = false;
-        client.emit('connected', { connected: true, authorized: false });
 
-        setTimeout(() => {
-            if (!socket.authorized) {
-                socket.disconnect(true);
-            }
-        }, 1000); // 1 second to authorize or kill the socket
-
-        /**
-         * Workaround for https://github.com/socketio/socket.io-client/issues/976
-         */
-        socket.on('authorize', (data) => {
-            socket.authorized = true;
-    
-            for (const key of Object.keys(middlewares)) {
-                initialPromise = initialPromise
-                    .then(() => marshal(middlewares[key])(client, app))
-                    .then((result) => {
-                        if (result.err) {
-                            return Promise.reject(result.err);
-                        }
-                    });
-            }
-
+        for (const key of Object.keys(middlewares)) {
             initialPromise = initialPromise
-                .then(() => {
-                    client.emit('connected');
-                    
-                    client.on('listen', (models) => {
-                        clients[client.id] = { client };
-                        clients[client.id].subscriptions = models
-                            .map(m => modelsNames[m.toLowerCase()]);
-
-                        client.emit('listening', clients[client.id].subscriptions);
-                    });
-
-                    client.on('disconnect', () => {
-                        delete clients[client.id];
-                    });
-                })
-                .catch((err) => {
-                    client.emit('APIError', err.message);
-                    log.warn('socket error:', err.message);
+                .then(() => marshal(middlewares[key])(client, app))
+                .then((result) => {
+                    if (result.err) {
+                        return Promise.reject(result.err);
+                    }
                 });
-        });
+        }
+
+        initialPromise = initialPromise
+            .then(() => {
+                client.emit('connected');
+
+                client.on('listen', (models) => {
+                    clients[client.id] = { client };
+                    clients[client.id].subscriptions = models
+                        .map(m => modelsNames[m.toLowerCase()]);
+
+                    client.emit('listening', clients[client.id].subscriptions);
+                });
+
+                client.on('disconnect', () => {
+                    delete clients[client.id];
+                });
+            })
+            .catch((err) => {
+                client.emit('APIError', err.message);
+                log.warn('socket error:', err.message);
+            });
     });
 
     io.on('error', (err) => {
