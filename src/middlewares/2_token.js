@@ -29,7 +29,7 @@ module.exports = function token(connector) {
         return Promise.reject(err);
     }
 
-    let parts = connector.headers.authorization || connector.jwt;
+    let parts = connector.headers.authorization || connector.jwt;
     parts     = parts.split(' ');
 
     // Invalid format (`Bearer Token`)
