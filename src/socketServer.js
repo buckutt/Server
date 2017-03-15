@@ -60,16 +60,16 @@ module.exports.ioServer = (httpServer, app) => {
         client.emit('connected', { connected: true, authorized: false });
 
         setTimeout(() => {
-            if (!client.authorized) {
-                client.disconnect(true);
+            if (!socket.authorized) {
+                socket.disconnect(true);
             }
         }, 1000); // 1 second to authorize or kill the socket
 
         /**
          * Workaround for https://github.com/socketio/socket.io-client/issues/976
          */
-        client.on('authorize', (data) => {
-            client.authorized = true;
+        socket.on('authorize', (data) => {
+            socket.authorized = true;
     
             for (const key of Object.keys(middlewares)) {
                 initialPromise = initialPromise
