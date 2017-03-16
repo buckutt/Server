@@ -2,17 +2,15 @@ const APIError = require('../errors/APIError');
 
 /**
  * Retrieve the point id from the SSL certificate fingerprint
- * @param {Request}  req  Express request
- * @param {Response} res  Express response
- * @param {Function} next Next middleware
+ * @param {Object} connector HTTP/Socket.IO connector
  */
-module.exports = (req, res, next) => {
-    const Device = req.app.locals.models.Device;
+module.exports = (connector) => {
+    const Device = connector.models.Device;
 
     let device;
 
-    Device
-        .getAll(req.fingerprint, {
+    return Device
+        .getAll(connector.fingerprint, {
             index: 'fingerprint'
         })
         .getJoin({
@@ -27,7 +25,7 @@ module.exports = (req, res, next) => {
         .then((devices) => {
             /* istanbul ignore if */
             if (devices.length === 0 || devices[0].periodPoints.length === 0) {
-                return next(new APIError(404, 'Device not found', { fingerprint: req.fingerprint }));
+                return Promise.reject(new APIError(404, 'Device not found', { fingerprint: connector.fingerprint }));
             }
 
             device = devices[0];
@@ -40,22 +38,26 @@ module.exports = (req, res, next) => {
                 const diff = periodPoint.period.end - periodPoint.period.start;
 
                 if (diff < minPeriod) {
-                    req.Point_id = periodPoint.Point_id;
-                    req.Event_id = periodPoint.period.Event_id;
-                    minPeriod    = diff;
+                    connector.Point_id = periodPoint.Point_id;
+                    connector.Event_id = periodPoint.period.Event_id;
+                    minPeriod          = diff;
 
-                    req.device = device;
-                    req.point  = periodPoint.point;
-                    req.event  = periodPoint.period.event;
+                    connector.device = device;
+                    connector.point  = periodPoint.point;
+                    connector.event  = periodPoint.period.event;
                 }
             });
 
-            res.header('event', req.Event_id);
-            res.header('eventName', req.event.name);
-            res.header('point', req.Point_id);
-            res.header('pointName', req.point.name);
-            res.header('device', device.id);
+            connector.header('event', connector.Event_id);
+            connector.header('eventName', connector.event.name);
+            connector.header('point', connector.Point_id);
+            connector.header('pointName', connector.point.name);
+            connector.header('device', device.id);
 
-            return next();
+            return Promise.resolve();
+        })
+        .catch(err => {
+            /* istanbul ignore next */
+            Promise.reject(new APIError(500, 'Unknown error', err))
         });
 };

@@ -16,10 +16,7 @@ function generateMessage(mail, key) {
     const to       = mail;
     const subject  = config.subject;
     const template = dots.template(config.template);
-    console.log(config.template);
-    console.log(template);
     const html     = template({ link: `${config.managerUrl}/#/generate?key=${key}` });
-    console.log(html);
 
     return { from, to, subject, html };
 }

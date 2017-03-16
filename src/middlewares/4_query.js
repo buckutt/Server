@@ -15,25 +15,22 @@ const interpolate = {
 
 /**
  * Parses the query to build the future rethink call
- * @param  {Request}  req  Express request
- * @param  {Response} res  Express response
- * @param  {Function} next Next middleware
- * @return {Function} The next middleware
+ * @param {Object} connector HTTP/Socket.IO connector
  */
-module.exports = function query(req, res, next) {
+module.exports = function query(connector) {
     for (const q of Object.keys(types)) {
-        if (req.query.hasOwnProperty(q)) {
-            if (typeof req.query[q] !== types[q]) {
+        if (connector.query.hasOwnProperty(q)) {
+            if (typeof connector.query[q] !== types[q]) {
                 const interpolater = interpolate[types[q]];
 
                 try {
-                    req.query[q] = interpolater(req.query[q]);
+                    connector.query[q] = interpolater(connector.query[q]);
                 } catch (e) {
-                    return next(new APIError(400, 'Bad Input', `Invalid query ${q}`));
+                    return Promise.reject(new APIError(400, 'Bad Input', `Invalid query ${q}`));
                 }
             }
         }
     }
 
-    return next();
+    return Promise.resolve();
 };
