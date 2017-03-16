@@ -91,6 +91,7 @@ describe('Before tests', () => {
             return r.table('MeanOfLogin').insert([{
                 type     : 'etuMail',
                 data     : 'buck@buckless.fr',
+                blocked  : false,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
@@ -98,6 +99,7 @@ describe('Before tests', () => {
             }, {
                 type     : 'etuId',
                 data     : '22000000353423',
+                blocked  : false,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
@@ -105,6 +107,7 @@ describe('Before tests', () => {
             }, {
                 type     : 'etuMail',
                 data     : 'norights@buckless.fr',
+                blocked  : false,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,
@@ -112,6 +115,7 @@ describe('Before tests', () => {
             }, {
                 type     : 'etuMail',
                 data     : 'seller@buckless.fr',
+                blocked  : false,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false,

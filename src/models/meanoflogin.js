@@ -8,6 +8,7 @@ const MeanOfLogin = thinky.createModel('MeanOfLogin', {
     type     : String,
     // String or Number
     data     : type.any(),
+    blocked  : type.boolean().default(false),
     createdAt: type.date().default(new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false),

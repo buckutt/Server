@@ -58,8 +58,9 @@ const seeder = () => {
 
     /* MeanOfLogin */
     const defaultMol = new models.MeanOfLogin({
-        type: 'etuMail',
-        data: 'admin@buckless.com'
+        type   : 'etuMail',
+        data   : 'admin@buckless.com',
+        blocked: false
     });
 
     /* Rights */

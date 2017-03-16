@@ -47,7 +47,8 @@ router.post('/services/login', (req, res, next) => {
         .filter({
             type     : ${req.body.meanOfLogin},
             data     : ${req.body.data},
-            isRemoved: false
+            isRemoved: false,
+            blocked  : false
         })
         .limit(1).getJoin(${pp({
             user: {
@@ -62,7 +63,8 @@ router.post('/services/login', (req, res, next) => {
         .filter({
             type     : req.body.meanOfLogin.toString(),
             data     : req.body.data.toString(),
-            isRemoved: false
+            isRemoved: false,
+            blocked  : false
         })
         .limit(1)
         .getJoin({

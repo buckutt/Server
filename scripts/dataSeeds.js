@@ -152,13 +152,15 @@ const seeder = {
 
         /* MeanOfLogin */
         const molGJEtuCard = new models.MeanOfLogin({
-            type: 'etuId',
-            data: '22000000353423'
+            type   : 'etuId',
+            data   : '22000000353423',
+            blocked: false
         });
 
         const molGJEtuMail = new models.MeanOfLogin({
-            type: 'etuMail',
-            data: 'gabriel.juchault@utt.fr'
+            type   : 'etuMail',
+            data   : 'gabriel.juchault@utt.fr',
+            blocked: false
         });
 
         /* MeanOfPayment */
