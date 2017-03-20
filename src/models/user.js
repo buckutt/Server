@@ -7,7 +7,7 @@ const User = thinky.createModel('User', {
     id         : type.string().optional(),
     firstname  : String,
     lastname   : String,
-    nickname   : String,
+    nickname   : type.string().optional(),
     pin        : String,
     password   : String,
     recoverKey : type.string().default(''),
