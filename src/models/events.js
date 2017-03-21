@@ -10,7 +10,7 @@ const Event = thinky.createModel('Event', {
         minReload    : Number,
         maxPerAccount: Number
     },
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false)
 }, {

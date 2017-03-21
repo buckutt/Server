@@ -9,7 +9,7 @@ const MeanOfLogin = thinky.createModel('MeanOfLogin', {
     // String or Number
     data     : type.any(),
     blocked  : type.boolean().default(false),
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra

@@ -12,7 +12,7 @@ const Article = thinky.createModel('Article', {
     alcohol  : type.number().default(0),
     // Optional VAT tax
     vat      : type.number().default(0),
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false)
 }, {

@@ -7,7 +7,7 @@ const Category = thinky.createModel('Category', {
     id       : type.string().optional(),
     name     : String,
     priority : type.number().default(0),
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false)
 }, {

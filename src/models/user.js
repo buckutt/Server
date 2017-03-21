@@ -14,7 +14,7 @@ const User = thinky.createModel('User', {
     mail       : String,
     credit     : Number,
     isTemporary: type.boolean().default(false),
-    createdAt  : type.date().default(new Date()),
+    createdAt  : type.date().default(() => new Date()),
     editedAt   : Date,
     isRemoved  : type.boolean().default(false)
 }, {

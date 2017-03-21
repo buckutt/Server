@@ -8,7 +8,7 @@ const Fundation = thinky.createModel('Fundation', {
     name     : String,
     website  : type.string().optional(),
     mail     : type.string().optional(),
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false)
 }, {

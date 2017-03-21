@@ -8,7 +8,7 @@ const MeanOfPayment = thinky.createModel('MeanOfPayment', {
     slug     : type.string(),
     name     : type.string(),
     step     : type.number().default(100),
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false)
 }, {

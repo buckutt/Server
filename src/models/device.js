@@ -13,7 +13,7 @@ const Device = thinky.createModel('Device', {
     showCategories  : type.boolean().default(true),
     realtime        : type.boolean().default(false),
     refreshInterval : type.number().default(5),
-    createdAt       : type.date().default(new Date()),
+    createdAt       : type.date().default(() => new Date()),
     editedAt        : Date,
     isRemoved       : type.boolean().default(false)
 }, {

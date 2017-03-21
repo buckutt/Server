@@ -8,7 +8,7 @@ const Period = thinky.createModel('Period', {
     name     : String,
     start    : Date,
     end      : Date,
-    createdAt: type.date().default(new Date()),
+    createdAt: type.date().default(() => new Date()),
     editedAt : Date,
     isRemoved: type.boolean().default(false),
     Event_id : type.string().optional()
