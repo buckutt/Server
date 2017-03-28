@@ -41,8 +41,8 @@ const listenForModelChanges = (Model, clients) => {
  */
 module.exports.ioServer = (httpServer, app) => {
     const io = require('socket.io')(httpServer, {
-        serveClient: false,
-        engine     : 'uws',
+        serveClient           : false,
+        engine                : 'uws',
         handlePreflightRequest: false
     });
 
