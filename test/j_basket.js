@@ -32,6 +32,15 @@ describe('Basket', () => {
             });
     });
 
+    it('should support empty basket', (done) => {
+        unirest.post('https://localhost:3006/services/basket')
+            .send([])
+            .end((response) => {
+                assert.equal(200, response.code);
+                done();
+            });
+    });
+
     it('should support reloads', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .send([
