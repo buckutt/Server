@@ -10,16 +10,12 @@ node_js:
 addons:
   rethinkdb: 2.3
 
-install:
-  - npm install -g mocha gulp
-  - npm install
-
 script:
-  - npm run test:coverage
-  - npm run lint
+  - yarn test:coverage
+  - yarn lint
 
 after_script:
-  - npm run coveralls
+  - yarn coveralls
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
