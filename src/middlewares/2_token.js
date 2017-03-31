@@ -71,9 +71,13 @@ module.exports = function token(connector) {
                         return false;
                     }
 
+                    if (right.isRemoved || right.period.isRemoved) {
+                        return false;
+                    }
+
                     if (right.period.start <= now && right.period.end > now) {
                         if (right.name !== 'admin' && right.point) {
-                            return (right.point.id === connector.Point_id);
+                            return (!right.point.isRemoved && right.point.id === connector.Point_id);
                         }
 
                         return true;

@@ -52,9 +52,9 @@ router.post('/services/basket', (req, res, next) => {
 
     const totalCost = req.body
         .map((item) => {
-            if (item.type === 'purchase') {
+            if (typeof item.cost === 'number') {
                 return item.cost;
-            } else if (item.type === 'reload') {
+            } else if (typeof item.credit === 'number') {
                 return -1 * item.credit;
             }
         })

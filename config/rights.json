@@ -41,7 +41,7 @@
             "/meansofpayment/search"
         ],
         "write": [
-            "/services/reload"
+            "/services/basket"
         ]
       },
       "openUrls": [

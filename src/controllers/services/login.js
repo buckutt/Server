@@ -114,14 +114,16 @@ router.post('/services/login', (req, res, next) => {
             user.canReload = false;
 
             for (const right of user.rights) {
-                const configRight = config.rights[right.name];
+                if (!right.isRemoved && !right.period.isRemoved) {
+                    const configRight = config.rights[right.name];
 
-                if (configRight && configRight.canSell) {
-                    user.canSell = true;
-                }
+                    if (configRight && configRight.canSell) {
+                        user.canSell = true;
+                    }
 
-                if (configRight && configRight.canReload) {
-                    user.canReload = true;
+                    if (configRight && configRight.canReload) {
+                        user.canReload = true;
+                    }
                 }
             }
 
