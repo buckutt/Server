@@ -56,8 +56,8 @@ module.exports = (connector) => {
 
             return Promise.resolve();
         })
-        .catch(err => {
+        .catch((err) => {
             /* istanbul ignore next */
-            Promise.reject(new APIError(500, 'Unknown error', err))
+            Promise.reject(new APIError(500, 'Unknown error', err));
         });
 };

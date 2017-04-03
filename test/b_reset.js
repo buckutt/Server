@@ -231,6 +231,13 @@ describe('Before tests', () => {
                 isRemoved: false,
                 Period_id: periodId,
                 Point_id : process.env.FoyerId
+            }, {
+                name     : 'admin',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: true,
+                Period_id: periodId,
+                Point_id : process.env.FoyerId
             }]);
         })
         .then(res =>
@@ -245,6 +252,9 @@ describe('Before tests', () => {
                 User_id : sellerUserId
             }, {
                 Right_id: res.generated_keys[3],
+                User_id : sellerUserId
+            }, {
+                Right_id: res.generated_keys[4],
                 User_id : sellerUserId
             }])
         )

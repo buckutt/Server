@@ -39,7 +39,7 @@ app.use(cors({
     origin        : true
 }));
 app.use(morgan(config.log.morganStyle, { stream: logger.stream }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(compression());
 

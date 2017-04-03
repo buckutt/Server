@@ -18,6 +18,10 @@ router.post('/services/basket', (req, res, next) => {
         return next(new APIError(400, 'Invalid basket'));
     }
 
+    if (req.body.length === 0) {
+        return res.status(200).json({}).end();
+    }
+
     req.Buyer_id = req.body[0].Buyer_id;
 
     if (!req.Buyer_id) {
@@ -48,9 +52,9 @@ router.post('/services/basket', (req, res, next) => {
 
     const totalCost = req.body
         .map((item) => {
-            if (item.type === 'purchase') {
+            if (typeof item.cost === 'number') {
                 return item.cost;
-            } else if (item.type === 'reload') {
+            } else if (typeof item.credit === 'number') {
                 return -1 * item.credit;
             }
         })

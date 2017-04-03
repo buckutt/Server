@@ -32,11 +32,16 @@
             "/usersgroups",
             "/devicespoints",
             "/devices",
+            "/devices/search",
             "/reloadtypes",
-            "/meanofloginsusers"
+            "/meansoflogin",
+            "/meansoflogin/search",
+            "/meanofloginsusers",
+            "/meansofpayment",
+            "/meansofpayment/search"
         ],
         "write": [
-            "/services/reload"
+            "/services/basket"
         ]
       },
       "openUrls": [
@@ -50,6 +55,6 @@
             "/services/manager/searchuser",
             "/services/manager/transfer"
       ],
-      "pinLoggingAllowed": ["seller"]
+      "pinLoggingAllowed": ["seller", "reloader"]
    }
 }
