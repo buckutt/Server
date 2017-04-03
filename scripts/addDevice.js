@@ -136,7 +136,7 @@ function addDevice(opts) {
     return initialPromise
         .then(() => genClient(opts))
         .then((res) => setDeviceConfig(opts, res.fingerprint))
-        .then((res) => { password: opts.password, fingerprint: res.fingerprint } );
+        .then(() => opts.password);
 }
 
 module.exports = { addDevice, createDir, genClient };
