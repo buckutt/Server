@@ -1,9 +1,10 @@
-const express  = require('express');
-const Promise  = require('bluebird');
-const APIError = require('../../errors/APIError');
-const logger   = require('../../lib/log');
-const thinky   = require('../../lib/thinky');
-const { pp }   = require('../../lib/utils');
+const express         = require('express');
+const Promise         = require('bluebird');
+const APIError        = require('../../errors/APIError');
+const canSellOrReload = require('../../lib/canSellOrReload');
+const logger          = require('../../lib/log');
+const thinky          = require('../../lib/thinky');
+const { pp }          = require('../../lib/utils');
 
 const log = logger(module);
 
@@ -90,6 +91,15 @@ router.post('/services/basket', (req, res, next) => {
                 newCredit: req.buyer.credit
             })
             .end();
+    }
+
+    const userRights = canSellOrReload(req.user);
+
+    const unallowedPurchase = (req.body.find(item => item.type === 'purchase') && !userRights.canSell);
+    const unallowedReload   = (req.body.find(item => item.type === 'reload') && !userRights.canReload);
+
+    if (unallowedPurchase || unallowedReload) {
+        return next(new APIError(401, 'No right to reload or sell', { unallowedPurchase, unallowedReload }));
     }
 
     req.body.forEach((item) => {

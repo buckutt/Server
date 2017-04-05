@@ -35,6 +35,7 @@ describe('Before tests', () => {
         let userId;
         let noRightsUserId;
         let sellerUserId;
+        let reloaderUserId;
         let deviceId;
         let periodId;
         let outdatedPeriodId;
@@ -81,12 +82,27 @@ describe('Before tests', () => {
                 editedAt   : new Date(),
                 isRemoved  : false,
                 failedAuth : 0
+            },
+            {
+                firstname  : 'Rel',
+                lastname   : 'oader',
+                nickname   : 'Reloader',
+                pin        : '$2a$08$BbpMLi5.FSkF/8vn1d.1iu3oiUorqdPlIJYv.4acQpNUbZRpxSzUa',
+                password   : '$2a$08$bXHvytIeJpSy8QdC8E4kIuwR5WjU8rhaBcMVoMC3mEgJ1fOS78kaO',
+                mail       : 'reloader@buckless.fr',
+                credit     : 120,
+                isTemporary: false,
+                createdAt  : new Date(),
+                editedAt   : new Date(),
+                isRemoved  : false,
+                failedAuth : 0
             }
         ])
         .then((res) => {
             userId         = res.generated_keys[0];
             noRightsUserId = res.generated_keys[1];
             sellerUserId   = res.generated_keys[2];
+            reloaderUserId = res.generated_keys[3];
 
             return r.table('MeanOfLogin').insert([{
                 type     : 'etuMail',
@@ -120,6 +136,14 @@ describe('Before tests', () => {
                 editedAt : new Date(),
                 isRemoved: false,
                 User_id  : sellerUserId
+            }, {
+                type     : 'etuMail',
+                data     : 'reloader@buckless.fr',
+                blocked  : false,
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false,
+                User_id  : reloaderUserId
             }]);
         })
         .then(() =>
@@ -238,6 +262,13 @@ describe('Before tests', () => {
                 isRemoved: true,
                 Period_id: periodId,
                 Point_id : process.env.FoyerId
+            }, {
+                name     : 'reloader',
+                createdAt: new Date(),
+                editedAt : new Date(),
+                isRemoved: false,
+                Period_id: periodId,
+                Point_id : process.env.FoyerId
             }]);
         })
         .then(res =>
@@ -256,6 +287,9 @@ describe('Before tests', () => {
             }, {
                 Right_id: res.generated_keys[4],
                 User_id : sellerUserId
+            }, {
+                Right_id: res.generated_keys[5],
+                User_id : reloaderUserId
             }])
         )
         .then(() => addDevice.genClient({ password: 'test', deviceName: 'test' }))

@@ -12,7 +12,7 @@ describe('Basket', () => {
                     Buyer_id    : process.env.GJId,
                     Point_id    : process.env.FoyerId,
                     Promotion_id: null,
-                    Seller_id   : process.env.GJId,
+                    Seller_id   : process.env.sellerId,
                     Price_id    : process.env.PriceId,
                     cost        : 50,
                     type        : 'purchase',
@@ -74,7 +74,7 @@ describe('Basket', () => {
                     Point_id    : process.env.FoyerId,
                     Promotion_id: process.env.Formule1EuroId,
                     Price_id    : process.env.PromotionPriceId,
-                    Seller_id   : process.env.GJId,
+                    Seller_id   : process.env.sellerId,
                     cost        : 100,
                     type        : 'purchase',
                     articles    : [
@@ -106,7 +106,7 @@ describe('Basket', () => {
                     Point_id    : process.env.FoyerId,
                     Promotion_id: process.env.Formule1EuroId,
                     Price_id    : process.env.PromotionPriceId,
-                    Seller_id   : process.env.GJId,
+                    Seller_id   : process.env.sellerId,
                     cost        : 100,
                     type        : 'purchase',
                     articles    : [
@@ -133,7 +133,7 @@ describe('Basket', () => {
                     Buyer_id    : process.env.GJId,
                     Point_id    : process.env.FoyerId,
                     Promotion_id: null,
-                    Seller_id   : process.env.GJId,
+                    Seller_id   : process.env.sellerId,
                     Price_id    : process.env.PriceId,
                     cost        : 50,
                     type        : 'purchase',
@@ -177,7 +177,7 @@ describe('Basket', () => {
                     Buyer_id    : process.env.GJId,
                     Point_id    : process.env.FoyerId,
                     Promotion_id: null,
-                    Seller_id   : process.env.GJId,
+                    Seller_id   : process.env.sellerId,
                     cost        : 10000,
                     type        : 'purchase',
                     articles    : [
@@ -207,6 +207,42 @@ describe('Basket', () => {
                 assert.equal(400, response.code);
                 assert.equal(0, response.body.message.indexOf('Maximum exceeded :'));
                 done();
+            });
+    });
+
+    it('should not accept if the seller has only reloader access or inverse', (done) => {
+        unirest.post('https://localhost:3006/services/login')
+            .send({
+                meanOfLogin: 'etuMail',
+                data       : 'reloader@buckless.fr',
+                password   : 'buckless'
+            })
+            .end((response) => {
+                unirest.post('https://localhost:3006/services/basket')
+                    .header('Authorization', `Bearer ${response.body.token}`)
+                    .send([
+                        {
+                            Buyer_id    : process.env.GJId,
+                            Point_id    : process.env.FoyerId,
+                            Promotion_id: null,
+                            Seller_id   : process.env.sellerId,
+                            Price_id    : process.env.PriceId,
+                            cost        : 50,
+                            type        : 'purchase',
+                            articles    : [
+                                {
+                                    id   : process.env.KinderDeliceId,
+                                    price: process.env.PriceId,
+                                    vat  : 0
+                                }
+                            ]
+                        }
+                    ])
+                    .end((response2) => {
+                        assert.equal(401, response2.code);
+                        assert.equal('No right to reload or sell', response2.body.message);
+                        done();
+                    });
             });
     });
 

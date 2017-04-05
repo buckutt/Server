@@ -1,12 +1,13 @@
-const bcrypt_  = require('bcryptjs');
-const express  = require('express');
-const jwt      = require('jsonwebtoken');
-const Promise  = require('bluebird');
-const config   = require('../../../config');
-const logger   = require('../../lib/log');
-const thinky   = require('../../lib/thinky');
-const { pp }   = require('../../lib/utils');
-const APIError = require('../../errors/APIError');
+const bcrypt_         = require('bcryptjs');
+const express         = require('express');
+const jwt             = require('jsonwebtoken');
+const Promise         = require('bluebird');
+const config          = require('../../../config');
+const logger          = require('../../lib/log');
+const thinky          = require('../../lib/thinky');
+const { pp }          = require('../../lib/utils');
+const canSellOrReload = require('../../lib/canSellOrReload');
+const APIError        = require('../../errors/APIError');
 
 const bcrypt = Promise.promisifyAll(bcrypt_);
 const log    = logger(module);
@@ -110,22 +111,10 @@ router.post('/services/login', (req, res, next) => {
             delete user.pin;
             delete user.password;
 
-            user.canSell   = false;
-            user.canReload = false;
+            const userRights = canSellOrReload(user);
 
-            for (const right of user.rights) {
-                if (!right.isRemoved && !right.period.isRemoved) {
-                    const configRight = config.rights[right.name];
-
-                    if (configRight && configRight.canSell) {
-                        user.canSell = true;
-                    }
-
-                    if (configRight && configRight.canReload) {
-                        user.canReload = true;
-                    }
-                }
-            }
+            user.canSell   = userRights.canSell;
+            user.canReload = userRights.canReload;
 
             return res
                 .status(200)
