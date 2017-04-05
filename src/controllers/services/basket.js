@@ -103,7 +103,7 @@ router.post('/services/basket', (req, res, next) => {
     }
 
     req.body.forEach((item) => {
-        if (item.type === 'purchase') {
+        if (typeof item.cost === 'number') {
             // Purchases
             const articlesIds = item.articles.map(article => article.id);
 
@@ -138,7 +138,7 @@ router.post('/services/basket', (req, res, next) => {
             });
 
             purchases.push(purchase.save());
-        } else if (item.type === 'reload') {
+        } else if (typeof item.credit === 'number') {
             queryLog += `reloads ${item.credit} `;
 
             // Reloads
