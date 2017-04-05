@@ -17,7 +17,7 @@ const log    = logger(module);
 const router = new express.Router();
 
 const tokenOptions = {
-    expiresIn: '24h'
+    expiresIn: '1m' // 1 month token
 };
 
 router.post('/services/login', (req, res, next) => {
