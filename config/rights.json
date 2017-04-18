@@ -5,6 +5,7 @@
         "canSell": true,
         "canReload": false,
         "read": [
+            "/events",
             "/articles",
             "/articles/search",
             "/promotions",
@@ -27,6 +28,7 @@
         "canSell": false,
         "canReload": true,
         "read": [
+            "/events",
             "/users",
             "/usersrights",
             "/usersgroups",

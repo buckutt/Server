@@ -119,7 +119,8 @@ router.post('/services/basket', (req, res, next) => {
                 Point_id    : req.Point_id,
                 Promotion_id: item.Promotion_id ? item.Promotion_id : '',
                 Seller_id   : item.Seller_id,
-                articlesAmount
+                alcohol     : item.alcohol,
+                articlesAmount,
             });
 
             queryLog += `buys ${pp(articlesIds)} `;

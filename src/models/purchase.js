@@ -12,6 +12,7 @@ const Purchase = thinky.createModel('Purchase', {
         price: String,
         vat  : Number
     }),
+    alcohol     : type.number().default(0),
     isRemoved   : type.boolean().default(false),
     // Force Thinky to show thoses additional fields that would be cut by enforce_extra
     Buyer_id    : type.string().optional(),

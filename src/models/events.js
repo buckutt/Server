@@ -8,7 +8,8 @@ const Event = thinky.createModel('Event', {
     name  : String,
     config: {
         minReload    : Number,
-        maxPerAccount: Number
+        maxPerAccount: Number,
+        maxAlcohol   : type.number().default(0)
     },
     createdAt: type.date().default(() => new Date()),
     editedAt : Date,
