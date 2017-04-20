@@ -1,29 +1,38 @@
 const path         = require('path');
+const fs           = require('fs');
 const childProcess = require('child_process');
-const Promise      = require('bluebird');
+const Mocha        = require('mocha');
 
-Promise.promisifyAll(childProcess);
+process.env.NODE_ENV = 'test';
 
-const cwd          = path.join(__dirname, '..');
-const withCoverage = process.argv.slice(2).indexOf('--coverage') > -1;
-const istanbul     = './node_modules/istanbul/lib/cli';
-const mocha        = './node_modules/mocha/bin/_mocha';
+if (process.argv.indexOf('--coverage') > -1) {
+    const cwd = path.join(__dirname, '..');
+    const istanbul = './node_modules/.bin/istanbul';
 
-const start = (p, cb) => {
-    const proc = childProcess.spawn(p, { cwd, shell: true });
+    // TODO: use glob pattern (https://github.com/gotwarlost/istanbul/issues/800)
+    const excludes = fs.readdirSync(__dirname)
+        .map(file => `-x scripts/${file}`)
+        .join(' ')
+        .split(' ');
 
-    proc.stdout.pipe(process.stdout);
-    proc.stderr.pipe(process.stderr);
+    console.log(istanbul, 'cover', './scripts/test.js', ...excludes);
 
-    if (cb) {
-        proc.on('exit', cb);
-    }
-};
+    childProcess.spawn(istanbul, ['cover', './scripts/test.js', ...excludes], {
+        cwd,
+        stdio: 'inherit'
+    });
+} else {
+    const files = Mocha.utils
+        .lookupFiles('test/', ['js'], false)
+        .map(file => path.resolve(file))
+        .sort();
 
-const cmd = (withCoverage) ?
-    `cross-env NODE_ENV=test node ${istanbul} cover ${mocha} -x "scripts/**" -- --sort --bail --timeout 5000` :
-    `cross-env NODE_ENV=test node ${mocha} --sort --bail --timeout 5000`;
+    const mocha = new Mocha({
+        bail   : true,
+        timeout: 5000
+    });
 
-start(cmd, (testCode) => {
-    process.exit(testCode);
-});
+    mocha.files = files;
+
+    mocha.run(code => process.exit(code));
+}

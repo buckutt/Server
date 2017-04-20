@@ -18,9 +18,14 @@ const seeder = () => {
         name: 'Liquide'
     });
 
-    const meanofpaymentCheque = new models.MeanOfPayment({
-        slug: 'cheque',
+    const meanofpaymentCheck = new models.MeanOfPayment({
+        slug: 'check',
         name: 'Chèque'
+    });
+
+    const meanofpaymentGift = new models.MeanOfPayment({
+        slug: 'gift',
+        name: 'Offert'
     });
 
     /* Events */
@@ -83,7 +88,8 @@ const seeder = () => {
     const meansOfPayment = {
         meanofpaymentCard,
         meanofpaymentCash,
-        meanofpaymentCheque
+        meanofpaymentCheck,
+        meanofpaymentGift
     };
 
     const users = {

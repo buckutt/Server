@@ -55,9 +55,5 @@ module.exports = (connector) => {
             connector.header('device', device.id);
 
             return Promise.resolve();
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            Promise.reject(new APIError(500, 'Unknown error', err));
         });
 };

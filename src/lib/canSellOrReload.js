@@ -3,6 +3,7 @@ const config = require('../../config');
 module.exports = (user) => {
     const result = { canSell: false, canReload: false };
 
+    /* istanbul ignore if */
     if (!user || !user.rights) {
         return result;
     }

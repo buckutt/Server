@@ -103,7 +103,7 @@ router.post('/services/basket', (req, res, next) => {
     }
 
     req.body.forEach((item) => {
-        if (item.type === 'purchase') {
+        if (typeof item.cost === 'number') {
             // Purchases
             const articlesIds = item.articles.map(article => article.id);
 
@@ -119,7 +119,8 @@ router.post('/services/basket', (req, res, next) => {
                 Point_id    : req.Point_id,
                 Promotion_id: item.Promotion_id ? item.Promotion_id : '',
                 Seller_id   : item.Seller_id,
-                articlesAmount
+                alcohol     : item.alcohol,
+                articlesAmount,
             });
 
             queryLog += `buys ${pp(articlesIds)} `;
@@ -138,7 +139,7 @@ router.post('/services/basket', (req, res, next) => {
             });
 
             purchases.push(purchase.save());
-        } else if (item.type === 'reload') {
+        } else if (typeof item.credit === 'number') {
             queryLog += `reloads ${item.credit} `;
 
             // Reloads
