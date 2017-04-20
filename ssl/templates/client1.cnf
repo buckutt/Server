@@ -8,12 +8,12 @@ x509_extensions        = v3_ca
 
 [ req_distinguished_name ]
 C                      = FR
-ST                     = IDF
-L                      = Paris
-O                      = Buckless
+ST                     = GE
+L                      = Troyes
+O                      = BuckUTT
 OU                     = certificates
 CN                     = client1
-emailAddress           = contact@buckless.com
+emailAddress           = buckutt@utt.fr
 
 [ req_attributes ]
 challengePassword      = password

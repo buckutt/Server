@@ -20,12 +20,12 @@ output_password        = test
 
 [ req_distinguished_name ]
 C                      = FR
-ST                     = IDF
-L                      = Paris
-O                      = Buckless
+ST                     = GE
+L                      = Troyes
+O                      = BuckUTT
 OU                     = certificates
 CN                     = ca
-emailAddress           = contact@buckless.com
+emailAddress           = buckutt@utt.fr
 
 [ req_attributes ]
 challengePassword      = test
