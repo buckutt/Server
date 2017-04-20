@@ -1,8 +1,8 @@
-FROM mhart/alpine-node:latest
+FROM node:alpine
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["yarn", "start"]
 
 WORKDIR /usr/src/buckless-server
 
@@ -11,7 +11,8 @@ RUN apk update && \
     mkdir -p /usr/src/buckless-server
 
 COPY package.json /usr/src/buckless-server/
+COPY yarn.lock /usr/src/buckless-server/
 
-RUN npm install
+RUN yarn
 
 COPY . /usr/src/buckless-server/

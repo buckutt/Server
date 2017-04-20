@@ -378,6 +378,7 @@ const seeder = {
             meanofpaymentCard,
             meanofpaymentCash,
             meanofpaymentCheck,
+            meanofpaymentGift,
             meanofpaymentGobby
         };
 

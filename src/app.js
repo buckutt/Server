@@ -100,7 +100,9 @@ app.start = () => {
             .then(() => {
                 log.info('Creating admin device...');
 
-                return addDevice({ admin: true, deviceName: 'admin', password: randomstring.generate() });
+                const password = process.env.NODE_ENV === 'development' ? 'development' : randomstring.generate();
+
+                return addDevice({ admin: true, deviceName: 'admin', password });
             })
             .then((adminPassword) => {
                 log.info(`[ admin .p12 password ] ${adminPassword}`);
@@ -113,7 +115,7 @@ app.start = () => {
     }
 
     return startingQueue.then(() => {
-        const server = process.env.NODE_ENV === 'production' ? http.createServer(app) : https.createServer({
+        const server = process.env.SERVER_PROTOCOL === 'http' ? http.createServer(app) : https.createServer({
             key               : fs.readFileSync(sslFilesPath.key),
             cert              : fs.readFileSync(sslFilesPath.cert),
             ca                : fs.readFileSync(sslFilesPath.ca),
