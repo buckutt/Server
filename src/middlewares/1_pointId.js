@@ -13,6 +13,7 @@ module.exports = (connector) => {
         .getAll(connector.fingerprint, {
             index: 'fingerprint'
         })
+        .filter({ isRemoved: false })
         .getJoin({
             periodPoints: {
                 period: {
