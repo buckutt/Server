@@ -2,7 +2,7 @@ const bcrypt_  = require('bcryptjs');
 const express  = require('express');
 const Promise  = require('bluebird');
 const APIError = require('../../../errors/APIError');
-const thinky   = require('../../../lib/thinky');
+const dbCatch  = require('../../../lib/dbCatch');
 
 /**
  * ChangePin controller.
@@ -37,25 +37,13 @@ router.put('/services/manager/changepin', (req, res, next) => {
 
             return user.save();
         })
-        .then(() => {
-            const confirm = {
-                changed: true
-            };
-
-            return res
+        .then(() =>
+            res
                 .status(200)
-                .json(confirm)
-                .end();
-        })
-        .catch(Error, err => next(err))
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+                .json({ changed: true })
+                .end()
+        )
+        .catch(err => dbCatch(err, next));
 });
 
 module.exports = router;

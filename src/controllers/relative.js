@@ -2,12 +2,13 @@ const express     = require('express');
 const idParser    = require('../lib/idParser');
 const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
-const thinky      = require('../lib/thinky');
+const requelize   = require('../lib/requelize');
 const { pp }      = require('../lib/utils');
+const dbCatch     = require('../lib/dbCatch');
 const APIError    = require('../errors/APIError');
 
 const log = logger(module);
-const r   = thinky.r;
+const r   = requelize.r;
 
 /**
  * Read submodel controller. Handles reading the children of one element (based on a relation).
@@ -30,12 +31,13 @@ router.get('/:model/:id/:submodel', (req, res, next) => {
         embed[submodel] = true;
     }
 
-    const queryLog = `${req.Model}.get(${req.params.id}).getJoin(${pp(embed)}).run()`;
+    const queryLog = `${req.Model._name}.get(${req.params.id}).embed(${pp(embed)}).run()`;
     log.info(queryLog);
 
     req.Model
         .get(req.params.id)
-        .getJoin(embed)
+        .default(r.error('Document not found'))
+        .embed(embed)
         .run()
         .then(instance =>
             res
@@ -43,60 +45,37 @@ router.get('/:model/:id/:submodel', (req, res, next) => {
                 .json(instance[submodel])
                 .end()
         )
-        .catch(thinky.Errors.DocumentNotFound, err =>
-            next(new APIError(404, 'Document not found', err))
-        )
-        .catch(thinky.Errors.ValidationError, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err));
-        })
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
-router.post('/:model/:id/:submodel', (req, res, next) => {
+router.post('/:model/:leftId/:submodel/:rightId', (req, res, next) => {
     const submodel = req.params.submodel;
 
     if (!req.Model._joins.hasOwnProperty(submodel)) {
         return next(new APIError(404, 'Document not found', `Submodel ${submodel} does not exist`));
     }
 
-    const queryLog = `${req.Model}
-        .get(${req.params.id})
-        .addRelation(${req.params.submodel}, { id: ${req.body.id} })
-        .run()`;
-    log.info(queryLog);
+    const through   = req.Model._joins[submodel].tableName;
+    const leftName  = req.Model._name;
+    const rightName = req.Model._joins[submodel].model;
 
-    const tableJoin = req.Model._joins[submodel].link;
-    const leftName  = `${req.Model.getTableName()}_id`;
-    const leftId    = req.params.id;
-    const rightName = `${req.Model._joins[submodel].model.getTableName()}_id`;
-    const rightId   = req.body.id;
+    const { leftId, rightId } = req.params;
 
-    log.info(`r.table(${tableJoin}).insert({
+    log.info(`r.table(${through}).insert({
         ['${leftName}'] : ${leftId},
         ['${rightName}']: ${rightId}
     });`);
 
-    r
-        // Check left model existence
-        .table(req.Model.getTableName())
+    req.Model
         .get(leftId)
+        .run()
         .then((leftModel) => {
             if (!leftModel) {
                 throw new APIError(404, 'Left document does not exist');
             }
 
             // Check right model
-            return r
-                .table(req.Model._joins[submodel].model.getTableName())
-                .get(rightId);
+            return r.table(req.Model._joins[submodel].model).get(rightId);
         })
         .then((rightModel) => {
             if (!rightModel) {
@@ -104,11 +83,11 @@ router.post('/:model/:id/:submodel', (req, res, next) => {
             }
 
             return r
-                .table(tableJoin)
-                .insert({
+                .table(through)
+                .insert(Object.assign({
                     [leftName] : leftId,
                     [rightName]: rightId
-                });
+                }, req.body));
         })
         .then(() =>
             res
@@ -116,11 +95,7 @@ router.post('/:model/:id/:submodel', (req, res, next) => {
                 .json({})
                 .end()
         )
-        .catch(APIError, err => next(err))
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
 router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
@@ -130,21 +105,21 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
         return next(new APIError(404, 'Document not found', `Submodel ${submodel} does not exist`));
     }
 
-    const tableJoin = req.Model._joins[submodel].link;
-    const leftName  = `${req.Model.getTableName()}_id`;
+    const JoinModel = requelize.models[req.Model._joins[submodel].tableName];
+    const leftName  = req.Model._name;
     const leftId    = req.params.id;
-    const rightName = `${req.Model._joins[submodel].model.getTableName()}_id`;
+    const rightName = req.Model._joins[submodel].model;
     const rightId   = req.params.subid;
 
-    log.info(`r.table(${tableJoin})
+    log.info(`${JoinModel._name}
         .filter({
-            ['${leftName}'] : ${leftId},
-            ['${rightName}']: ${rightId}
+            ${leftName} : ${leftId},
+            ${rightName}: ${rightId}
         })
         .nth(0)
         .default(null)`);
 
-    r.table(tableJoin)
+    JoinModel
         .filter({
             [leftName] : leftId,
             [rightName]: rightId
@@ -156,7 +131,7 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
                 throw new APIError(404, 'Document not found');
             }
 
-            return r.table(tableJoin).get(rel.id).delete();
+            return JoinModel.get(rel.id).delete();
         })
         .then(() =>
             res
@@ -164,11 +139,7 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
                 .json({})
                 .end()
         )
-        .catch(APIError, err => next(err))
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
 router.param('model', modelParser);

@@ -126,11 +126,12 @@ describe('Create', function () {
                 });
         });
 
-        it('should create GroupPeriod', (done) => {
-            unirest.post('https://localhost:3006/groupPeriods')
+        it('should create GroupUser', (done) => {
+            unirest.post('https://localhost:3006/groupUsers')
                 .send({
-                    Group_id : '',
-                    Period_id: ''
+                    Group    : '',
+                    Period_id: process.env.PeriodId,
+                    User     : ''
                 })
                 .end((response) => {
                     assert.equal(200, response.code);
@@ -196,10 +197,11 @@ describe('Create', function () {
         });
 
         it('should create PeriodPoint', (done) => {
-            unirest.post('https://localhost:3006/periodPoints')
+            unirest.post('https://localhost:3006/devicePoints')
                 .send({
-                    Period_id: '',
-                    Point_id : ''
+                    Device   : '',
+                    Period_id: process.env.PeriodId,
+                    Point    : ''
                 })
                 .end((response) => {
                     assert.equal(200, response.code);
@@ -348,6 +350,7 @@ describe('Create', function () {
                     Price_id: process.env.PromotionPriceId
                 })
                 .end((response) => {
+                    console.log(response.body);
                     assert.equal(200, response.code);
                     assert.equal('string', typeof response.body.id);
                     assert.equal(2, response.body.articles.length);

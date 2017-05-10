@@ -54,7 +54,7 @@ module.exports = function token(connector) {
             const userId = decoded.id;
             connectType  = decoded.connectType;
 
-            return connector.models.User.get(userId).getJoin({
+            return connector.models.User.get(userId).embed({
                 rights: {
                     period: true,
                     point : true
@@ -63,6 +63,7 @@ module.exports = function token(connector) {
         })
         .then((user) => {
             connector.user = user;
+
 
             connector.user.rights = connector.user.rights
                 .filter((right) => {

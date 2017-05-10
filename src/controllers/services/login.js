@@ -3,14 +3,11 @@ const express         = require('express');
 const jwt             = require('jsonwebtoken');
 const Promise         = require('bluebird');
 const config          = require('../../../config');
-const logger          = require('../../lib/log');
-const thinky          = require('../../lib/thinky');
-const { pp }          = require('../../lib/utils');
 const canSellOrReload = require('../../lib/canSellOrReload');
+const dbCatch         = require('../../lib/dbCatch');
 const APIError        = require('../../errors/APIError');
 
 const bcrypt = Promise.promisifyAll(bcrypt_);
-const log    = logger(module);
 
 /**
  * Login controller. Connects a user
@@ -44,31 +41,15 @@ router.post('/services/login', (req, res, next) => {
     const connectType = (req.body.hasOwnProperty('pin')) ? 'pin' : 'password';
     let user;
 
-    const queryLog = `${models.MeanOfLogin}
-        .filter({
-            type     : ${req.body.meanOfLogin},
-            data     : ${req.body.data},
-            isRemoved: false,
-            blocked  : false
-        })
-        .limit(1).getJoin(${pp({
-            user: {
-                rights: {
-                    period: true
-                }
-            }
-        })})`;
-    log.info(queryLog);
-
     models.MeanOfLogin
+        .getAll(req.body.meanOfLogin.toString(), { index: 'type' })
         .filter({
-            type     : req.body.meanOfLogin.toString(),
             data     : req.body.data.toString(),
             isRemoved: false,
             blocked  : false
         })
         .limit(1)
-        .getJoin({
+        .embed({
             user: {
                 rights: {
                     period: true
@@ -108,8 +89,8 @@ router.post('/services/login', (req, res, next) => {
             })
         )
         .then(() => {
-            delete user.pin;
-            delete user.password;
+            user.pin      = '';
+            user.password = '';
 
             const userRights = canSellOrReload(user);
 
@@ -128,15 +109,7 @@ router.post('/services/login', (req, res, next) => {
                 })
                 .end();
         })
-        .catch(Error, err => next(err))
-        .catch(thinky.Errors.DocumentNotFound, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(404, 'User not found', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
 module.exports = router;

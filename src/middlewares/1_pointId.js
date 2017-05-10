@@ -14,38 +14,37 @@ module.exports = (connector) => {
             index: 'fingerprint'
         })
         .filter({ isRemoved: false })
-        .getJoin({
-            periodPoints: {
-                period: {
-                    event: true
-                },
-                point: true
+        .embed({
+            points: {
+                _through: {
+                    period: {
+                        event: true
+                    }
+                }
             }
         })
         .run()
         .then((devices) => {
             /* istanbul ignore if */
-            if (devices.length === 0 || devices[0].periodPoints.length === 0) {
+            if (devices.length === 0 || devices[0].points.length === 0) {
                 return Promise.reject(new APIError(404, 'Device not found', { fingerprint: connector.fingerprint }));
             }
 
             device = devices[0];
 
-            const periodPoints = device.periodPoints;
-
             let minPeriod = Infinity;
 
-            periodPoints.forEach((periodPoint) => {
-                const diff = periodPoint.period.end - periodPoint.period.start;
+            device.points.forEach((point) => {
+                const diff = point._through.period.end - point._through.period.start;
 
                 if (diff < minPeriod) {
-                    connector.Point_id = periodPoint.Point_id;
-                    connector.Event_id = periodPoint.period.Event_id;
+                    connector.Point_id = point.id;
+                    connector.Event_id = point._through.period.event.id;
                     minPeriod          = diff;
 
                     connector.device = device;
-                    connector.point  = periodPoint.point;
-                    connector.event  = periodPoint.period.event;
+                    connector.point  = point;
+                    connector.event  = point._through.period.event;
                 }
             });
 

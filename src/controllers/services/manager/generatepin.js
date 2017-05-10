@@ -1,6 +1,7 @@
 const express  = require('express');
 const Promise  = require('bluebird');
 const APIError = require('../../../errors/APIError');
+const dbCatch  = require('../../../lib/dbCatch');
 
 /**
  * GeneratePin controller.
@@ -35,7 +36,7 @@ router.put('/services/manager/generatepin', (req, res, next) => {
             return user.save();
         })
         .then(() => res.status(200).json({}).end())
-        .catch(err => next(err));
+        .catch(err => dbCatch(err, next));
 });
 
 module.exports = router;

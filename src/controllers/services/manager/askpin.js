@@ -3,7 +3,8 @@ const randomstring = require('randomstring');
 const dots         = require('dot');
 const APIError     = require('../../../errors/APIError');
 const mailer       = require('../../../lib/mailer');
-const config       = require('../../../../config').askpin;
+const dbCatch      = require('../../../lib/dbCatch');
+const config       = require('../../../../config');
 
 /**
  * Generate mail to send
@@ -15,7 +16,7 @@ function generateMessage(mail, key) {
     const from     = config.from;
     const to       = mail;
     const subject  = config.subject;
-    const template = dots.template(config.template);
+    const template = dots.template(config.askpin.template);
     const html     = template({ link: `${config.managerUrl}/#/generate?key=${key}` });
 
     return { from, to, subject, html };
@@ -46,7 +47,7 @@ router.get('/services/manager/askpin', (req, res, next) => {
         })
         .then(() => mailer.sendMail(generateMessage(mail, user.recoverKey)))
         .then(() => res.status(200).json({}).end())
-        .catch(err => next(err));
+        .catch(err => dbCatch(err, next));
 });
 
 module.exports = router;

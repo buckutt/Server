@@ -8,12 +8,13 @@ const router = new express.Router();
 router.get('/services/manager/history', (req, res) => {
     const models = req.app.locals.models;
 
+    // TODO: optimize filters
     const purchaseQuery = models.Purchase
         .filter({
             Buyer_id : req.user.id,
             isRemoved: false
         })
-        .getJoin({
+        .embed({
             seller   : true,
             price    : true,
             articles : true,
@@ -26,7 +27,7 @@ router.get('/services/manager/history', (req, res) => {
             Buyer_id : req.user.id,
             isRemoved: false
         })
-        .getJoin({
+        .embed({
             seller: true,
             point : true
         });
@@ -36,7 +37,7 @@ router.get('/services/manager/history', (req, res) => {
             Reciever_id: req.user.id,
             isRemoved  : false
         })
-        .getJoin({
+        .embed({
             sender: true
         });
 
@@ -45,7 +46,7 @@ router.get('/services/manager/history', (req, res) => {
             Sender_id: req.user.id,
             isRemoved: false
         })
-        .getJoin({
+        .embed({
             reciever: true
         });
 
@@ -57,7 +58,7 @@ router.get('/services/manager/history', (req, res) => {
                  ({
                      type  : purchase.promotion ? 'promotion' : 'purchase',
                      date  : purchase.createdAt,
-                     amount: -purchase.price.amount,
+                     amount: -1 * purchase.price.amount,
                      point : purchase.point.name,
                      seller: {
                          lastname : purchase.seller.lastname,
@@ -113,7 +114,7 @@ router.get('/services/manager/history', (req, res) => {
                  ({
                      type  : 'transfer',
                      date  : transfer.createdAt,
-                     amount: -transfer.amount,
+                     amount: -1 * transfer.amount,
                      point : 'Internet',
                      mop   : '',
                      seller: {

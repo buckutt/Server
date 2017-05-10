@@ -1,10 +1,11 @@
 const express         = require('express');
 const Promise         = require('bluebird');
 const APIError        = require('../../errors/APIError');
-const canSellOrReload = require('../../lib/canSellOrReload');
 const logger          = require('../../lib/log');
-const thinky          = require('../../lib/thinky');
+const requelize       = require('../../lib/requelize');
+const canSellOrReload = require('../../lib/canSellOrReload');
 const { pp }          = require('../../lib/utils');
+const dbCatch         = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -46,7 +47,7 @@ router.post('/services/basket', (req, res, next) => {
     const reloads       = [];
     // Stock reduciton queries
     const stocks        = [];
-    // Purchases-Articles queries: prevent thinky from uniqify
+    // Purchases-Articles queries: prevent requelize from uniqify
     const purchasesRels = [];
 
     let queryLog  = '';
@@ -85,6 +86,8 @@ router.post('/services/basket', (req, res, next) => {
     const newCredit = req.buyer.credit - totalCost;
 
     if (isNaN(newCredit)) {
+        log.error('credit is not a number');
+
         return res
             .status(400)
             .json({
@@ -117,10 +120,10 @@ router.post('/services/basket', (req, res, next) => {
                 Buyer_id    : item.Buyer_id,
                 Price_id    : item.Price_id,
                 Point_id    : req.Point_id,
-                Promotion_id: item.Promotion_id ? item.Promotion_id : '',
+                Promotion_id: item.Promotion_id || null,
                 Seller_id   : item.Seller_id,
                 alcohol     : item.alcohol,
-                articlesAmount,
+                articlesAmount
             });
 
             queryLog += `buys ${pp(articlesIds)} `;
@@ -131,7 +134,7 @@ router.post('/services/basket', (req, res, next) => {
                 const stockReduction = models.Article
                     .get(article)
                     .update({
-                        stock: thinky.r.row('stock').sub(1)
+                        stock: requelize.r.row('stock').sub(1)
                     })
                     .run();
 
@@ -157,7 +160,7 @@ router.post('/services/basket', (req, res, next) => {
     });
 
     queryLog += `and update credit to ${newCredit}`;
-    const updateCredit = thinky.r.table('User')
+    const updateCredit = requelize.r.table('User')
         .get(req.buyer.id)
         .update({
             credit: newCredit
@@ -174,15 +177,15 @@ router.post('/services/basket', (req, res, next) => {
             const allRels = purchases_.map(({ id }, i) =>
                 models.r.table('Article_Purchase').insert(purchasesRels[i].map(articleId =>
                     ({
-                        Article_id : articleId,
-                        Purchase_id: id
+                        Article : articleId,
+                        Purchase: id
                     })
                 ))
             );
 
             return Promise.all(allRels);
         })
-        .all(everythingSaving)
+        .then(() => Promise.all(everythingSaving))
         .then(() =>
             res
                 .status(200)
@@ -191,18 +194,7 @@ router.post('/services/basket', (req, res, next) => {
                 })
                 .end()
         )
-        .catch(thinky.Errors.ValidationError, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err));
-        })
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
 module.exports = router;

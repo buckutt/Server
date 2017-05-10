@@ -67,8 +67,7 @@ describe('PinForgotten', () => {
                                 assert.notEqual(user.pin, user_.pin);
 
                                 done();
-                            })
-                            .catch(err => assert.equal(err, null));
+                            });
                     });
             });
         });

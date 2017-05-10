@@ -1,5 +1,6 @@
-const models = require('../src/models');
-const logger = require('../src/lib/log');
+const models    = require('../src/models');
+const requelize = require('../src/lib/requelize');
+const logger    = require('../src/lib/log');
 
 const log = logger(module);
 
@@ -166,7 +167,8 @@ module.exports = seed;
 if (require.main === module) {
     const raw = seeder();
 
-    seeds(raw.all)
+    requelize.sync()
+        .then(() => seeds(raw.all))
         .then(() => {
             log.info('Inserted documents');
 

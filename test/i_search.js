@@ -93,6 +93,7 @@ describe('Searching', () => {
 
             unirest.get(`https://localhost:3006/articles/search?q=${q(search)}${orQ}&orderBy=name&sort=dsc`)
                 .end((response) => {
+                    console.log(response.body);
                     assert.equal(200, response.code);
                     response.body.forEach((article) => {
                         assert.equal(0, article.alcohol);

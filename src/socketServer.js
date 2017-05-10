@@ -16,22 +16,11 @@ const broadcast = (clients, action, model, data) => {
 };
 
 const listenForModelChanges = (Model, clients) => {
-    Model.changes().then((feed) => {
-        feed.each((err, doc) => {
-            /* istanbul ignore if */
-            if (err) {
-                return;
-            }
+    const feed = Model.feed();
 
-            if (doc.isSaved() === false) {
-                broadcast(clients, 'delete', Model._name, doc);
-            } else if (!doc.getOldValue()) {
-                broadcast(clients, 'create', Model._name, doc);
-            } else {
-                broadcast(clients, 'update', Model._name, { from: doc.getOldValue(), to: doc });
-            }
-        });
-    });
+    feed.subscribe(
+        change => broadcast(clients, change.type, Model._name, { from: change.from, to: change.to })
+    );
 };
 
 /**

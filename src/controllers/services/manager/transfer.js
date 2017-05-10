@@ -1,9 +1,10 @@
-const bcrypt_  = require('bcryptjs');
-const express  = require('express');
-const Promise  = require('bluebird');
-const logger   = require('../../../lib/log');
-const thinky   = require('../../../lib/thinky');
-const APIError = require('../../../errors/APIError');
+const bcrypt_   = require('bcryptjs');
+const express   = require('express');
+const Promise   = require('bluebird');
+const logger    = require('../../../lib/log');
+const dbCatch   = require('../../../lib/dbCatch');
+const requelize = require('../../../lib/requelize');
+const APIError  = require('../../../errors/APIError');
 
 const log = logger(module);
 
@@ -22,11 +23,11 @@ router.post('/services/manager/transfer', (req, res, next) => {
     }
 
     req.app.locals.models.User
-        .filter(thinky.r.row('isRemoved').eq(false))
-        .filter(thinky.r.row('id').eq(req.Reciever_id))
+        .parse(false)
+        .filter(requelize.r.row('isRemoved').eq(false))
+        .filter(requelize.r.row('id').eq(req.Reciever_id))
         .nth(0)
         .default(null)
-        .execute()
         .then((user) => {
             if (!user) {
                 return next(new APIError(400, 'Invalid reciever'));
@@ -114,18 +115,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
                 })
                 .end();
         })
-        .catch(thinky.Errors.ValidationError, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err));
-        })
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
 module.exports = router;

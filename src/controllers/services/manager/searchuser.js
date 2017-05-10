@@ -1,5 +1,5 @@
-const express = require('express');
-const thinky  = require('../../../lib/thinky');
+const express   = require('express');
+const requelize = require('../../../lib/requelize');
 
 /**
  * SearchUser controller.
@@ -8,7 +8,7 @@ const router = new express.Router();
 
 router.get('/services/manager/searchuser', (req, res) => {
     const models = req.app.locals.models;
-    const r      = thinky.r;
+    const r      = requelize.r;
     const name   = req.query.name.split(' ');
 
     models.User

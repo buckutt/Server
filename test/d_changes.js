@@ -131,8 +131,8 @@ describe('Changes', () => {
 
                 socket.on('create', (doc) => {
                     calls += 1;
-                    assert.equal('object', typeof doc.data);
-                    assert.equal('string', typeof doc.data.id);
+                    assert.equal('object', typeof doc.data.to);
+                    assert.equal('string', typeof doc.data.to.id);
                 });
 
                 socket.on('update', (doc) => {
@@ -145,8 +145,8 @@ describe('Changes', () => {
 
                 socket.on('delete', (doc) => {
                     calls += 1;
-                    assert.equal(mopId, doc.data.id);
-                    assert.equal('Bar', doc.data.name);
+                    assert.equal(mopId, doc.data.from.id);
+                    assert.equal('Bar', doc.data.from.name);
                     assert.equal(3, calls);
 
                     done();

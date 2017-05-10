@@ -3,12 +3,13 @@ const qs          = require('qs');
 const url         = require('url');
 const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
-const thinky      = require('../lib/thinky');
+const requelize   = require('../lib/requelize');
 const { pp }      = require('../lib/utils');
+const dbCatch     = require('../lib/dbCatch');
 const APIError    = require('../errors/APIError');
 
 const log = logger(module);
-const r   = thinky.r;
+const r   = requelize.r;
 
 /**
  * Converts a JSON object to a RethinkDB call
@@ -181,7 +182,7 @@ router.get('/:model/search', (req, res, next) => {
     searchQuery = [searchQuery];
     searchQuery.push(...orQuery);
 
-    let queryLog = `${req.Model}.filter(`;
+    let queryLog = `${req.Model._name}.filter(`;
 
     // Must use a boolean variable because we want to stop the request if failed
     let failed = false;
@@ -239,8 +240,8 @@ router.get('/:model/search', (req, res, next) => {
 
     // Embed multiple relatives
     if (req.query.embed) {
-        queryLog += `.getJoin(${pp(req.query.embed)})`;
-        request = request.getJoin(req.query.embed);
+        queryLog += `.embed(${pp(req.query.embed)})`;
+        request = request.embed(req.query.embed);
     }
 
     log.info(queryLog);
@@ -253,14 +254,7 @@ router.get('/:model/search', (req, res, next) => {
                 .json(result)
                 .end();
         })
-        .catch(thinky.Errors.DocumentNotFound, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(404, 'Document not found', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(err, next));
 });
 
 router.param('model', modelParser);

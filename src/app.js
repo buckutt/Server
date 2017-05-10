@@ -1,24 +1,25 @@
-const fs           = require('fs');
-const path         = require('path');
-const cors         = require('cors');
-const bodyParser   = require('body-parser');
-const compression  = require('compression');
-const cookieParser = require('cookie-parser');
-const express      = require('express');
-const http         = require('http');
-const https        = require('https');
-const morgan       = require('morgan');
-const randomstring = require('randomstring');
-const config       = require('../config');
-const controllers  = require('./controllers');
-const models       = require('./models');
-const socketServer = require('./socketServer');
-const logger       = require('./lib/log');
-const thinky       = require('./lib/thinky');
-const APIError     = require('./errors/APIError');
-const sslConfig    = require('../scripts/sslConfig');
-const baseSeed     = require('../scripts/seed');
-const addDevice    = require('../scripts/addDevice').addDevice;
+const fs                   = require('fs');
+const path                 = require('path');
+const cors                 = require('cors');
+const bodyParser           = require('body-parser');
+const compression          = require('compression');
+const cookieParser         = require('cookie-parser');
+const express              = require('express');
+const http                 = require('http');
+const https                = require('https');
+const morgan               = require('morgan');
+const randomstring         = require('randomstring');
+const { ReqlRuntimeError } = require('rethinkdbdash/lib/error');
+const config               = require('../config');
+const controllers          = require('./controllers');
+const models               = require('./models');
+const socketServer         = require('./socketServer');
+const logger               = require('./lib/log');
+const requelize            = require('./lib/requelize');
+const APIError             = require('./errors/APIError');
+const sslConfig            = require('../scripts/sslConfig');
+const baseSeed             = require('../scripts/seed');
+const { addDevice }        = require('../scripts/addDevice');
 
 const log = logger(module);
 
@@ -60,7 +61,11 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     /* istanbul ignore next */
     if (!(err instanceof APIError)) {
-        log.error(err);
+        if (err instanceof ReqlRuntimeError) {
+            log.error(`ReqlRuntimeError\n${err.msg}`);
+        } else {
+            log.error(err);
+        }
     } else {
         log.error(err.message, err.details);
     }
@@ -78,8 +83,7 @@ app.start = () => {
         ca  : './ssl/certificates/ca/ca-crt.pem'
     };
 
-    let startingQueue = thinky.dbReady()
-        .then(() => models.loadModels());
+    let startingQueue = requelize.sync();
 
     /* istanbul ignore if */
     if (!fs.existsSync(sslFilesPath.key) ||
