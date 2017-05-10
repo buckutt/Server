@@ -65,5 +65,8 @@
     "mocha": "^3.1.2",
     "nodemon": "^1.11.0",
     "unirest": "github:mashape/unirest-nodejs"
+  },
+  "resolutions": {
+    "uws": "0.14.1"
   }
 }
