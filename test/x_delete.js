@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 
-/* global unirest, q */
+/* global unirest */
 
 describe('Delete', () => {
     describe('Correct id', () => {
