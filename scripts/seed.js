@@ -40,7 +40,7 @@ const seeder = () => {
 
     /* Periods */
     const periodEternity = new models.Period({
-        name : 'Éternité',
+        name : 'Défaut',
         start: new Date(0),
         end  : new Date(21474000000000)
     });
@@ -135,6 +135,10 @@ function seeds(all) {
 
 function rels(data) {
     const arr = [];
+
+    /* Events - Relationships : period */
+    data.events.eventDefault.DefaultPeriod_id = data.periods.periodEternity.id;
+    arr.push(data.events.eventDefault.save());
 
     /* MeansOfLogin - Relationships : user */
     data.meansOfLogin.defaultMol.User_id = data.users.defaultAdmin.id;

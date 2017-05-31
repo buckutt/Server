@@ -16,6 +16,7 @@ Period.on('saving', (inst) => { inst.editedAt = new Date(); });
 Period.index('name');
 
 Period.belongsTo('Event', 'event');
+Period.hasMany('Event', 'events');
 Period.hasMany('DevicePoint', 'devicePoints');
 Period.hasMany('GroupUser', 'groupUsers');
 Period.hasMany('Price', 'prices');

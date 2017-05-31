@@ -15,6 +15,7 @@ Fundation.on('saving', (inst) => { inst.editedAt = new Date(); });
 
 Fundation.index('name');
 
+Fundation.hasMany('Event', 'events');
 Fundation.hasMany('Price', 'prices');
 
 module.exports = Fundation;

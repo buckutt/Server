@@ -93,7 +93,7 @@ function genClient(opts) {
 function getAdminPeriodPoint(opts) {
     return models.r
         .table('Period')
-        .getAll('Éternité', { index: 'name' })
+        .getAll('Défaut', { index: 'name' })
         .pluck('id')
         .run()
         .then((res) => {

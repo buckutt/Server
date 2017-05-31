@@ -15,6 +15,7 @@ Group.on('saving', (inst) => { inst.editedAt = new Date(); });
 
 Group.index('name');
 
+Group.hasMany('Event', 'events');
 Group.hasMany('Price', 'prices');
 Group.belongsToMany('User', 'users', 'GroupUser');
 
