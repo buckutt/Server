@@ -4,6 +4,7 @@ const types = {
     q     : 'object',
     or    : 'object',
     embed : 'object',
+    filter: 'object',
     limit : 'number',
     offset: 'number'
 };

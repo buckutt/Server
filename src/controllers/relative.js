@@ -111,19 +111,18 @@ router.delete('/:model/:id/:submodel/:subid', (req, res, next) => {
     const rightName = req.Model._joins[submodel].model;
     const rightId   = req.params.subid;
 
+    const filter = Object.assign({}, {
+        [leftName] : leftId,
+        [rightName]: rightId
+    }, req.query.filter)
+
     log.info(`${JoinModel._name}
-        .filter({
-            ${leftName} : ${leftId},
-            ${rightName}: ${rightId}
-        })
+        .filter(${JSON.stringify(filter, null, 4)})
         .nth(0)
         .default(null)`);
 
     JoinModel
-        .filter({
-            [leftName] : leftId,
-            [rightName]: rightId
-        })
+        .filter(filter)
         .nth(0)
         .default(null)
         .then((rel) => {
