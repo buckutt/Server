@@ -74,11 +74,6 @@ module.exports = (moduleToUse) => {
     if (config.log.graylog && config.log.graylog.gelfPro) {
         const graylogTransport = new WinstonTcpGraylog(config.log.graylog);
 
-        graylogTransport.on('error', () => {
-            // internal WinstonTcpGraylog problems
-            console.error('Warning: Graylog connection lost');
-        });
-
         transports.push(graylogTransport);
     }
 

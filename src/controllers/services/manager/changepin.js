@@ -3,6 +3,9 @@ const express  = require('express');
 const Promise  = require('bluebird');
 const APIError = require('../../../errors/APIError');
 const dbCatch  = require('../../../lib/dbCatch');
+const logger   = require('../../../lib/log');
+
+const log = logger(module);
 
 /**
  * ChangePin controller.
@@ -11,10 +14,12 @@ const bcrypt = Promise.promisifyAll(bcrypt_);
 const router = new express.Router();
 
 router.put('/services/manager/changepin', (req, res, next) => {
+    log.info(`Change pin for user ${req.user.id}`, req.details);
+
     const models = req.app.locals.models;
 
     if (req.body.currentPin.length !== 4) {
-        next(new APIError(401, 'Current PIN has to be clear, not crypted'));
+        next(new APIError(module, 401, 'Current PIN has to be clear, not crypted'));
     }
 
     bcrypt.compareAsync(req.body.currentPin.toString(), req.user.pin)
@@ -24,7 +29,7 @@ router.put('/services/manager/changepin', (req, res, next) => {
                     return resolve();
                 }
 
-                reject(new APIError(401, 'PIN is wrong'));
+                reject(new APIError(module, 401, 'PIN is wrong'));
             })
         )
         .then(() =>
@@ -43,7 +48,7 @@ router.put('/services/manager/changepin', (req, res, next) => {
                 .json({ changed: true })
                 .end()
         )
-        .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;

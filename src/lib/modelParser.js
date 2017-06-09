@@ -35,7 +35,7 @@ const possibleValues = Object.keys(modelsNames);
  */
 function modelParser(req, res, next, model) {
     if (possibleValues.indexOf(model.toLowerCase()) === -1) {
-        return next(new APIError(404, 'Model not found'));
+        return next(new APIError(module, 404, 'Model not found'));
     }
 
     req.Model = req.app.locals.models[modelsNames[model.toLowerCase()]];

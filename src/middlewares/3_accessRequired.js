@@ -54,6 +54,6 @@ module.exports = (connector) => {
     }
 
     if (!handled) {
-        return Promise.reject(new APIError(401, 'Unauthorized', 'No right to do that'));
+        return Promise.reject(new APIError(module, 401, 'Unauthorized: insufficient rights'));
     }
 };

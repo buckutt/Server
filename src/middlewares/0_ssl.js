@@ -12,7 +12,12 @@ module.exports = (connector) => {
     }
 
     if (!connector.authorized) {
-        return Promise.reject(new APIError(401, 'Unauthorized : missing client HTTPS certificate'));
+        return Promise.reject(new APIError(
+            module,
+            401,
+            'Unauthorized : missing client HTTPS certificate',
+            { ip: connector.ip }
+        ));
     }
 
     connector.fingerprint = connector.getClientFingerprint();

@@ -1,8 +1,10 @@
 module.exports.marshal = function marshal(mw) {
     return function connectorMiddleware(req, res, next) {
-        // Connector should be kept throught middlesares to keep req.user, req.fingerprint, etc.
+        // Connector should be kept throught middlewares to keep req.user, req.fingerprint, etc.
         // That's why it's set inside req.connector
         req.connector = req.connector || {
+            ip: req.ip,
+
             authorized: req.client.authorized,
 
             headers: req.headers,
@@ -42,6 +44,7 @@ module.exports.unmarshal = function unmarshal(req, res, next) {
     req.point       = req.connector.point;
     req.event       = req.connector.event;
     req.user        = req.connector.user;
+    req.details     = req.connector.details;
 
     next();
 };

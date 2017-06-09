@@ -5,6 +5,9 @@ const APIError     = require('../../../errors/APIError');
 const mailer       = require('../../../lib/mailer');
 const dbCatch      = require('../../../lib/dbCatch');
 const config       = require('../../../../config');
+const logger       = require('../../../lib/log');
+
+const log = logger(module);
 
 /**
  * Generate mail to send
@@ -29,15 +32,17 @@ function generateMessage(mail, key) {
 const router = new express.Router();
 
 router.get('/services/manager/askpin', (req, res, next) => {
-    const models = req.app.locals.models;
+    log.info(`Ask pin for mail ${req.query.mail}`);
+
     const mail   = req.query.mail;
+    const models = req.app.locals.models;
 
     let user;
 
     models.User.getAll(mail, { index: 'mail' })
         .then((users) => {
             if (!users.length) {
-                return Promise.reject(new APIError(404, 'Incorrect mail'));
+                return Promise.reject(new APIError(module, 404, 'Incorrect mail'));
             }
 
             user = users[0];
@@ -47,7 +52,7 @@ router.get('/services/manager/askpin', (req, res, next) => {
         })
         .then(() => mailer.sendMail(generateMessage(mail, user.recoverKey)))
         .then(() => res.status(200).json({}).end())
-        .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;

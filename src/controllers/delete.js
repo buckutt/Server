@@ -2,7 +2,6 @@ const express     = require('express');
 const idParser    = require('../lib/idParser');
 const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
-const { pp }      = require('../lib/utils');
 const dbCatch     = require('../lib/dbCatch');
 
 const log = logger(module);
@@ -13,8 +12,7 @@ const log = logger(module);
 const router = new express.Router();
 
 router.delete('/:model/:id', (req, res, next) => {
-    const queryLog = `${req.Model._name}.get(${req.params.id}).embed(${pp(req.query.embed)})`;
-    log.info(queryLog);
+    log.info(`Delete ${req.params.model} ${req.params.id}`, req.details);
 
     // First, get the model
     req.Model
@@ -27,7 +25,7 @@ router.delete('/:model/:id', (req, res, next) => {
                 .status(200)
                 .end()
         )
-        .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
 });
 
 router.param('model', modelParser);

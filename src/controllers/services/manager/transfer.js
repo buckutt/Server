@@ -16,10 +16,12 @@ const router = new express.Router();
 
 // Get the reciever user
 router.post('/services/manager/transfer', (req, res, next) => {
+    log.info(`Transfer from ${req.user.id} to ${req.body.Reciever_id} by ${req.body.amount}`);
+
     req.Reciever_id = req.body.Reciever_id;
 
     if (!req.Reciever_id) {
-        return next(new APIError(400, 'Invalid reciever'));
+        return next(new APIError(module, 400, 'Invalid reciever', { receiver: req.Reciever_id }));
     }
 
     req.app.locals.models.User
@@ -30,7 +32,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
         .default(null)
         .then((user) => {
             if (!user) {
-                return next(new APIError(400, 'Invalid reciever'));
+                return next(new APIError(module, 400, 'Invalid reciever'));
             }
 
             req.recieverUser = user;
@@ -40,11 +42,11 @@ router.post('/services/manager/transfer', (req, res, next) => {
 
 router.post('/services/manager/transfer', (req, res, next) => {
     if (!req.body.currentPin) {
-        return next(new APIError(400, 'Current PIN has to be sent'));
+        return next(new APIError(module, 400, 'Current PIN has to be sent'));
     }
 
     if (req.body.currentPin.length !== 4) {
-        return next(new APIError(400, 'Current PIN has to be clear, not crypted'));
+        return next(new APIError(module, 400, 'Current PIN has to be clear, not crypted'));
     }
 
     bcrypt.compareAsync(req.body.currentPin.toString(), req.user.pin)
@@ -52,7 +54,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
             if (match) {
                 next();
             } else {
-                next(new APIError(400, 'Current PIN is wrong'));
+                next(new APIError(module, 400, 'Current PIN is wrong'));
             }
         });
 });
@@ -63,15 +65,20 @@ router.post('/services/manager/transfer', (req, res, next) => {
     let amount = parseInt(req.body.amount, 10);
 
     if (req.user.credit - amount < 0) {
-        return next(new APIError(400, 'Not enough sender credit', `Credit: ${req.user.credit} Amount: ${amount}`));
+        return next(new APIError(module, 400, 'Not enough sender credit', { 
+            sender: req.Sender_id,
+            credit: req.user.credit, 
+            amount 
+        }));
     }
 
     if (req.recieverUser.credit + amount > 100 * 100) {
-        return next(new APIError(400, 'Too much reciever credit'));
+        return next(new APIError(module, 400, 'Too much reciever credit', { 
+            receiver: req.Reciever_id,
+            credit: req.user.credit, 
+            amount 
+        }));
     }
-
-    let queryLog = `User ${req.user.firstname} ${req.user.lastname} sends ${amount / 100}€ to `;
-    queryLog    += `${req.recieverUser.firstname} ${req.recieverUser.lastname}`;
 
     const newTransfer = new models.Transfer({
         amount
@@ -79,8 +86,6 @@ router.post('/services/manager/transfer', (req, res, next) => {
 
     newTransfer.Sender_id   = req.user.id;
     newTransfer.Reciever_id = req.recieverUser.id;
-
-    log.info(queryLog);
 
     req.app.locals.models.User
         .get(newTransfer.Reciever_id)
@@ -115,7 +120,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
                 })
                 .end();
         })
-        .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;

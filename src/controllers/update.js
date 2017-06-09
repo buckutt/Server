@@ -12,8 +12,7 @@ const log = logger(module);
 const router = new express.Router();
 
 router.put('/:model/:id', (req, res, next) => {
-    const queryLog = `${req.Model._name}.get(${req.params.id})`;
-    log.info(queryLog);
+    log.info(`Update ${req.params.model}(${req.params.id}) with ${JSON.stringify(req.body)}`, req.details);
 
     // First, get the model
     req.Model
@@ -25,7 +24,6 @@ router.put('/:model/:id', (req, res, next) => {
                 inst[k] = req.body[k];
             });
 
-            log.info(`${req.params.id}.save()`);
             return inst.save();
         })
         .then((result) => {
@@ -41,7 +39,7 @@ router.put('/:model/:id', (req, res, next) => {
                 .json(result)
                 .end();
         })
-        .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
 });
 
 router.param('model', modelParser);

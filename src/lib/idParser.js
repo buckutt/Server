@@ -15,7 +15,7 @@ function id(req, res, next, value) {
         return next();
     }
 
-    return next(new APIError(400, 'id is not a guid/uuid'));
+    return next(new APIError(module, 400, 'id is not a guid/uuid'));
 }
 
 module.exports = id;

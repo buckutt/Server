@@ -1,25 +1,23 @@
-const fs                   = require('fs');
-const path                 = require('path');
-const cors                 = require('cors');
-const bodyParser           = require('body-parser');
-const compression          = require('compression');
-const cookieParser         = require('cookie-parser');
-const express              = require('express');
-const http                 = require('http');
-const https                = require('https');
-const morgan               = require('morgan');
-const randomstring         = require('randomstring');
-const { ReqlRuntimeError } = require('rethinkdbdash/lib/error');
-const config               = require('../config');
-const controllers          = require('./controllers');
-const models               = require('./models');
-const socketServer         = require('./socketServer');
-const logger               = require('./lib/log');
-const requelize            = require('./lib/requelize');
-const APIError             = require('./errors/APIError');
-const sslConfig            = require('../scripts/sslConfig');
-const baseSeed             = require('../scripts/seed');
-const { addDevice }        = require('../scripts/addDevice');
+const fs            = require('fs');
+const path          = require('path');
+const cors          = require('cors');
+const bodyParser    = require('body-parser');
+const compression   = require('compression');
+const cookieParser  = require('cookie-parser');
+const express       = require('express');
+const http          = require('http');
+const https         = require('https');
+const randomstring  = require('randomstring');
+const config        = require('../config');
+const controllers   = require('./controllers');
+const models        = require('./models');
+const socketServer  = require('./socketServer');
+const logger        = require('./lib/log');
+const requelize     = require('./lib/requelize');
+const APIError      = require('./errors/APIError');
+const sslConfig     = require('../scripts/sslConfig');
+const baseSeed      = require('../scripts/seed');
+const { addDevice } = require('../scripts/addDevice');
 
 const log = logger(module);
 
@@ -39,7 +37,6 @@ app.use(cors({
     exposedHeaders: ['device', 'point', 'pointName', 'event', 'eventName'],
     origin        : true
 }));
-app.use(morgan(config.log.morganStyle, { stream: logger.stream }));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(compression());
@@ -54,25 +51,24 @@ app.use(controllers);
  */
 // 404
 app.use((req, res, next) => {
-    next(new APIError(404, 'Not Found'));
+    next(new APIError(module, 404, 'Not Found'));
 });
 
 // Internal error
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+    let error = err;
+
     /* istanbul ignore next */
     if (!(err instanceof APIError)) {
-        if (err instanceof ReqlRuntimeError) {
-            log.error(`ReqlRuntimeError\n${err.msg}`);
-        } else {
-            log.error(err);
-        }
+        log.error(err, req.details);
+        error = new APIError(module, 500, 'Unknown error');
     } else {
-        log.error(err.message, err.details);
+        logger(err.module).error(err.message, err.details);
     }
 
     res
-        .status(err.status || 500)
-        .send(err.toJSON ? err.toJSON() : JSON.stringify(err))
+        .status(error.status || 500)
+        .send(error.toJSON ? error.toJSON() : JSON.stringify(error))
         .end();
 });
 
@@ -161,6 +157,15 @@ const clearLock = (status) => {
     process.exit(status || 0);
 };
 
+/* istanbul ignore next */
+process.on('unhandledRejection', (err) => {
+    if (err.name === 'ReqlDriverError' &&
+        err.message === 'None of the pools have an opened connection and failed to open a new one.') {
+        log.error('Cannot open connection to database');
+        process.exit(1);
+    }
+});
+
 module.exports = app;
 
 // Start the application
@@ -170,6 +175,7 @@ if (require.main === module) {
     process.on('SIGINT', clearLock);
     process.on('SIGTERM', clearLock);
     process.on('uncaughtException', clearLock);
+    process.on('unhandledRejection', clearLock);
 
     app
         .start()

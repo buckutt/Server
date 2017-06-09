@@ -53,8 +53,8 @@ describe('Relatives', () => {
             unirest.get('https://localhost:3006/purchases/00000000-0000-1000-8000-000000000000/foo')
                 .end((response) => {
                     assert.equal(404, response.code);
-                    assert.equal('Document not found', response.body.message);
-                    assert.equal('Submodel foo does not exist', response.body.details);
+                    assert.equal('Document not found: submodel does not exist', response.body.message);
+                    assert.equal('foo', response.body.details.submodel);
 
                     done();
                 });

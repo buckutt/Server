@@ -1,4 +1,7 @@
-const express  = require('express');
+const express = require('express');
+const logger  = require('../../../lib/log');
+
+const log = logger(module);
 
 /**
  * History controller.
@@ -6,6 +9,8 @@ const express  = require('express');
 const router = new express.Router();
 
 router.get('/services/manager/history', (req, res) => {
+    log.info(`Get history for user ${req.user.id}`, req.details);
+
     const models = req.app.locals.models;
 
     // TODO: optimize filters

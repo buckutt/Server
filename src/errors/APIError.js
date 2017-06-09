@@ -8,12 +8,13 @@ module.exports = class APIError extends Error {
      * @param {String} message The error description
      * @param {Mixed}  details Any other relative information
      */
-    constructor(status, message, details = '') {
+    constructor(module, status, message, details) {
         super(message);
         this.name = this.constructor.name;
 
         Error.captureStackTrace(this, this.constructor);
 
+        this.module  = module;
         this.message = message;
         this.status  = status;
         this.details = details;

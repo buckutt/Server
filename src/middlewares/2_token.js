@@ -25,14 +25,24 @@ module.exports = function token(connector) {
 
     // Missing header
     if (!(connector.headers && connector.headers.authorization)) {
-        const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
+        const err = new APIError(
+            module,
+            400,
+            'No token or scheme provided. Header format is Authorization: Bearer [token]',
+            connector.details
+        );
         return Promise.reject(err);
     }
 
     const parts = connector.headers.authorization.split(' ');
     // Invalid format (`Bearer Token`)
     if (parts.length !== 2) {
-        const err = new APIError(400, 'No token or scheme provided. Header format is Authorization: Bearer [token]');
+        const err = new APIError(
+            module,
+            400,
+            'No token or scheme provided. Header format is Authorization: Bearer [token]',
+            connector.details
+        );
         return Promise.reject(err);
     }
 
@@ -40,7 +50,13 @@ module.exports = function token(connector) {
     const bearer = parts[1];
     // Invalid format (`Bearer Token`)
     if (scheme.toLowerCase() !== 'bearer') {
-        return Promise.reject(new APIError(400, 'Scheme is `Bearer`. Header format is Authorization: Bearer [token]'));
+        const err = new APIError(
+            module,
+            400,
+            'Scheme is `Bearer`. Header format is Authorization: Bearer [token]',
+            connector.details
+        );
+        return Promise.reject(err);
     }
 
     let connectType;
@@ -88,12 +104,18 @@ module.exports = function token(connector) {
                     return false;
                 });
 
+            connector.details.userId = user.id;
+            connector.details.user    = `${user.firstname} ${user.lastname}`;
+            connector.details.rights  = connector.user.rights.map(right =>
+                ({ name: right.name, end: right.period.end })
+            );
+
             return Promise.resolve();
         })
-        .catch(jwt.TokenExpiredError, err =>
-            Promise.reject(new APIError(401, 'Token expired', err))
+        .catch(jwt.TokenExpiredError, () =>
+            Promise.reject(new APIError(module, 401, 'Token expired'))
         )
-        .catch(jwt.JsonWebTokenError, err =>
-            Promise.reject(new APIError(401, 'Invalid token', err))
-        );
+        .catch(jwt.JsonWebTokenError, () =>
+            Promise.reject(new APIError(module, 401, 'Invalid token', { bearer }))
+        )
 };

@@ -3,9 +3,12 @@ const express         = require('express');
 const jwt             = require('jsonwebtoken');
 const Promise         = require('bluebird');
 const config          = require('../../../config');
+const logger          = require('../../lib/log');
 const canSellOrReload = require('../../lib/canSellOrReload');
 const dbCatch         = require('../../lib/dbCatch');
 const APIError        = require('../../errors/APIError');
+
+const log = logger(module);
 
 const bcrypt = Promise.promisifyAll(bcrypt_);
 
@@ -23,28 +26,31 @@ router.post('/services/login', (req, res, next) => {
     const models = req.app.locals.models;
 
     if (!req.body.meanOfLogin) {
-        return next(new APIError(401, 'No meanOfLogin provided'));
+        return next(new APIError(module, 401, 'No meanOfLogin provided'));
     }
 
     if (!req.body.data) {
-        return next(new APIError(401, 'No (meanOfLogin) data provided'));
+        return next(new APIError(module, 401, 'No (meanOfLogin) data provided'));
     }
 
     if (!req.body.password && !req.body.pin) {
-        return next(new APIError(401, 'No password nor pin provided'));
+        return next(new APIError(module, 401, 'No password nor pin provided'));
     }
 
     if (req.body.password && req.body.pin) {
-        return next(new APIError(401, 'Password and pin provided'));
+        return next(new APIError(module, 401, 'Password and pin provided'));
     }
 
     const connectType = (req.body.hasOwnProperty('pin')) ? 'pin' : 'password';
     let user;
 
+    const infos = { type: req.body.meanOfLogin.toString(), data: req.body.data.toString() }
+    log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
+    
     models.MeanOfLogin
-        .getAll(req.body.meanOfLogin.toString(), { index: 'type' })
+        .getAll(infos.type, { index: 'type' })
         .filter({
-            data     : req.body.data.toString(),
+            data     : infos.data,
             isRemoved: false,
             blocked  : false
         })
@@ -59,11 +65,11 @@ router.post('/services/login', (req, res, next) => {
         .then((mol) => {
             if (mol.length === 0) {
                 const errDetails = {
-                    mol  : req.body.meanOfLogin.toString(),
+                    mol  : mol.type,
                     point: req.Point_id
                 };
 
-                return next(new APIError(404, 'User not found', errDetails));
+                return next(new APIError(module, 404, 'User not found', errDetails));
             }
 
             user = mol[0].user;
@@ -81,11 +87,11 @@ router.post('/services/login', (req, res, next) => {
                 }
 
                 const errDetails = {
-                    mol  : req.body.meanOfLogin.toString(),
+                    mol  : infos.type,
                     point: req.Point_id
                 };
 
-                reject(new APIError(401, 'User not found', errDetails));
+                reject(new APIError(module, 401, 'User not found', errDetails));
             })
         )
         .then(() => {
@@ -109,7 +115,7 @@ router.post('/services/login', (req, res, next) => {
                 })
                 .end();
         })
-        .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;

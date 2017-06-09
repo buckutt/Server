@@ -22,9 +22,7 @@
 
         if (req.query.period) {
             if (isUUID(req.query.period)) {
-                initialQuery = initialQuery.filter(doc =>
-                doc('price')('Period_id').eq(req.query.period)
-            );
+                initialQuery = initialQuery.filter(doc => doc('price')('Period_id').eq(req.query.period));
             }
         }
 
@@ -34,50 +32,44 @@
 
             if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
                 initialQuery = initialQuery
-                .filter(doc =>
-                    doc('createdAt').ge(dateIn).and(
-                        doc('createdAt').le(dateOut)
-                    )
-                );
+                    .filter(doc =>
+                        doc('createdAt').ge(dateIn).and(
+                            doc('createdAt').le(dateOut)
+                        )
+                    );
             } else {
-                return next(new APIError(400, 'Invalid dates'));
+                return next(new APIError(module, 400, 'Invalid dates'));
             }
         }
 
         if (req.query.event) {
-            initialQuery = initialQuery.filter(doc =>
-            doc('price')('period')('Event_id').eq(req.query.event)
-        );
+            initialQuery = initialQuery.filter(doc => doc('price')('period')('Event_id').eq(req.query.event));
         }
 
         if (req.query.point) {
-            initialQuery = initialQuery.filter(doc =>
-            doc('Point_id').eq(req.query.point)
-        );
+            initialQuery = initialQuery.filter(doc => doc('Point_id').eq(req.query.point));
         }
 
         if (req.query.fundation) {
-            initialQuery = initialQuery.filter(doc =>
-            doc('price')('Fundation_id').eq(req.query.fundation)
-        );
+            initialQuery = initialQuery.filter(doc => doc('price')('Fundation_id').eq(req.query.fundation));
         }
 
         initialQuery = initialQuery
-        .parse(false)
-        .group(purchase => purchase('price')('id'))
-        .map(doc => doc.merge({
-            articlesAmount: doc('articlesAmount').merge(articleAmount => ({
-                price: models.r.table('Price').get(articleAmount('price'))
-            })),
-            vat: models.r.branch(
-                doc('articlesAmount').count().eq(1),
-                doc('price')('amount').div(
-                    models.r.expr(1).add(doc('articlesAmount').nth(0)('vat').div(100))
-                ),
-                -1
-            )
-        }))
-        .run();
+            .parse(false)
+            .group(purchase => purchase('price')('id'))
+            .map(doc => doc.merge({
+                articlesAmount: doc('articlesAmount').merge(articleAmount => ({
+                    price: models.r.table('Price').get(articleAmount('price'))
+                })),
+                vat: models.r.branch(
+                    doc('articlesAmount').count().eq(1),
+                    doc('price')('amount').div(
+                        models.r.expr(1).add(doc('articlesAmount').nth(0)('vat').div(100))
+                    ),
+                    -1
+                )
+            }))
+            .run();
 
         initialQuery.then((groups) => {
             const results = groups.map((group) => {
@@ -124,20 +116,18 @@
 
             res.status(200).json(results).end();
         })
-    .catch(err => dbCatch(err, next));
+        .catch(err => dbCatch(module, err, next));
     });
 
     router.get('/services/treasury/reloads', (req, res, next) => {
         const models = req.app.locals.models;
 
         let initialQuery = models.Reload
-        .filter(requelize.r.row('isRemoved').eq(false));
+            .filter(requelize.r.row('isRemoved').eq(false));
 
         if (req.query.point) {
             if (isUUID(req.query.point)) {
-                initialQuery = initialQuery.filter(doc =>
-                doc('Point_id').eq(req.query.point)
-            );
+                initialQuery = initialQuery.filter(doc => doc('Point_id').eq(req.query.point));
             }
         }
 
@@ -153,25 +143,25 @@
                     )
                 );
             } else {
-                return next(new APIError(400, 'Invalid dates'));
+                return next(new APIError(module, 400, 'Invalid dates'));
             }
         }
 
         initialQuery = initialQuery
-        .parse(false)
-        .group('type')
-        .map(doc => doc('credit'))
-        .sum()
-        .run();
+            .parse(false)
+            .group('type')
+            .map(doc => doc('credit'))
+            .sum()
+            .run();
 
         initialQuery
-        .then((credits) => {
-            res
-                .status(200)
-                .json(credits)
-                .end();
-        })
-        .catch(err => dbCatch(err, next));
+            .then((credits) => {
+                res
+                    .status(200)
+                    .json(credits)
+                    .end();
+            })
+            .catch(err => dbCatch(module, err, next));
     });
 
     module.exports = router;

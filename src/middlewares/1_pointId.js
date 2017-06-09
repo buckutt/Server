@@ -45,6 +45,14 @@ module.exports = (connector) => {
                     connector.device = device;
                     connector.point  = point;
                     connector.event  = point._through.period.event;
+
+                    connector.details = {
+                        device: connector.device.name,
+                        event : connector.event.name,
+                        point : connector.point.name,
+                        path  : connector.path,
+                        method: connector.method
+                    };
                 }
             });
 

@@ -36,12 +36,12 @@ describe('Should start the test application', () => {
             ca                : null,
             strictSSL         : false,
             rejectUnauthorized: false
-        }, (error, res) => {
+        }, (error, res_) => {
             assert.equal(error, null);
-            assert.equal(401, res.statusCode);
 
-            const ERR = '{"status":401,"message":"Unauthorized : missing client HTTPS certificate","details":""}';
-            assert.equal(ERR, res.body);
+            const res = JSON.parse(res_.body);
+            assert.equal(401, res.status);
+            assert.equal(res.message, 'Unauthorized : missing client HTTPS certificate');
 
             done();
         });

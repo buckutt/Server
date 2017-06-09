@@ -1,19 +1,19 @@
 const { ReqlRuntimeError } = require('rethinkdbdash/lib/error');
 const APIError             = require('../errors/APIError');
 
-module.exports = function dbCatch(err, next) {
+module.exports = function dbCatch(module_, err, next) {
     if (err.message === 'DocumentNotFound' || err === 'Document not found' || err.msg === 'Document not found') {
-        return next(new APIError(404, 'Document not found', err));
+        return next(new APIError(module_, 404, 'Document not found'));
     }
 
     /* istanbul ignore next */
     if (err.message === 'ValidationError') {
-        return next(new APIError(400, 'Invalid model', err));
+        return next(new APIError(module_, 400, 'Invalid model', err.message));
     }
 
     /* istanbul ignore next */
     if (err.message === 'InvalidWrite') {
-        return next(new APIError(500, 'Couldn\'t write to disk', err));
+        return next(new APIError(module_, 500, 'Couldn\'t write to disk', err));
     }
 
     if (err instanceof APIError || err instanceof ReqlRuntimeError) {
@@ -21,5 +21,5 @@ module.exports = function dbCatch(err, next) {
     }
 
     /* istanbul ignore next */
-    next(new APIError(500, 'Unknown error', err));
+    next(err);
 };
