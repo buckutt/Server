@@ -17,10 +17,12 @@ if (process.argv.indexOf('--coverage') > -1) {
 
     console.log(istanbul, 'cover', './scripts/test.js', ...excludes);
 
-    childProcess.spawn(istanbul, ['cover', './scripts/test.js', ...excludes], {
+    const spawn = childProcess.spawn(istanbul, ['cover', './scripts/test.js', ...excludes], {
         cwd,
         stdio: 'inherit'
     });
+
+    spawn.on('close', code => process.exit(code));
 } else {
     const files = Mocha.utils
         .lookupFiles('test/', ['js'], false)
