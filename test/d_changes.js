@@ -33,6 +33,8 @@ describe('Changes', () => {
     it('should not allow the changefeed when no Authorization header is sent', (done) => {
         const socket = new WS();
 
+        socket.emit('listen');
+
         socket.on('APIError', (err) => {
             assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
             socket.close();
@@ -43,6 +45,8 @@ describe('Changes', () => {
     it('should not allow the changefeed when the Authorization header is wrong', (done) => {
         const socket = new WS({ Authorization: 'foo' });
 
+        socket.emit('listen');
+
         socket.on('APIError', (err) => {
             assert.equal('No token or scheme provided. Header format is Authorization: Bearer [token]', err);
             socket.close();
@@ -52,6 +56,8 @@ describe('Changes', () => {
 
     it('should not allow the changefeed when the Authorization header is not Bearer', (done) => {
         const socket = new WS({ Authorization: 'foo bar' });
+
+        socket.emit('listen');
 
         socket.on('APIError', (err) => {
             assert.equal('Scheme is `Bearer`. Header format is Authorization: Bearer [token]', err);

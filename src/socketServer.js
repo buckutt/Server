@@ -1,27 +1,15 @@
-const logger          = require('./lib/log');
-const { modelsNames } = require('./lib/modelParser');
-const middlewares     = require('./middlewares');
-const { marshal }     = require('./middlewares/connectors/socket');
+const fs          = require('fs');
+const path        = require('path');
+const logger      = require('./lib/log');
+const middlewares = require('./middlewares');
+const { marshal } = require('./middlewares/connectors/socket');
+
+const controllers = fs
+    .readdirSync(path.join(__dirname, 'controllers/live'))
+    .filter(f => f.slice(-3) === '.js')
+    .map(f => require(path.join(__dirname, 'controllers', 'live', f)));
 
 const log = logger(module);
-
-const broadcast = (clients, action, model, data) => {
-    Object.keys(clients)
-        .map(id => clients[id])
-        .filter(client => Array.isArray(client.subscriptions))
-        .filter(client => client.subscriptions.indexOf(model) > -1)
-        .forEach((client) => {
-            client.client.emit(action, { model, data });
-        });
-};
-
-const listenForModelChanges = (Model, clients) => {
-    const feed = Model.feed();
-
-    feed.subscribe(
-        change => broadcast(clients, change.type, Model._name, { from: change.from, to: change.to })
-    );
-};
 
 /**
  * Start a socketio server on an express instance
@@ -39,47 +27,57 @@ module.exports.ioServer = (httpServer, app) => {
 
     const clients = {};
 
-    Object.keys(modelsNames)
-        .map(n => modelsNames[n])
-        .map(modelName => app.locals.models[modelName])
-        .forEach(Model => listenForModelChanges(Model, clients));
+    // Setup all controllers
+    controllers.forEach(controller => controller.setup(app, clients));
 
     io.on('connection', (client) => {
-        let initialPromise = Promise.resolve();
+        const socket = client;
+        client.emit('connected');
 
-        for (const key of Object.keys(middlewares)) {
-            initialPromise = initialPromise
-                .then(() => marshal(middlewares[key])(client, app))
-                .then((result) => {
-                    if (result.err) {
-                        return Promise.reject(result.err);
-                    }
-                });
+        if (process.env.SERVER_PROTOCOL === 'http') {
+            client.fingerprint = socket.client.request.headers['x-certificate-fingerprint'];
+        } else {
+            client.fingerprint = socket.client.request.connection.getPeerCertificate()
+                .fingerprint
+                .replace(/:/g, '')
+                .trim();
         }
 
-        initialPromise = initialPromise
-            .then(() => {
-                client.emit('connected');
+        controllers.forEach((controller) => {
+            client.on(controller.route, (...args) => {
+                let initialPromise = Promise.resolve();
 
-                client.on('listen', (models) => {
-                    /* istanbul ignore else */
-                    if (Array.isArray(models)) {
-                        clients[client.id] = { client };
-                        clients[client.id].subscriptions = models
-                            .map(m => modelsNames[m.toLowerCase()]);
+                // Make client go through middlewares
+                for (const key of Object.keys(middlewares)) {
+                    initialPromise = initialPromise
+                        .then(() => marshal(middlewares[key])(controller.route, client, app))
+                        .then((result) => {
+                            if (result.err) {
+                                return Promise.reject(result.err);
+                            }
 
-                        client.emit('listening', clients[client.id].subscriptions);
-                    }
-                });
+                            return result.user;
+                        });
+                }
 
-                client.on('disconnect', () => {
-                    delete clients[client.id];
-                });
-            })
-            .catch((err) => {
-                client.emit('APIError', err.message);
-                log.warn('socket error:', err.message);
+                initialPromise = initialPromise
+                    .then((user) => {
+
+                        clients[client.id] = { client, user };
+
+                        // Make controllers aware of clients
+                        controllers.forEach(c => c.client(clients, client, ...args));
+
+                        client.on('disconnect', () => {
+                            delete clients[client.id];
+                        });
+                    })
+                    .catch((err) => {
+                        client.emit('APIError', err.message);
+                        log.warn('socket error:', err.message);
+                    });
             });
+        });
     });
 
     io.on('error', (err) => {

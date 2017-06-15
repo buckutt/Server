@@ -1,5 +1,5 @@
 module.exports.marshal = function marshal(mw) {
-    return function connectorMiddleware(socket, app) {
+    return function connectorMiddleware(path, socket, app) {
         socket.connector = socket.connector || {
             authorized: socket.client.request.client.authorized,
 
@@ -7,7 +7,7 @@ module.exports.marshal = function marshal(mw) {
 
             query: {},
 
-            path: '/changes',
+            path,
 
             method: 'GET',
 
@@ -23,7 +23,7 @@ module.exports.marshal = function marshal(mw) {
             },
 
             getClientFingerprint() {
-                return socket.client.request.connection.getPeerCertificate().fingerprint.replace(/:/g, '').trim();
+                return socket.fingerprint;
             }
         };
 
@@ -33,6 +33,10 @@ module.exports.marshal = function marshal(mw) {
 
                 return Promise.resolve();
             })
-            .then(() => socket.connector.result);
+            .then(() => {
+                socket.connector.result.user = socket.connector.user;
+
+                return socket.connector.result;
+            });
     };
 };

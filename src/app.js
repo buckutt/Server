@@ -123,6 +123,8 @@ app.start = () => {
             rejectUnauthorized: false
         }, app);
 
+        app.locals.modelChanges = require('./modelChanges')(app);
+
         socketServer.ioServer(server, app);
 
         return new Promise((resolve, reject) => {
