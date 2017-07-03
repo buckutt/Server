@@ -66,9 +66,10 @@ router.post('/services/basket', (req, res, next) => {
         .map(item => item.credit)
         .reduce((a, b) => a + b, 0);
 
-    if (req.buyer.credit < totalCost) {
-        return next(new APIError(module, 400, 'Not enough credit'));
-    }
+    // Disabled for offline requests:
+    // if (req.buyer.credit < totalCost) {
+    //     return next(new APIError(module, 400, 'Not enough credit'));
+    // }
 
     if (req.event.config.maxPerAccount && req.buyer.credit - totalCost > req.event.config.maxPerAccount) {
         const max = (req.event.config.maxPerAccount / 100).toFixed(2);

@@ -13,6 +13,7 @@ describe('Issue #99', () => {
                 password   : 'buckless'
             })
             .end((response) => {
+                console.log(response.body);
                 assert.equal(200, response.code);
                 assert.equal(true, response.body.hasOwnProperty('user'));
 

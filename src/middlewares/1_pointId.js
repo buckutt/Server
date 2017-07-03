@@ -27,15 +27,21 @@ module.exports = (connector) => {
         .then((devices) => {
             /* istanbul ignore if */
             if (devices.length === 0 || devices[0].points.length === 0) {
-                return Promise.reject(new APIError(404, 'Device not found', { fingerprint: connector.fingerprint }));
+                return Promise.reject(new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint }));
             }
 
             device = devices[0];
 
             let minPeriod = Infinity;
 
+            let handled = false;
+
             device.points.forEach((point) => {
                 const diff = point._through.period.end - point._through.period.start;
+
+                if (point._through.period.start > connector.date || point._through.period.end < connector.date) {
+                    return;
+                }
 
                 if (diff < minPeriod) {
                     connector.Point_id = point.id;
@@ -53,8 +59,14 @@ module.exports = (connector) => {
                         path  : connector.path,
                         method: connector.method
                     };
+
+                    handled = true;
                 }
             });
+
+            if (!handled) {
+                return Promise.reject(new APIError(module, 404, 'No assigned points'));
+            }
 
             connector.header('event', connector.Event_id);
             connector.header('eventName', connector.event.name);

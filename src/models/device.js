@@ -10,7 +10,7 @@ const Device = requelize.model('Device', {
     showCategories  : joi.boolean().default(true),
     realtime        : joi.boolean().default(false),
     refreshInterval : joi.number().default(5),
-    createdAt       : joi.date().default(new Date()),
+    createdAt       : joi.date().default(() => new Date(), 'default date is now'),
     editedAt        : joi.date(),
     isRemoved       : joi.boolean().default(false)
 });

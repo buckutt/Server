@@ -1,3 +1,5 @@
+const moment = require('moment');
+
 module.exports.marshal = function marshal(mw) {
     return function connectorMiddleware(req, res, next) {
         // Connector should be kept throught middlewares to keep req.user, req.fingerprint, etc.
@@ -16,6 +18,12 @@ module.exports.marshal = function marshal(mw) {
             method: req.method,
 
             models: req.app.locals.models,
+
+            get date() {
+                const headerDate = moment(req.headers.date);
+
+                return (headerDate.isValid()) ? headerDate.toDate() : new Date();
+            },
 
             header(name, value) {
                 res.header(name, value);

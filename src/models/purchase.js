@@ -2,7 +2,7 @@ const requelize = require('../lib/requelize');
 const joi       = require('joi');
 
 const Purchase = requelize.model('Purchase', {
-    createdAt     : joi.date().default(new Date()),
+    createdAt     : joi.date().default(() => new Date(), 'default date is now'),
     editedAt      : joi.date(),
     articlesAmount: joi.array().items({
         id   : joi.string(),

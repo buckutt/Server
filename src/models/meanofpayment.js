@@ -5,7 +5,7 @@ const MeanOfPayment = requelize.model('MeanOfPayment', {
     slug     : joi.string().required(),
     name     : joi.string().required(),
     step     : joi.number().default(100),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

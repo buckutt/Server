@@ -5,7 +5,7 @@ const Period = requelize.model('Period', {
     name     : joi.string().required(),
     start    : joi.date().required(),
     end      : joi.date().required(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

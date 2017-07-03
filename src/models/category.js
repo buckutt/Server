@@ -4,7 +4,7 @@ const joi       = require('joi');
 const Category = requelize.model('Category', {
     name     : joi.string().required(),
     priority : joi.number().default(0),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.string(),
     isRemoved: joi.boolean().default(false)
 });

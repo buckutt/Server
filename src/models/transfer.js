@@ -3,7 +3,7 @@ const joi       = require('joi');
 
 const Transfer = requelize.model('Transfer', {
     amount   : joi.number().required(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

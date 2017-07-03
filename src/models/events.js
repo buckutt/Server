@@ -11,7 +11,7 @@ const Event = requelize.model('Event', {
         hasFundations: joi.boolean().allow(null).default(null),
         hasPeriods   : joi.boolean().allow(null).default(null)
     },
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

@@ -2,7 +2,7 @@ const requelize = require('../lib/requelize');
 const joi       = require('joi');
 
 const DevicePoint = requelize.model('DevicePoint', {
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

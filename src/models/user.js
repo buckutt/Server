@@ -11,7 +11,7 @@ const User = requelize.model('User', {
     mail       : joi.string().required(),
     credit     : joi.number().default(0),
     isTemporary: joi.boolean().default(false),
-    createdAt  : joi.date().default(new Date()),
+    createdAt  : joi.date().default(() => new Date(), 'default date is now'),
     editedAt   : joi.date(),
     isRemoved  : joi.boolean().default(false)
 });

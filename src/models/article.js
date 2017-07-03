@@ -9,7 +9,7 @@ const Article = requelize.model('Article', {
     alcohol  : joi.number().default(0),
     // Optional VAT tax
     vat      : joi.number().default(0),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

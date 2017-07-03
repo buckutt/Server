@@ -62,7 +62,7 @@ module.exports = function token(connector) {
     let connectType;
 
     const pinLoggingAllowed = config.rights.pinLoggingAllowed;
-    const now               = Date.now();
+    const now               = connector.date;
 
     return jwt
         .verifyAsync(bearer, secret)

@@ -3,7 +3,7 @@ const joi       = require('joi');
 
 const Group = requelize.model('Group', {
     name     : joi.string().required(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isOpen   : joi.boolean().default(true),
     isPublic : joi.boolean().default(false),

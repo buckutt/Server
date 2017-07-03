@@ -5,7 +5,7 @@ const MeanOfLogin = requelize.model('MeanOfLogin', {
     type     : joi.string().required(),
     data     : joi.alternatives(joi.number(), joi.string()).required(),
     blocked  : joi.boolean().default(false),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

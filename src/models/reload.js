@@ -5,7 +5,7 @@ const Reload = requelize.model('Reload', {
     credit   : joi.number().required(),
     type     : joi.string().required(),
     trace    : joi.string().allow('').required(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

@@ -3,7 +3,7 @@ const joi       = require('joi');
 
 const Price = requelize.model('Price', {
     amount   : joi.number().required(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

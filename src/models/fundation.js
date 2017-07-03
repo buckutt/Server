@@ -5,7 +5,7 @@ const Fundation = requelize.model('Fundation', {
     name     : joi.string(),
     website  : joi.string().optional(),
     mail     : joi.string().optional(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });

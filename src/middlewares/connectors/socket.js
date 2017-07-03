@@ -18,6 +18,10 @@ module.exports.marshal = function marshal(mw) {
                 headers: {}
             },
 
+            get date() {
+                return new Date();
+            },
+
             header(name, value) {
                 socket.connector.result.headers[name] = value;
             },

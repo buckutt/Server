@@ -4,7 +4,7 @@ const joi       = require('joi');
 // `Set` already exists.
 const Set_ = requelize.model('Set', {
     name     : joi.string().required(),
-    createdAt: joi.date().default(new Date()),
+    createdAt: joi.date().default(() => new Date(), 'default date is now'),
     editedAt : joi.date(),
     isRemoved: joi.boolean().default(false)
 });
