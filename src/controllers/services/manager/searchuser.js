@@ -1,5 +1,8 @@
 const express = require('express');
-const thinky  = require('../../../lib/thinky');
+const requelize = require('../../../lib/requelize');
+const logger       = require('../../../lib/log');
+
+const log = logger(module);
 
 /**
  * SearchUser controller.
@@ -7,8 +10,10 @@ const thinky  = require('../../../lib/thinky');
 const router = new express.Router();
 
 router.get('/services/manager/searchuser', (req, res) => {
+    log.info(`Search user ${req.query.name}`, req.details);
+
     const models = req.app.locals.models;
-    const r      = thinky.r;
+    const r      = requelize.r;
     const name   = req.query.name.split(' ');
 
     models.User

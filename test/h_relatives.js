@@ -53,8 +53,8 @@ describe('Relatives', () => {
             unirest.get('https://localhost:3006/purchases/00000000-0000-1000-8000-000000000000/foo')
                 .end((response) => {
                     assert.equal(404, response.code);
-                    assert.equal('Document not found', response.body.message);
-                    assert.equal('Submodel foo does not exist', response.body.details);
+                    assert.equal('Document not found: submodel does not exist', response.body.message);
+                    assert.equal('foo', response.body.details.submodel);
 
                     done();
                 });
@@ -72,8 +72,8 @@ describe('Relatives', () => {
         it('should not add a relation if the submodel does not exists', (done) => {
             const gid = '00000000-0000-1000-8000-000000000000';
 
-            unirest.post(`https://localhost:3006/groups/${gid}/foo`)
-                .send({ id: gid })
+            unirest.post(`https://localhost:3006/groups/${gid}/foo/${gid}`)
+                .send()
                 .end((response2) => {
                     assert.equal(404, response2.code);
 
@@ -84,8 +84,8 @@ describe('Relatives', () => {
         it('should not add a relation if the left document does not exist', (done) => {
             const rid = '00000000-0000-1000-8000-000000000000';
 
-            unirest.post(`https://localhost:3006/rights/${rid}/users`)
-                .send({ id: rid })
+            unirest.post(`https://localhost:3006/rights/${rid}/users/${rid}`)
+                .send()
                 .end((response2) => {
                     assert.equal(404, response2.code);
 
@@ -98,8 +98,8 @@ describe('Relatives', () => {
                 .end((response) => {
                     const rid = response.body[0].id;
 
-                    unirest.post(`https://localhost:3006/rights/${rid}/users`)
-                        .send({ id: '00000000-0000-1000-8000-000000000000' })
+                    unirest.post(`https://localhost:3006/rights/${rid}/users/00000000-0000-1000-8000-000000000000`)
+                        .send()
                         .end((response2) => {
                             assert.equal(404, response2.code);
 
@@ -113,8 +113,8 @@ describe('Relatives', () => {
                 .end((response) => {
                     const rid = response.body[0].id;
 
-                    unirest.post(`https://localhost:3006/users/${process.env.GJId}/rights`)
-                        .send({ id: rid })
+                    unirest.post(`https://localhost:3006/users/${process.env.GJId}/rights/${rid}`)
+                        .send()
                         .end((response2) => {
                             assert.equal(200, response2.code);
 

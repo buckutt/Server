@@ -55,7 +55,8 @@
             "/services/manager/changepin",
             "/services/manager/history",
             "/services/manager/searchuser",
-            "/services/manager/transfer"
+            "/services/manager/transfer",
+            "userCredit"
       ],
       "pinLoggingAllowed": ["seller", "reloader"]
    }

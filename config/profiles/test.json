@@ -17,10 +17,8 @@
         "name": "buckless_test"
     },
     "mailer": {
-        "smtp": {
-            "host": "smtp.utt.fr",
-            "port": 25
-        }
+        "streamTransport": true,
+        "newLine": "unix"
     },
     "askpin": {
         "from": "noreply@buckless.com",

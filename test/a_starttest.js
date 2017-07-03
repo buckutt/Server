@@ -1,32 +1,32 @@
 /* eslint-disable func-names */
 
-const assert   = require('assert');
-const unirest  = require('unirest');
-const syncExec = require('sync-exec');
-const moment   = require('moment');
-const app      = require('../src/app');
+const assert  = require('assert');
+const unirest = require('unirest');
+const app     = require('../src/app');
+
+const sslConfig     = require('../scripts/sslConfig');
+const requelize     = require('../src/lib/requelize');
+const seed          = require('../scripts/seed');
+const { addDevice } = require('../scripts/addDevice');
+
+// Define models
+require('../src/models');
 
 describe('Should start the test application', () => {
     before(function (done) {
         this.timeout(30000);
 
-        let sslDateResult = syncExec('openssl x509 -noout -enddate -in ssl/templates/test-crt.pem').stdout;
-        sslDateResult = sslDateResult.split('=').pop();
+        sslConfig('test', 'test');
 
-        let date = moment(sslDateResult, ['MMM D HH:mm:ss YYYY', 'MMM  D HH:mm:ss YYYY']);
-
-        // Remove GMT
-        date = date
-            .add(moment().utcOffset(), 'minutes')
-            .utcOffset(0);
-
-        if (date.isBefore(moment())) {
-            throw new Error('Test SSL certificates are outdated');
-        }
-
-        app
-            .start()
-            .then(() => done());
+        requelize.sync()
+            .then(() => seed())
+            .then(() => addDevice({ admin: true, deviceName: 'test', password: 'test' }))
+            .then(() => app.start())
+            .then(() => done())
+            .catch((err) => {
+                console.error(err);
+                process.exit(1);
+            });
     });
 
     it('should refuse if no ssl certificate is present', (done) => {
@@ -36,12 +36,12 @@ describe('Should start the test application', () => {
             ca                : null,
             strictSSL         : false,
             rejectUnauthorized: false
-        }, (error, res) => {
+        }, (error, res_) => {
             assert.equal(error, null);
-            assert.equal(401, res.statusCode);
 
-            const ERR = '{"status":401,"message":"Unauthorized : missing client HTTPS certificate","details":""}';
-            assert.equal(ERR, res.body);
+            const res = JSON.parse(res_.body);
+            assert.equal(401, res.status);
+            assert.equal(res.message, 'Unauthorized : missing client HTTPS certificate');
 
             done();
         });

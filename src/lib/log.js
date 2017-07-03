@@ -74,9 +74,15 @@ module.exports = (moduleToUse) => {
     if (config.log.graylog && config.log.graylog.gelfPro) {
         const graylogTransport = new WinstonTcpGraylog(config.log.graylog);
 
-        graylogTransport.on('error', () => {
-            // internal WinstonTcpGraylog problems
-            console.error('Warning: Graylog connection lost');
+        // Debouce disconnect errors
+        let lastError = Date.now();
+        graylogTransport.on('error', (error) => {
+            const now = Date.now();
+
+            if (now - lastError >= 60 * 1000) {
+                console.log(`Graylog error: ${error}`);
+                lastError = now;
+            }
         });
 
         transports.push(graylogTransport);

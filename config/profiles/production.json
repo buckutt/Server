@@ -21,13 +21,11 @@
         "name": "buckless_dev"
     },
     "mailer": {
-        "smtp": {
-            "host": "smtp.mailtrap.io",
-            "port": 2525,
-            "auth": {
-                "user": "ed37a3f7039a0e",
-                "pass": "d617720e0b2db0"
-            }
+        "host": "smtp.mailtrap.io",
+        "port": 2525,
+        "auth": {
+            "user": "ed37a3f7039a0e",
+            "pass": "d617720e0b2db0"
         }
     },
     "askpin": {

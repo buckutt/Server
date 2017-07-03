@@ -17,13 +17,13 @@ describe('Issue #99', () => {
 
                 initial = response.body[0].users.length;
 
-                unirest.post(`https://localhost:3006/rights/${rid}/users`)
-                    .send({ id: process.env.GJId })
+                unirest.post(`https://localhost:3006/rights/${rid}/users/${process.env.GJId}`)
+                    .send()
                     .end((response2) => {
                         assert.equal(200, response2.code);
 
-                        unirest.post(`https://localhost:3006/rights/${rid}/users`)
-                            .send({ id: process.env.GJId })
+                        unirest.post(`https://localhost:3006/rights/${rid}/users/${process.env.GJId}`)
+                            .send()
                             .end((response3) => {
                                 assert.equal(200, response3.code);
 

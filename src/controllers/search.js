@@ -3,12 +3,12 @@ const qs          = require('qs');
 const url         = require('url');
 const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
-const thinky      = require('../lib/thinky');
-const { pp }      = require('../lib/utils');
+const requelize   = require('../lib/requelize');
+const dbCatch     = require('../lib/dbCatch');
 const APIError    = require('../errors/APIError');
 
 const log = logger(module);
-const r   = thinky.r;
+const r   = requelize.r;
 
 /**
  * Converts a JSON object to a RethinkDB call
@@ -32,21 +32,17 @@ function objToRethinkDBSearch(obj, onFail) {
     }
 
     let rethinkSearch = r.row(obj.field.toString());
-    let outputLog     = `r.row("${obj.field.toString()}")`;
 
     if (obj.hasOwnProperty('startsWith')) {
         rethinkSearch = rethinkSearch.match(`^${obj.startsWith.toString()}`);
-        outputLog     += `.match("^${obj.startsWith.toString()}")`;
     }
 
     if (obj.hasOwnProperty('endsWith')) {
         rethinkSearch = rethinkSearch.match(`${obj.endsWith.toString()}$`);
-        outputLog     += `.match("${obj.endsWith.toString()}$")`;
     }
 
     if (obj.hasOwnProperty('matches')) {
         rethinkSearch = rethinkSearch.match(obj.matches.toString());
-        outputLog     += `.match("${obj.matches.toString()}")`;
     }
 
     if (obj.date) {
@@ -59,35 +55,29 @@ function objToRethinkDBSearch(obj, onFail) {
 
     if (obj.hasOwnProperty('gt')) {
         rethinkSearch = rethinkSearch.gt(obj.gt);
-        outputLog     += `.gt("${obj.gt}")`;
     }
 
     if (obj.hasOwnProperty('ne')) {
         rethinkSearch = rethinkSearch.ne(obj.ne);
-        outputLog     += `.ne("${obj.ne}")`;
     }
 
     if (obj.hasOwnProperty('lt')) {
         rethinkSearch = rethinkSearch.lt(obj.lt);
-        outputLog     += `.lt("${obj.lt}")`;
     }
 
     if (obj.hasOwnProperty('ge')) {
         rethinkSearch = rethinkSearch.ge(obj.ge);
-        outputLog     += `.ge("${obj.ge}")`;
     }
 
     if (obj.hasOwnProperty('le')) {
         rethinkSearch = rethinkSearch.le(obj.le);
-        outputLog     += `.le("${obj.le}")`;
     }
 
     if (obj.hasOwnProperty('eq')) {
         rethinkSearch = rethinkSearch.eq(obj.eq);
-        outputLog     += `.eq("${obj.eq}")`;
     }
 
-    return [outputLog, rethinkSearch];
+    return rethinkSearch;
 }
 
 /**
@@ -98,10 +88,10 @@ function objToRethinkDBSearch(obj, onFail) {
  */
 function arrayToRethinkFilters(array, onFail) {
     let rethinkSearch = r;
-    let outputLog     = '';
+
     array.forEach((searchObj, i) => {
         // First call, do not call and
-        const [subLog, subSearch] = objToRethinkDBSearch(searchObj, onFail);
+        const subSearch = objToRethinkDBSearch(searchObj, onFail);
 
         if (subSearch === null) {
             return [null, null];
@@ -109,14 +99,12 @@ function arrayToRethinkFilters(array, onFail) {
 
         if (i !== 0) {
             rethinkSearch = rethinkSearch.and(subSearch);
-            outputLog     += `.and(${subLog})`;
         } else {
             rethinkSearch = subSearch;
-            outputLog     += subLog;
         }
     });
 
-    return [outputLog, rethinkSearch];
+    return rethinkSearch;
 }
 
 /**
@@ -127,10 +115,10 @@ function arrayToRethinkFilters(array, onFail) {
  */
 function arrayOfArrayToRethinkFilters(array, onFail) {
     let rethinkSearch = r;
-    let outputLog     = '';
+
     array.forEach((searchObj, i) => {
         // First call, do not call or
-        const [subLog, subSearch] = arrayToRethinkFilters(searchObj, onFail);
+        const subSearch = arrayToRethinkFilters(searchObj, onFail);
 
         /* istanbul ignore next */
         if (subSearch === null) {
@@ -139,14 +127,12 @@ function arrayOfArrayToRethinkFilters(array, onFail) {
 
         if (i !== 0) {
             rethinkSearch = rethinkSearch.or(subSearch);
-            outputLog     += `.or(${subLog})`;
         } else {
             rethinkSearch = subSearch;
-            outputLog     += subLog;
         }
     });
 
-    return [outputLog, rethinkSearch];
+    return rethinkSearch;
 }
 
 /**
@@ -155,11 +141,13 @@ function arrayOfArrayToRethinkFilters(array, onFail) {
 const router = new express.Router();
 
 router.get('/:model/search', (req, res, next) => {
+    log.info(`Search ${req.params.model} ${JSON.stringify(req.query)||''}`, req.details);
+
     // Support encoded JSON (express doesn't)
     const q = qs.parse(url.parse(req.url).query).q;
 
     if (!q) {
-        return next(new APIError(400, 'Missing q parameter'));
+        return next(new APIError(module, 400, 'Missing q parameter'));
     }
 
     let searchQuery;
@@ -168,7 +156,7 @@ router.get('/:model/search', (req, res, next) => {
         searchQuery = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
     } catch (e) {
         /* istanbul ignore next */
-        return next(new APIError(400, 'Invalid search object', e));
+        return next(new APIError(module, 400, 'Invalid search object', e));
     }
 
     if (!Array.isArray(searchQuery)) {
@@ -181,42 +169,33 @@ router.get('/:model/search', (req, res, next) => {
     searchQuery = [searchQuery];
     searchQuery.push(...orQuery);
 
-    let queryLog = `${req.Model}.filter(`;
-
     // Must use a boolean variable because we want to stop the request if failed
     let failed = false;
 
-    const [logFilter, filterResult] = arrayOfArrayToRethinkFilters(searchQuery, () => {
+    const filterResult = arrayOfArrayToRethinkFilters(searchQuery, () => {
         failed = true;
     });
 
-    queryLog += logFilter;
-
     if (failed) {
-        return next(new APIError(400, 'Invalid search object'));
+        return next(new APIError(module, 400, 'Invalid search object'));
     }
 
     let request = req.Model;
-
-    queryLog += ')';
 
     // Order
     if (req.query.orderBy) {
         if (req.query.sort === 'asc') {
             // Order ASC
-            queryLog += `.orderBy({ index: r.asc(${req.query.orderBy}) })`;
             request = request.orderBy({
                 index: r.asc(req.query.orderBy)
             });
         } else if (req.query.sort === 'dsc') {
             // Order DSC
-            queryLog += `.orderBy({ index: r.desc(${req.query.orderBy})})`;
             request = request.orderBy({
                 index: r.desc(req.query.orderBy)
             });
         } else {
             // Order Default
-            queryLog += `.orderBy({ index: ${req.query.orderBy} })`;
             request = request.orderBy({
                 index: req.query.orderBy
             });
@@ -227,23 +206,18 @@ router.get('/:model/search', (req, res, next) => {
 
     // Limit
     if (req.query.limit) {
-        queryLog += `.limit(${req.query.limit})`;
         request = request.limit(req.query.limit);
     }
 
     // Skip/Offset
     if (req.query.offset) {
-        queryLog += `.skip(${req.query.offset})`;
         request = request.skip(req.query.offset);
     }
 
     // Embed multiple relatives
     if (req.query.embed) {
-        queryLog += `.getJoin(${pp(req.query.embed)})`;
-        request = request.getJoin(req.query.embed);
+        request = request.embed(req.query.embed);
     }
-
-    log.info(queryLog);
 
     request
         .run()
@@ -253,14 +227,7 @@ router.get('/:model/search', (req, res, next) => {
                 .json(result)
                 .end();
         })
-        .catch(thinky.Errors.DocumentNotFound, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(404, 'Document not found', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(module, err, next));
 });
 
 router.param('model', modelParser);

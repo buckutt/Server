@@ -2,8 +2,7 @@ const express     = require('express');
 const idParser    = require('../lib/idParser');
 const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
-const thinky      = require('../lib/thinky');
-const APIError    = require('../errors/APIError');
+const dbCatch     = require('../lib/dbCatch');
 
 const log = logger(module);
 
@@ -13,8 +12,7 @@ const log = logger(module);
 const router = new express.Router();
 
 router.put('/:model/:id', (req, res, next) => {
-    const queryLog = `${req.Model}.get(${req.params.id})`;
-    log.info(queryLog);
+    log.info(`Update ${req.params.model}(${req.params.id}) with ${JSON.stringify(req.body)}`, req.details);
 
     // First, get the model
     req.Model
@@ -26,13 +24,11 @@ router.put('/:model/:id', (req, res, next) => {
                 inst[k] = req.body[k];
             });
 
-            log.info(`${req.params.id}.saveAll()`);
-            // Save all (including relatives)
             return inst.save();
         })
         .then((result) => {
             if (req.query.embed) {
-                return req.Model.get(result.id).getJoin(req.query.embed).run();
+                return req.Model.get(result.id).embed(req.query.embed).run();
             }
 
             return result;
@@ -43,20 +39,7 @@ router.put('/:model/:id', (req, res, next) => {
                 .json(result)
                 .end();
         })
-        .catch(thinky.Errors.DocumentNotFound, err =>
-            next(new APIError(404, 'Document not found', err))
-        )
-        .catch(thinky.Errors.ValidationError, err =>
-            next(new APIError(400, 'Invalid model', err))
-        )
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(module, err, next));
 });
 
 router.param('model', modelParser);

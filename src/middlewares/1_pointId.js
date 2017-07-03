@@ -13,40 +13,60 @@ module.exports = (connector) => {
         .getAll(connector.fingerprint, {
             index: 'fingerprint'
         })
-        .getJoin({
-            periodPoints: {
-                period: {
-                    event: true
-                },
-                point: true
+        .filter({ isRemoved: false })
+        .embed({
+            points: {
+                _through: {
+                    period: {
+                        event: true
+                    }
+                }
             }
         })
         .run()
         .then((devices) => {
             /* istanbul ignore if */
-            if (devices.length === 0 || devices[0].periodPoints.length === 0) {
-                return Promise.reject(new APIError(404, 'Device not found', { fingerprint: connector.fingerprint }));
+            if (devices.length === 0 || devices[0].points.length === 0) {
+                return Promise.reject(new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint }));
             }
 
             device = devices[0];
 
-            const periodPoints = device.periodPoints;
-
             let minPeriod = Infinity;
 
-            periodPoints.forEach((periodPoint) => {
-                const diff = periodPoint.period.end - periodPoint.period.start;
+            let handled = false;
+
+            device.points.forEach((point) => {
+                const diff = point._through.period.end - point._through.period.start;
+
+                if (point._through.period.start > connector.date || point._through.period.end < connector.date) {
+                    return;
+                }
 
                 if (diff < minPeriod) {
-                    connector.Point_id = periodPoint.Point_id;
-                    connector.Event_id = periodPoint.period.Event_id;
+                    connector.Point_id = point.id;
+                    connector.Event_id = point._through.period.event.id;
                     minPeriod          = diff;
 
                     connector.device = device;
-                    connector.point  = periodPoint.point;
-                    connector.event  = periodPoint.period.event;
+                    connector.point  = point;
+                    connector.event  = point._through.period.event;
+
+                    connector.details = {
+                        device: connector.device.name,
+                        event : connector.event.name,
+                        point : connector.point.name,
+                        path  : connector.path,
+                        method: connector.method
+                    };
+
+                    handled = true;
                 }
             });
+
+            if (!handled) {
+                return Promise.reject(new APIError(module, 404, 'No assigned points'));
+            }
 
             connector.header('event', connector.Event_id);
             connector.header('eventName', connector.event.name);

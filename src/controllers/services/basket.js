@@ -1,10 +1,10 @@
 const express         = require('express');
 const Promise         = require('bluebird');
 const APIError        = require('../../errors/APIError');
-const canSellOrReload = require('../../lib/canSellOrReload');
 const logger          = require('../../lib/log');
-const thinky          = require('../../lib/thinky');
-const { pp }          = require('../../lib/utils');
+const requelize       = require('../../lib/requelize');
+const canSellOrReload = require('../../lib/canSellOrReload');
+const dbCatch         = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -15,8 +15,10 @@ const router = new express.Router();
 
 // Get the buyer
 router.post('/services/basket', (req, res, next) => {
+    log.info(`Processing basket ${JSON.stringify(req.body)}`, req.details);
+
     if (!Array.isArray(req.body)) {
-        return next(new APIError(400, 'Invalid basket'));
+        return next(new APIError(module, 400, 'Invalid basket'));
     }
 
     if (req.body.length === 0) {
@@ -26,7 +28,7 @@ router.post('/services/basket', (req, res, next) => {
     req.Buyer_id = req.body[0].Buyer_id;
 
     if (!req.Buyer_id) {
-        return next(new APIError(400, 'Invalid buyer'));
+        return next(new APIError(module, 400, 'Invalid buyer'));
     }
 
     req.app.locals.models.User
@@ -46,10 +48,8 @@ router.post('/services/basket', (req, res, next) => {
     const reloads       = [];
     // Stock reduciton queries
     const stocks        = [];
-    // Purchases-Articles queries: prevent thinky from uniqify
+    // Purchases-Articles queries: prevent requelize from uniqify
     const purchasesRels = [];
-
-    let queryLog  = '';
 
     const totalCost = req.body
         .map((item) => {
@@ -66,25 +66,27 @@ router.post('/services/basket', (req, res, next) => {
         .map(item => item.credit)
         .reduce((a, b) => a + b, 0);
 
-    if (req.buyer.credit < totalCost) {
-        return next(new APIError(400, 'Not enough credit'));
-    }
+    // Disabled for offline requests:
+    // if (req.buyer.credit < totalCost) {
+    //     return next(new APIError(module, 400, 'Not enough credit'));
+    // }
 
     if (req.event.config.maxPerAccount && req.buyer.credit - totalCost > req.event.config.maxPerAccount) {
         const max = (req.event.config.maxPerAccount / 100).toFixed(2);
-        return next(new APIError(400, `Maximum exceeded : ${max}€`));
+        return next(new APIError(module, 400, `Maximum exceeded : ${max}€`, { user: req.user.id }));
     }
 
     if (req.event.config.minReload && reloadOnly < req.event.config.minReload && reloadOnly > 0) {
         const min = (req.event.config.minReload / 100).toFixed(2);
-        return next(new APIError(400, `Can not reload less than : ${min}€`));
+        return next(new APIError(module, 400, `Can not reload less than : ${min}€`));
     }
-
-    queryLog += `User ${req.buyer.id} `;
 
     const newCredit = req.buyer.credit - totalCost;
 
+    // TODO: standardize error response
     if (isNaN(newCredit)) {
+        log.error('credit is not a number');
+
         return res
             .status(400)
             .json({
@@ -99,7 +101,11 @@ router.post('/services/basket', (req, res, next) => {
     const unallowedReload   = (req.body.find(item => item.type === 'reload') && !userRights.canReload);
 
     if (unallowedPurchase || unallowedReload) {
-        return next(new APIError(401, 'No right to reload or sell', { unallowedPurchase, unallowedReload }));
+        return next(new APIError(module, 401, 'No right to reload or sell', { 
+            user: req.user.id, 
+            unallowedPurchase, 
+            unallowedReload 
+        }));
     }
 
     req.body.forEach((item) => {
@@ -117,13 +123,12 @@ router.post('/services/basket', (req, res, next) => {
                 Buyer_id    : item.Buyer_id,
                 Price_id    : item.Price_id,
                 Point_id    : req.Point_id,
-                Promotion_id: item.Promotion_id ? item.Promotion_id : '',
+                Promotion_id: item.Promotion_id || null,
                 Seller_id   : item.Seller_id,
                 alcohol     : item.alcohol,
-                articlesAmount,
+                articlesAmount
             });
 
-            queryLog += `buys ${pp(articlesIds)} `;
             purchasesRels.push(articlesIds);
 
             // Stock reduction
@@ -131,7 +136,7 @@ router.post('/services/basket', (req, res, next) => {
                 const stockReduction = models.Article
                     .get(article)
                     .update({
-                        stock: thinky.r.row('stock').sub(1)
+                        stock: requelize.r.row('stock').sub(1)
                     })
                     .run();
 
@@ -140,7 +145,6 @@ router.post('/services/basket', (req, res, next) => {
 
             purchases.push(purchase.save());
         } else if (typeof item.credit === 'number') {
-            queryLog += `reloads ${item.credit} `;
 
             // Reloads
             const reload = new models.Reload({
@@ -156,15 +160,12 @@ router.post('/services/basket', (req, res, next) => {
         }
     });
 
-    queryLog += `and update credit to ${newCredit}`;
-    const updateCredit = thinky.r.table('User')
+    const updateCredit = requelize.r.table('User')
         .get(req.buyer.id)
         .update({
             credit: newCredit
         })
         .run();
-
-    log.info(queryLog);
 
     const everythingSaving = [updateCredit].concat(reloads).concat(stocks);
 
@@ -174,15 +175,15 @@ router.post('/services/basket', (req, res, next) => {
             const allRels = purchases_.map(({ id }, i) =>
                 models.r.table('Article_Purchase').insert(purchasesRels[i].map(articleId =>
                     ({
-                        Article_id : articleId,
-                        Purchase_id: id
+                        Article : articleId,
+                        Purchase: id
                     })
                 ))
             );
 
             return Promise.all(allRels);
         })
-        .all(everythingSaving)
+        .then(() => Promise.all(everythingSaving))
         .then(() =>
             res
                 .status(200)
@@ -191,18 +192,7 @@ router.post('/services/basket', (req, res, next) => {
                 })
                 .end()
         )
-        .catch(thinky.Errors.ValidationError, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(400, 'Invalid model', err));
-        })
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;

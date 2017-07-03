@@ -1,10 +1,11 @@
-const fs       = require('fs-extra');
-const path     = require('path');
-const execSync = require('child_process').execSync;
-const Promise  = require('bluebird');
-const inquirer = require('inquirer');
-const models   = require('../src/models');
-const logger   = require('../src/lib/log');
+const fs        = require('fs-extra');
+const path      = require('path');
+const execSync  = require('child_process').execSync;
+const Promise   = require('bluebird');
+const inquirer  = require('inquirer');
+const models    = require('../src/models');
+const requelize = require('../src/lib/requelize');
+const logger    = require('../src/lib/log');
 
 const log = logger(module);
 
@@ -21,35 +22,22 @@ function createDir(opts) {
 }
 
 function setDeviceConfig(opts, fingerprint) {
-    const device = new models.Device({ name: opts.deviceName, fingerprint });
-    let periodPoint;
-
     log.info('Inserting device in database');
 
-    return models.PeriodPoint
-        .filter({ Period_id: opts.periodId, Point_id: opts.pointId })
-        .getJoin({ devices: true })
-        .run()
-        .then((res) => {
-            if (res.length === 0) {
-                periodPoint         = new models.PeriodPoint({});
-                periodPoint.devices = [device];
-            } else {
-                periodPoint = res[0];
-                periodPoint.devices.push(device);
-            }
+    const device      = new models.Device({ name: opts.deviceName, fingerprint });
+    const devicePoint = new models.DevicePoint({ Period_id: opts.periodId });
 
-            return models.Period.get(opts.periodId);
-        })
-
-        .then((period) => {
-            periodPoint.period = period;
-
-            return models.Point.get(opts.pointId);
-        })
+    return models.Point.get(opts.pointId)
         .then((point) => {
-            periodPoint.point = point;
-            return periodPoint.saveAll();
+            device.points = (device.points || []).concat({
+                document: point,
+                through : devicePoint,
+                saveAll : {
+                    period: true
+                }
+            });
+
+            return device.saveAll({ points: true });
         });
 }
 
@@ -105,7 +93,7 @@ function genClient(opts) {
 function getAdminPeriodPoint(opts) {
     return models.r
         .table('Period')
-        .getAll('Éternité', { index: 'name' })
+        .getAll('Défaut', { index: 'name' })
         .pluck('id')
         .run()
         .then((res) => {
@@ -147,14 +135,16 @@ if (require.main === module) {
     let periods;
     let points;
 
-    models.r
-        .table('Period')
-        .pluck('id', 'name')
-        .run()
+    requelize.sync()
+        .then(() => requelize.r
+            .table('Period')
+            .pluck('id', 'name')
+            .run()
+        )
         .then((res) => {
             periods = res;
 
-            return models.r.table('Point').pluck('id', 'name').run();
+            return requelize.r.table('Point').pluck('id', 'name').run();
         })
         .then((res) => {
             points = res;

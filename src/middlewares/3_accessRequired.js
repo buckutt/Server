@@ -23,6 +23,10 @@ module.exports = (connector) => {
     let handled = false;
 
     for (const right of rights) {
+        if (right.period.start > connector.date || right.period.end < connector.date) {
+            return;
+        }
+
         // Admin/Treasurer : he does whatever he wants
         if (authorize.all.indexOf(right.name) > -1) {
             handled = true;
@@ -54,6 +58,6 @@ module.exports = (connector) => {
     }
 
     if (!handled) {
-        return Promise.reject(new APIError(401, 'Unauthorized', 'No right to do that'));
+        return Promise.reject(new APIError(module, 401, 'Unauthorized: insufficient rights'));
     }
 };

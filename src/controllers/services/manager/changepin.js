@@ -2,7 +2,10 @@ const bcrypt_  = require('bcryptjs');
 const express  = require('express');
 const Promise  = require('bluebird');
 const APIError = require('../../../errors/APIError');
-const thinky   = require('../../../lib/thinky');
+const dbCatch  = require('../../../lib/dbCatch');
+const logger   = require('../../../lib/log');
+
+const log = logger(module);
 
 /**
  * ChangePin controller.
@@ -11,10 +14,12 @@ const bcrypt = Promise.promisifyAll(bcrypt_);
 const router = new express.Router();
 
 router.put('/services/manager/changepin', (req, res, next) => {
+    log.info(`Change pin for user ${req.user.id}`, req.details);
+
     const models = req.app.locals.models;
 
     if (req.body.currentPin.length !== 4) {
-        next(new APIError(401, 'Current PIN has to be clear, not crypted'));
+        next(new APIError(module, 401, 'Current PIN has to be clear, not crypted'));
     }
 
     bcrypt.compareAsync(req.body.currentPin.toString(), req.user.pin)
@@ -24,7 +29,7 @@ router.put('/services/manager/changepin', (req, res, next) => {
                     return resolve();
                 }
 
-                reject(new APIError(401, 'PIN is wrong'));
+                reject(new APIError(module, 401, 'PIN is wrong'));
             })
         )
         .then(() =>
@@ -37,25 +42,13 @@ router.put('/services/manager/changepin', (req, res, next) => {
 
             return user.save();
         })
-        .then(() => {
-            const confirm = {
-                changed: true
-            };
-
-            return res
+        .then(() =>
+            res
                 .status(200)
-                .json(confirm)
-                .end();
-        })
-        .catch(Error, err => next(err))
-        .catch(thinky.Errors.InvalidWrite, (err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Couldn\'t write to disk', err));
-        })
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+                .json({ changed: true })
+                .end()
+        )
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;

@@ -44,6 +44,7 @@ describe('Read', () => {
                 .end((response) => {
                     unirest.get(`https://localhost:3006/purchases/${response.body[0].id}/?embed=${q(e)}`)
                         .end((response2) => {
+                            console.log(response2.body);
                             assert.equal('string', typeof response2.body.buyer.id);
                             assert.equal('string', typeof response2.body.seller.id);
                             done();
@@ -54,6 +55,7 @@ describe('Read', () => {
         it('should support ordering asc', (done) => {
             unirest.get('https://localhost:3006/articles?orderBy=name&sort=asc')
                 .end((response) => {
+                    console.log(response.body)
                     const articles = response.body.map(article => article.name);
                     const otherOne = clone(articles);
                     assert.deepEqual(articles.sort(), otherOne);

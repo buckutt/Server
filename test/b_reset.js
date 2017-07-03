@@ -3,17 +3,16 @@
 const Promise   = require('bluebird');
 const fs        = require('fs');
 const unirest   = require('unirest');
-const thinky    = require('../src/lib/thinky');
-const models    = require('../src/models');
+const requelize = require('../src/lib/requelize');
 const addDevice = require('../scripts/addDevice');
 
-const r         = thinky.r;
+const r         = requelize.r;
 
 describe('Before tests', () => {
     it('should empty the database', function (done) {
         this.timeout(20 * 1000);
 
-        models.loadModels()
+        requelize.sync()
             .then(() => r.tableList())
             .then((tableList) => {
                 const deletePromises = [];
@@ -30,7 +29,7 @@ describe('Before tests', () => {
     });
 
     it('should create one user', function (done) {
-        this.timeout(10000);
+        this.timeout(100000);
 
         let userId;
         let noRightsUserId;
@@ -273,23 +272,23 @@ describe('Before tests', () => {
         })
         .then(res =>
             r.table('Right_User').insert([{
-                Right_id: res.generated_keys[0],
-                User_id : userId
+                Right: res.generated_keys[0],
+                User : userId
             }, {
-                Right_id: res.generated_keys[1],
-                User_id : userId
+                Right: res.generated_keys[1],
+                User : userId
             }, {
-                Right_id: res.generated_keys[2],
-                User_id : sellerUserId
+                Right: res.generated_keys[2],
+                User : sellerUserId
             }, {
-                Right_id: res.generated_keys[3],
-                User_id : sellerUserId
+                Right: res.generated_keys[3],
+                User : sellerUserId
             }, {
-                Right_id: res.generated_keys[4],
-                User_id : sellerUserId
+                Right: res.generated_keys[4],
+                User : sellerUserId
             }, {
-                Right_id: res.generated_keys[5],
-                User_id : reloaderUserId
+                Right: res.generated_keys[5],
+                User : reloaderUserId
             }])
         )
         .then(() => addDevice.genClient({ password: 'test', deviceName: 'test' }))
@@ -307,19 +306,13 @@ describe('Before tests', () => {
             process.env.deviceId = deviceId;
         })
         .then(() =>
-            r.table('PeriodPoint').insert({
+            r.table('DevicePoint').insert({
+                Device   : deviceId,
                 Period_id: periodId,
-                Point_id : process.env.FoyerId,
+                Point    : process.env.FoyerId,
                 createdAt: new Date(),
                 editedAt : new Date(),
                 isRemoved: false
-            })
-        )
-        .then(res =>
-            r.table('Device_PeriodPoint').insert({
-                id            : `${deviceId}_${res.generated_keys[0]}`,
-                Device_id     : deviceId,
-                PeriodPoint_id: res.generated_keys[0]
             })
         )
         .then(() =>

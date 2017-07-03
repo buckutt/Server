@@ -170,27 +170,28 @@ describe('Basket', () => {
             });
     });
 
-    it('should not accept if the user does not have enough credit', (done) => {
-        unirest.post('https://localhost:3006/services/basket')
-            .send([
-                {
-                    Buyer_id    : process.env.GJId,
-                    Point_id    : process.env.FoyerId,
-                    Promotion_id: null,
-                    Seller_id   : process.env.sellerId,
-                    cost        : 10000,
-                    type        : 'purchase',
-                    articles    : [
-                        process.env.KinderDeliceId
-                    ]
-                }
-            ])
-            .end((response) => {
-                assert.equal(400, response.code);
-                assert.equal('Not enough credit', response.body.message);
-                done();
-            });
-    });
+    // Disabled for offline requests:
+    // it('should not accept if the user does not have enough credit', (done) => {
+    //     unirest.post('https://localhost:3006/services/basket')
+    //         .send([
+    //             {
+    //                 Buyer_id    : process.env.GJId,
+    //                 Point_id    : process.env.FoyerId,
+    //                 Promotion_id: null,
+    //                 Seller_id   : process.env.sellerId,
+    //                 cost        : 10000,
+    //                 type        : 'purchase',
+    //                 articles    : [
+    //                     process.env.KinderDeliceId
+    //                 ]
+    //             }
+    //         ])
+    //         .end((response) => {
+    //             assert.equal(400, response.code);
+    //             assert.equal('Not enough credit', response.body.message);
+    //             done();
+    //         });
+    // });
 
     it('should not accept if the user tries to reload too much', (done) => {
         unirest.post('https://localhost:3006/services/basket')

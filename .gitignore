@@ -9,3 +9,5 @@ config/*.json
 !config/dev.json
 ssl/certificates
 ready.lock
+yarn-error.log
+

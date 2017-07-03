@@ -1,7 +1,9 @@
 const express   = require('express');
-const thinky    = require('../../lib/thinky');
-const APIError  = require('../../errors/APIError');
+const dbCatch   = require('../../lib/dbCatch');
 const addDevice = require('../../../scripts/addDevice');
+const logger          = require('../../lib/log');
+
+const log = logger(module);
 
 /**
  * Certificate controller. Handle ssl certificate generation
@@ -14,6 +16,8 @@ router.get('/services/certificate', (req, res, next) => {
     const deviceId = req.query.deviceId;
     const password = req.query.password;
 
+    log.info(`Generation certificate for device ${deviceId} password ${password}`, req.details);
+
     let device;
     let fileName;
 
@@ -25,18 +29,12 @@ router.get('/services/certificate', (req, res, next) => {
         })
         .then((result) => {
             device.fingerprint = result.fingerprint;
-            fileName = result.fileName;
+            fileName           = result.fileName;
 
             return device.save();
         })
         .then(() => res.download(fileName))
-        .catch(thinky.Errors.DocumentNotFound, err =>
-            next(new APIError(404, 'Document not found', err))
-        )
-        .catch((err) => {
-            /* istanbul ignore next */
-            next(new APIError(500, 'Unknown error', err));
-        });
+        .catch(err => dbCatch(module, err, next));
 });
 
 module.exports = router;
