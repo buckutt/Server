@@ -4,7 +4,7 @@ const joi       = require('joi');
 const User = requelize.model('User', {
     firstname  : joi.string().required(),
     lastname   : joi.string().required(),
-    nickname   : joi.string().required(),
+    nickname   : joi.string().allow('').default(''),
     pin        : joi.string().required(),
     password   : joi.string().required(),
     recoverKey : joi.string().allow('').default(''),
