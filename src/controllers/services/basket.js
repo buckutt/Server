@@ -95,16 +95,16 @@ router.post('/services/basket', (req, res, next) => {
             .end();
     }
 
-    const userRights = canSellOrReload(req.user);
+    const userRights = canSellOrReload(req.user, req.connectType);
 
     const unallowedPurchase = (req.body.find(item => item.type === 'purchase') && !userRights.canSell);
     const unallowedReload   = (req.body.find(item => item.type === 'reload') && !userRights.canReload);
 
     if (unallowedPurchase || unallowedReload) {
-        return next(new APIError(module, 401, 'No right to reload or sell', { 
-            user: req.user.id, 
-            unallowedPurchase, 
-            unallowedReload 
+        return next(new APIError(module, 401, 'No right to reload or sell', {
+            user: req.user.id,
+            unallowedPurchase,
+            unallowedReload
         }));
     }
 

@@ -53,6 +53,7 @@ module.exports.unmarshal = function unmarshal(req, res, next) {
     req.event       = req.connector.event;
     req.user        = req.connector.user;
     req.details     = req.connector.details;
+    req.connectType = req.connector.connectType;
 
     next();
 };
