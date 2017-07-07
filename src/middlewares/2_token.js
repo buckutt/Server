@@ -80,6 +80,8 @@ module.exports = function token(connector) {
         .then((user) => {
             connector.user = user;
 
+            connector.connectType = connectType;
+
 
             connector.user.rights = connector.user.rights
                 .filter((right) => {

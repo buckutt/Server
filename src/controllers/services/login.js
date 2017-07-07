@@ -46,7 +46,7 @@ router.post('/services/login', (req, res, next) => {
 
     const infos = { type: req.body.meanOfLogin.toString(), data: req.body.data.toString() }
     log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
-    
+
     models.MeanOfLogin
         .getAll(infos.type, { index: 'type' })
         .filter({
@@ -98,7 +98,7 @@ router.post('/services/login', (req, res, next) => {
             user.pin      = '';
             user.password = '';
 
-            const userRights = canSellOrReload(user);
+            const userRights = canSellOrReload(user, connectType);
 
             user.canSell   = userRights.canSell;
             user.canReload = userRights.canReload;
