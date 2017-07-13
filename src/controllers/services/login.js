@@ -69,7 +69,7 @@ router.post('/services/login', (req, res, next) => {
                     point: req.Point_id
                 };
 
-                return next(new APIError(module, 404, 'User not found', errDetails));
+                return next(new APIError(module, 401, 'User not found', errDetails));
             }
 
             user = mol[0].user;

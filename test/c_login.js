@@ -255,7 +255,7 @@ describe('Login', () => {
                 pin        : 1234
             })
             .end((response) => {
-                assert.equal(404, response.code);
+                assert.equal(401, response.code);
 
                 done();
             });
@@ -311,7 +311,7 @@ describe('Login', () => {
                 pin        : 1258
             })
             .end((response) => {
-                assert.equal(404, response.code);
+                assert.equal(401, response.code);
 
                 done();
             });
