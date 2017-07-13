@@ -7,9 +7,7 @@ const Device = requelize.model('Device', {
     doubleValidation: joi.boolean().default(false),
     alcohol         : joi.boolean().default(false),
     showPicture     : joi.boolean().default(false),
-    showCategories  : joi.boolean().default(true),
-    realtime        : joi.boolean().default(false),
-    refreshInterval : joi.number().default(5),
+    defaultGroup    : joi.string().guid(),
     createdAt       : joi.date().default(() => new Date(), 'default date is now'),
     editedAt        : joi.date(),
     isRemoved       : joi.boolean().default(false)
