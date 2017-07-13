@@ -11,14 +11,14 @@ function checkTreasuryResponse(body_) {
         {
             count   : 3,
             price   : 100,
-            totalVAT: 300,
-            totalWT : 283.0188679245283
+            totalTI : 300,
+            totalVAT: 11.320754716981131
         },
         {
             count   : 2,
             price   : 60,
-            totalVAT: 120,
-            totalWT : 120
+            totalTI : 120,
+            totalVAT: 0
         }
     ], body);
 }

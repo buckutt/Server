@@ -141,7 +141,7 @@ function arrayOfArrayToRethinkFilters(array, onFail) {
 const router = new express.Router();
 
 router.get('/:model/search', (req, res, next) => {
-    log.info(`Search ${req.params.model} ${JSON.stringify(req.query)||''}`, req.details);
+    log.info(`Search ${req.params.model} ${JSON.stringify(req.query) || ''}`, req.details);
 
     // Support encoded JSON (express doesn't)
     const q = qs.parse(url.parse(req.url).query).q;

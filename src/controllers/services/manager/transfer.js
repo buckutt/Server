@@ -37,7 +37,8 @@ router.post('/services/manager/transfer', (req, res, next) => {
 
             req.recieverUser = user;
             next();
-        });
+        })
+        .catch(() => next(new APIError(400, 'Invalid reciever')));
 });
 
 router.post('/services/manager/transfer', (req, res, next) => {
@@ -65,18 +66,18 @@ router.post('/services/manager/transfer', (req, res, next) => {
     let amount = parseInt(req.body.amount, 10);
 
     if (req.user.credit - amount < 0) {
-        return next(new APIError(module, 400, 'Not enough sender credit', { 
+        return next(new APIError(module, 400, 'Not enough sender credit', {
             sender: req.Sender_id,
-            credit: req.user.credit, 
-            amount 
+            credit: req.user.credit,
+            amount
         }));
     }
 
     if (req.recieverUser.credit + amount > 100 * 100) {
-        return next(new APIError(module, 400, 'Too much reciever credit', { 
+        return next(new APIError(module, 400, 'Too much reciever credit', {
             receiver: req.Reciever_id,
-            credit: req.user.credit, 
-            amount 
+            credit  : req.user.credit,
+            amount
         }));
     }
 

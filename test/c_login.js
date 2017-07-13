@@ -77,6 +77,8 @@ describe('Login', () => {
                 assert.equal(true, response.headers.device.length > 0);
                 sellerToken = response.body.token;
 
+                process.env.sellerId = response.body.user.id;
+
                 unirest.get('https://localhost:3006/articles')
                     .header('Authorization', `Bearer ${sellerToken}`)
                     .end((response2) => {

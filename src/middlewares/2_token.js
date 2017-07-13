@@ -119,5 +119,5 @@ module.exports = function token(connector) {
         )
         .catch(jwt.JsonWebTokenError, () =>
             Promise.reject(new APIError(module, 401, 'Invalid token', { bearer }))
-        )
+        );
 };

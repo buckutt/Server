@@ -44,7 +44,7 @@ router.post('/services/login', (req, res, next) => {
     const connectType = (req.body.hasOwnProperty('pin')) ? 'pin' : 'password';
     let user;
 
-    const infos = { type: req.body.meanOfLogin.toString(), data: req.body.data.toString() }
+    const infos = { type: req.body.meanOfLogin.toString(), data: req.body.data.toString() };
     log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
 
     models.MeanOfLogin

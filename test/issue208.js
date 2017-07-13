@@ -11,7 +11,7 @@ describe('Issue #208', () => {
             .end((response) => {
                 const gid = response.body[0].id;
 
-                const filter = q({ foo: 'bar' })
+                const filter = q({ foo: 'bar' });
 
                 unirest.delete(`https://localhost:3006/groups/${gid}/users/${process.env.GJId}?filter=${filter}`)
                     .send()

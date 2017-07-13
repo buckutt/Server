@@ -15,7 +15,7 @@ const r   = requelize.r;
 const router = new express.Router();
 
 router.get('/:model/:id/:submodel', (req, res, next) => {
-    let info = `Read relatives ${req.params.submodel} of ${req.params.model} ${JSON.stringify(req.query)}`;
+    const info = `Read relatives ${req.params.submodel} of ${req.params.model} ${JSON.stringify(req.query)}`;
     log.info(info, req.details);
 
     const submodel = req.params.submodel;
@@ -48,7 +48,7 @@ router.get('/:model/:id/:submodel', (req, res, next) => {
 });
 
 router.post('/:model/:id/:submodel/:subId', (req, res, next) => {
-    let info = `Create relative ${req.params.submodel}(${req.params.subId}) of
+    const info = `Create relative ${req.params.submodel}(${req.params.subId}) of
         ${req.params.model}(${req.params.id}) ${JSON.stringify(req.query)}`;
     log.info(info, req.details);
 
@@ -96,7 +96,7 @@ router.post('/:model/:id/:submodel/:subId', (req, res, next) => {
 });
 
 router.delete('/:model/:id/:submodel/:subId', (req, res, next) => {
-    let info = `Delete relative ${req.params.submodel}(${req.params.subId}) of
+    const info = `Delete relative ${req.params.submodel}(${req.params.subId}) of
         ${req.params.model}(${req.params.id}) ${JSON.stringify(req.query)}`;
     log.info(info, req.details);
 
@@ -115,7 +115,7 @@ router.delete('/:model/:id/:submodel/:subId', (req, res, next) => {
     const filter = Object.assign({}, {
         [leftName] : leftId,
         [rightName]: rightId
-    }, req.query.filter)
+    }, req.query.filter);
 
     JoinModel
         .filter(filter)
