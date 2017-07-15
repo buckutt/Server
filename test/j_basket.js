@@ -3,7 +3,6 @@
 const assert = require('assert');
 
 /* global unirest, q */
-
 describe('Basket', () => {
     it('should support payment', (done) => {
         unirest.post('https://localhost:3006/services/basket')
@@ -14,8 +13,9 @@ describe('Basket', () => {
                     Promotion_id: null,
                     Seller_id   : process.env.sellerId,
                     Price_id    : process.env.PriceId,
-                    cost        : 50,
+                    cost        : 60,
                     type        : 'purchase',
+                    alcohol     : 0,
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
@@ -27,7 +27,7 @@ describe('Basket', () => {
             ])
             .end((response) => {
                 assert.equal(200, response.code);
-                assert.equal(100, response.body.newCredit);
+                assert.equal(90, response.body.newCredit);
                 done();
             });
     });
@@ -61,7 +61,7 @@ describe('Basket', () => {
             ])
             .end((response) => {
                 assert.equal(200, response.code);
-                assert.equal(5100, response.body.newCredit);
+                assert.equal(5090, response.body.newCredit);
                 done();
             });
     });
@@ -77,23 +77,24 @@ describe('Basket', () => {
                     Seller_id   : process.env.sellerId,
                     cost        : 100,
                     type        : 'purchase',
+                    alcohol     : 0,
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
                             price: process.env.PriceId,
-                            vat  : 6
+                            vat  : 0.06
                         },
                         {
                             id   : process.env.IceTeaPecheId,
                             price: process.env.PriceId,
-                            vat  : 6
+                            vat  : 0.06
                         }
                     ]
                 }
             ])
             .end((response) => {
                 assert.equal(200, response.code);
-                assert.equal(5000, response.body.newCredit);
+                assert.equal(4990, response.body.newCredit);
                 done();
             });
     });
@@ -109,16 +110,17 @@ describe('Basket', () => {
                     Seller_id   : process.env.sellerId,
                     cost        : 100,
                     type        : 'purchase',
+                    alcohol     : 0,
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
                             price: process.env.PriceId,
-                            vat  : 6
+                            vat  : 0.06
                         },
                         {
                             id   : process.env.IceTeaPecheId,
                             price: process.env.PriceId,
-                            vat  : 6
+                            vat  : 0.06
                         }
                     ]
                 },
@@ -148,7 +150,7 @@ describe('Basket', () => {
             ])
             .end((response) => {
                 assert.equal(200, response.code);
-                assert.equal(9900, response.body.newCredit);
+                assert.equal(9880, response.body.newCredit);
                 done();
             });
     });
@@ -177,12 +179,17 @@ describe('Basket', () => {
     //             {
     //                 Buyer_id    : process.env.GJId,
     //                 Point_id    : process.env.FoyerId,
+    //                 Price_id    : process.env.ExpensivePrice,
     //                 Promotion_id: null,
     //                 Seller_id   : process.env.sellerId,
-    //                 cost        : 10000,
+    //                 cost        : 60,
     //                 type        : 'purchase',
     //                 articles    : [
-    //                     process.env.KinderDeliceId
+    //                     {
+    //                         id   : process.env.KinderDeliceId,
+    //                         price: process.env.PriceId,
+    //                         vat  : 0
+    //                     }
     //                 ]
     //             }
     //         ])
@@ -305,7 +312,7 @@ describe('Basket', () => {
         });
 
         it('should update user credit', () => {
-            assert.equal(9900, gj.credit);
+            assert.equal(9880, gj.credit);
         });
 
         it('should update purchases', () => {

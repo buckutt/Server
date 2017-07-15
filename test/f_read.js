@@ -55,7 +55,7 @@ describe('Read', () => {
         it('should support ordering asc', (done) => {
             unirest.get('https://localhost:3006/articles?orderBy=name&sort=asc')
                 .end((response) => {
-                    console.log(response.body)
+                    console.log(response.body);
                     const articles = response.body.map(article => article.name);
                     const otherOne = clone(articles);
                     assert.deepEqual(articles.sort(), otherOne);

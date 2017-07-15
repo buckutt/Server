@@ -24,7 +24,7 @@ describe('Transfers', () => {
             unirest.post('https://localhost:3006/services/manager/transfer')
                 .send({
                     Reciever_id: process.env.LoggedId,
-                    amount     : 20,
+                    amount     : 30,
                     currentPin : '1234'
                 })
                 .end((response) => {
@@ -111,15 +111,28 @@ describe('Transfers', () => {
         });
 
         it('should not transfer if reciever would have more than 100€', (done) => {
-            unirest.post('https://localhost:3006/services/manager/transfer')
-                .send({
-                    Reciever_id: process.env.GJId,
-                    amount     : 100,
-                    currentPin : '1234'
-                })
-                .end((response) => {
-                    assert.equal(400, response.code);
-                    done();
+            unirest.post('https://localhost:3006/services/basket')
+                .send([
+                    {
+                        credit   : 98.5 * 100,
+                        trace    : 'card',
+                        Buyer_id : process.env.LoggedId,
+                        Seller_id: process.env.GJId,
+                        type     : 'reload'
+                    }
+                ])
+                .end(() => {
+                    unirest.post('https://localhost:3006/services/manager/transfer')
+                        .send({
+                            Reciever_id: process.env.GJId,
+                            amount     : 9900,
+                            currentPin : '1234'
+                        })
+                        .end((response) => {
+                            assert.equal(400, response.code);
+                            assert.equal('Too much reciever credit', response.body.message);
+                            done();
+                        });
                 });
         });
     });
