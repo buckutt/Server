@@ -1,12 +1,25 @@
 const express         = require('express');
 const Promise         = require('bluebird');
+const { memoize }     = require('lodash');
 const APIError        = require('../../errors/APIError');
 const logger          = require('../../lib/log');
-const requelize       = require('../../lib/requelize');
+const vat             = require('../../lib/vat');
+const { r }           = require('../../lib/requelize');
 const canSellOrReload = require('../../lib/canSellOrReload');
 const dbCatch         = require('../../lib/dbCatch');
 
 const log = logger(module);
+
+const getArticlePrice    = memoize(purchase => r.table('Price').get(purchase.Price_id)('amount').run());
+const getPromotionPrices = memoize(item => Promise.all(
+    item.articles.map(article => r.table('Price').get(article.price)('amount').run())
+));
+
+/* istanbul ignore next */
+setInterval(() => {
+    getArticlePrice.cache.clear();
+    getPromotionPrices.cache.clear();
+}, 60 * 1000);
 
 /**
  * Basket controller. Handles purchases and reloads
@@ -32,11 +45,43 @@ router.post('/services/basket', (req, res, next) => {
     }
 
     req.app.locals.models.User
-        .get(req.Buyer_id)
+        .get(req.Buyer_id).run()
         .then((user) => {
             req.buyer = user;
             next();
         });
+});
+
+router.post('/services/basket', (req, res, next) => {
+    let purchases = req.body.filter(item => item.type === 'purchase');
+
+    const getArticleCost = purchases.map(purchase => getArticlePrice(purchase));
+
+    const initialPromise = Promise.all(getArticleCost)
+        .then((articleCosts) => {
+            purchases = purchases.map((purchase, i) => {
+                purchase.cost = articleCosts[i];
+
+                return purchase;
+            });
+        });
+
+    const getPromotionsCosts = purchases.map(item => getPromotionPrices(item));
+
+    initialPromise
+        .then(() => Promise.all(getPromotionsCosts))
+        .then((promotionsCosts) => {
+            purchases = purchases.map((purchase, i) => {
+                purchase.articles = purchase.articles.map((amount, j) => {
+                    amount.cost = promotionsCosts[i][j];
+
+                    return amount;
+                });
+
+                return purchase;
+            });
+        })
+        .then(() => next());
 });
 
 router.post('/services/basket', (req, res, next) => {
@@ -48,14 +93,14 @@ router.post('/services/basket', (req, res, next) => {
     const reloads       = [];
     // Stock reduciton queries
     const stocks        = [];
-    // Purchases-Articles queries: prevent requelize from uniqify
+    // Purchases-Articles queries: prevent from uniqify
     const purchasesRels = [];
 
     const totalCost = req.body
         .map((item) => {
-            if (typeof item.cost === 'number') {
+            if (item.type === 'purchase') {
                 return item.cost;
-            } else if (typeof item.credit === 'number') {
+            } else if (item.type === 'reload') {
                 return -1 * item.credit;
             }
         })
@@ -112,13 +157,6 @@ router.post('/services/basket', (req, res, next) => {
         if (typeof item.cost === 'number') {
             // Purchases
             const articlesIds = item.articles.map(article => article.id);
-
-            const articlesAmount = item.articles.map(article => ({
-                id   : article.id,
-                price: article.price,
-                vat  : article.vat
-            }));
-
             const purchase = new models.Purchase({
                 Buyer_id    : item.Buyer_id,
                 Price_id    : item.Price_id,
@@ -126,7 +164,7 @@ router.post('/services/basket', (req, res, next) => {
                 Promotion_id: item.Promotion_id || null,
                 Seller_id   : item.Seller_id,
                 alcohol     : item.alcohol,
-                articlesAmount
+                vat         : vat(item)
             });
 
             purchasesRels.push(articlesIds);
@@ -136,7 +174,7 @@ router.post('/services/basket', (req, res, next) => {
                 const stockReduction = models.Article
                     .get(article)
                     .update({
-                        stock: requelize.r.row('stock').sub(1)
+                        stock: r.row('stock').sub(1)
                     })
                     .run();
 
@@ -145,11 +183,10 @@ router.post('/services/basket', (req, res, next) => {
 
             purchases.push(purchase.save());
         } else if (typeof item.credit === 'number') {
-
             // Reloads
             const reload = new models.Reload({
                 credit   : item.credit,
-                type     : item.type || 'reload',
+                type     : item.type,
                 trace    : item.trace || '',
                 Point_id : req.Point_id,
                 Buyer_id : item.Buyer_id,
@@ -160,7 +197,7 @@ router.post('/services/basket', (req, res, next) => {
         }
     });
 
-    const updateCredit = requelize.r.table('User')
+    const updateCredit = r.table('User')
         .get(req.buyer.id)
         .update({
             credit: newCredit

@@ -6,9 +6,10 @@ const Purchase = requelize.model('Purchase', {
     editedAt      : joi.date(),
     articlesAmount: joi.array().items({
         id   : joi.string(),
-        price: joi.string(),
-        vat  : joi.number()
+        price: joi.string()
     }).optional(),
+    vat      : joi.number().default(0),
+    alcohol  : joi.number().default(0),
     isRemoved: joi.boolean().default(false)
 });
 

@@ -17,7 +17,7 @@ router.get('/:model', (req, res, next) => {
     // List instances
     let request = req.Model;
 
-    let info = `Read ${req.params.model} ${JSON.stringify(req.query) || ''}`;
+    const info = `Read ${req.params.model} ${JSON.stringify(req.query) || ''}`;
     log.info(info, req.details);
 
     // Order

@@ -14,6 +14,7 @@ process.env.GJId           = '';
 process.env.KinderDeliceId = '';
 process.env.IceTeaPecheId  = '';
 process.env.Formule1EuroId = '';
+process.env.ExpensivePrice = '';
 
 describe('Create', function () {
     // First request creates the tables
@@ -238,11 +239,14 @@ describe('Create', function () {
         it('should create Price', (done) => {
             unirest.post('https://localhost:3006/prices')
                 .send({
-                    amount: 3.141592654
+                    amount: 3141592654
                 })
                 .end((response) => {
                     assert.equal(200, response.code);
                     assert.equal('string', typeof response.body.id);
+
+                    process.env.ExpensivePrice = response.body.id;
+
                     done();
                 });
         });
@@ -344,13 +348,12 @@ describe('Create', function () {
                         KinderDelice.id
                     ],
                     articlesAmount: [
-                        { id: IceTeaPeche.id, price: process.env.PriceId, vat: 6 },
-                        { id: KinderDelice.id, price: process.env.PriceId, vat: 6 }
+                        { id: IceTeaPeche.id, price: process.env.PriceId },
+                        { id: KinderDelice.id, price: process.env.PriceId }
                     ],
                     Price_id: process.env.PromotionPriceId
                 })
                 .end((response) => {
-                    console.log(response.body);
                     assert.equal(200, response.code);
                     assert.equal('string', typeof response.body.id);
                     assert.equal(2, response.body.articles.length);

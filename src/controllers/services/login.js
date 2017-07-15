@@ -44,7 +44,7 @@ router.post('/services/login', (req, res, next) => {
     const connectType = (req.body.hasOwnProperty('pin')) ? 'pin' : 'password';
     let user;
 
-    const infos = { type: req.body.meanOfLogin.toString(), data: req.body.data.toString() }
+    const infos = { type: req.body.meanOfLogin.toString(), data: req.body.data.toString() };
     log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
 
     models.MeanOfLogin
@@ -69,7 +69,7 @@ router.post('/services/login', (req, res, next) => {
                     point: req.Point_id
                 };
 
-                return next(new APIError(module, 404, 'User not found', errDetails));
+                return next(new APIError(module, 401, 'User not found', errDetails));
             }
 
             user = mol[0].user;

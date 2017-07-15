@@ -77,6 +77,8 @@ describe('Login', () => {
                 assert.equal(true, response.headers.device.length > 0);
                 sellerToken = response.body.token;
 
+                process.env.sellerId = response.body.user.id;
+
                 unirest.get('https://localhost:3006/articles')
                     .header('Authorization', `Bearer ${sellerToken}`)
                     .end((response2) => {
@@ -255,7 +257,7 @@ describe('Login', () => {
                 pin        : 1234
             })
             .end((response) => {
-                assert.equal(404, response.code);
+                assert.equal(401, response.code);
 
                 done();
             });
@@ -311,7 +313,7 @@ describe('Login', () => {
                 pin        : 1258
             })
             .end((response) => {
-                assert.equal(404, response.code);
+                assert.equal(401, response.code);
 
                 done();
             });

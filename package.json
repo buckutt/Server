@@ -45,7 +45,7 @@
     "nodemailer": "^4.0.1",
     "qs": "^6.1.0",
     "randomstring": "^1.1.5",
-    "requelize": "^0.9.3",
+    "requelize": "^0.9.4",
     "rimraf": "^2.5.2",
     "socket.io": "^2.0.3",
     "source-map-support": "^0.4.15",
