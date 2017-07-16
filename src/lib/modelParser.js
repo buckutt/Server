@@ -16,6 +16,7 @@ const modelsNames = {
     prices        : 'Price',
     promotions    : 'Promotion',
     purchases     : 'Purchase',
+    refunds       : 'Refund',
     reloads       : 'Reload',
     rights        : 'Right',
     sets          : 'Set',

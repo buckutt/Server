@@ -37,6 +37,15 @@ router.get('/services/manager/history', (req, res) => {
             point : true
         });
 
+    const refundQuery = models.Refund
+        .filter({
+            Buyer_id : req.user.id,
+            isRemoved: false
+        })
+        .embed({
+            seller: true
+        });
+
     const transferFromQuery = models.Transfer
         .filter({
             Reciever_id: req.user.id,
@@ -60,54 +69,73 @@ router.get('/services/manager/history', (req, res) => {
     purchaseQuery.run()
         .then((result) => {
             history = result.map(purchase =>
-                 ({
-                     type  : purchase.promotion ? 'promotion' : 'purchase',
-                     date  : purchase.createdAt,
-                     amount: -1 * purchase.price.amount,
-                     point : purchase.point.name,
-                     seller: {
-                         lastname : purchase.seller.lastname,
-                         firstname: purchase.seller.firstname
-                     },
-                     articles : purchase.articles.map(article => article.name),
-                     promotion: purchase.promotion ? purchase.promotion.name : ''
-                 })
+                ({
+                    type  : purchase.promotion ? 'promotion' : 'purchase',
+                    date  : purchase.createdAt,
+                    amount: -1 * purchase.price.amount,
+                    point : purchase.point.name,
+                    seller: {
+                        lastname : purchase.seller.lastname,
+                        firstname: purchase.seller.firstname
+                    },
+                    articles : purchase.articles.map(article => article.name),
+                    promotion: purchase.promotion ? purchase.promotion.name : ''
+                })
             );
 
             return reloadQuery.run();
         })
         .then((result) => {
             const reloads = result.map(reload =>
-                 ({
-                     type  : 'reload',
-                     date  : reload.createdAt,
-                     amount: reload.credit,
-                     point : reload.point.name,
-                     mop   : reload.type,
-                     seller: {
-                         lastname : reload.seller.lastname,
-                         firstname: reload.seller.firstname
-                     }
-                 })
+                ({
+                    type  : 'reload',
+                    date  : reload.createdAt,
+                    amount: reload.credit,
+                    point : reload.point.name,
+                    mop   : reload.type,
+                    seller: {
+                       lastname : reload.seller.lastname,
+                       firstname: reload.seller.firstname
+                    }
+                })
             );
 
             history = history.concat(reloads);
+
+            return refundQuery.run();
+        })
+        .then((result) => {
+            const refunds = result.map(refund =>
+                ({
+                    type  : 'refund',
+                    date  : refund.createdAt,
+                    amount: -1 * refund.amount,
+                    point : 'Internet',
+                    mop   : refund.type,
+                    seller: {
+                        lastname : refund.seller.lastname,
+                        firstname: refund.seller.firstname
+                    }
+                })
+            );
+
+            history = history.concat(refunds);
 
             return transferFromQuery.run();
         })
         .then((result) => {
             const transfersFrom = result.map(transfer =>
-                 ({
-                     type  : 'transfer',
-                     date  : transfer.createdAt,
-                     amount: transfer.amount,
-                     point : 'Internet',
-                     mop   : '',
-                     seller: {
-                         lastname : transfer.sender.lastname,
-                         firstname: transfer.sender.firstname
-                     }
-                 })
+                ({
+                    type  : 'transfer',
+                    date  : transfer.createdAt,
+                    amount: transfer.amount,
+                    point : 'Internet',
+                    mop   : '',
+                    seller: {
+                        lastname : transfer.sender.lastname,
+                        firstname: transfer.sender.firstname
+                    }
+                })
             );
 
             history = history.concat(transfersFrom);
@@ -116,17 +144,17 @@ router.get('/services/manager/history', (req, res) => {
         })
         .then((result) => {
             const transfersTo = result.map(transfer =>
-                 ({
-                     type  : 'transfer',
-                     date  : transfer.createdAt,
-                     amount: -1 * transfer.amount,
-                     point : 'Internet',
-                     mop   : '',
-                     seller: {
-                         lastname : transfer.reciever.lastname,
-                         firstname: transfer.reciever.firstname
-                     }
-                 })
+                ({
+                    type  : 'transfer',
+                    date  : transfer.createdAt,
+                    amount: -1 * transfer.amount,
+                    point : 'Internet',
+                    mop   : '',
+                    seller: {
+                        lastname : transfer.reciever.lastname,
+                        firstname: transfer.reciever.firstname
+                    }
+                })
             );
 
             history = history
