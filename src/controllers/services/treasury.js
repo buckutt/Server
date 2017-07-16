@@ -127,4 +127,43 @@ router.get('/services/treasury/reloads', (req, res, next) => {
         .catch(err => dbCatch(module, err, next));
 });
 
+router.get('/services/treasury/refunds', (req, res, next) => {
+    const models = req.app.locals.models;
+
+    let initialQuery = models.Refund
+        .filter(requelize.r.row('isRemoved').eq(false));
+
+    if (req.query.dateIn) {
+        const dateIn = new Date(req.query.dateIn);
+        const dateOut = new Date(req.query.dateOut);
+
+        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+            initialQuery = initialQuery
+            .filter(doc =>
+                doc('createdAt').ge(dateIn).and(
+                    doc('createdAt').le(dateOut)
+                )
+            );
+        } else {
+            return next(new APIError(module, 400, 'Invalid dates'));
+        }
+    }
+
+    initialQuery = initialQuery
+        .parse(false)
+        .group('type')
+        .map(doc => doc('amount'))
+        .sum()
+        .run();
+
+    initialQuery
+        .then((amounts) => {
+            res
+                .status(200)
+                .json(amounts)
+                .end();
+        })
+        .catch(err => dbCatch(module, err, next));
+});
+
 module.exports = router;

@@ -281,6 +281,20 @@ describe('Create', function () {
                 });
         });
 
+        it('should create Refunds', (done) => {
+            unirest.post('https://localhost:3006/refunds')
+                .send({
+                    type  : 'cash',
+                    trace : 'Remboursement rechargement n°123',
+                    amount: 50
+                })
+                .end((response) => {
+                    assert.equal(200, response.code);
+                    assert.equal('string', typeof response.body.id);
+                    done();
+                });
+        });
+
         it('should create Right', (done) => {
             unirest.post('https://localhost:3006/rights')
                 .send({

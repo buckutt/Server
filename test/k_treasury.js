@@ -140,4 +140,42 @@ describe('Treasury', () => {
                 });
         });
     });
+
+    describe('Refunds', () => {
+        it('should support basic refunds list', (done) => {
+            unirest.get('https://localhost:3006/services/treasury/refunds')
+                    .end((response) => {
+                        const body = response.body.sort((a, b) => a.group.localeCompare(b.group));
+
+                        assert.equal(1, body.length);
+                        assert.equal(50, body[0].reduction);
+
+                        done();
+                    });
+        });
+
+        it('should support basic treasury list with dates', (done) => {
+            const dateIn  = '1995-02-02T00:10:11.450Z';
+            const dateOut = '2220-02-02T00:10:11.450Z';
+            unirest.get(`https://localhost:3006/services/treasury/refunds?dateIn=${dateIn}&dateOut=${dateOut}`)
+                    .end((response) => {
+                        const body = response.body.sort((a, b) => a.group.localeCompare(b.group));
+
+                        assert.equal(1, body.length);
+                        assert.equal(50, body[0].reduction);
+
+                        done();
+                    });
+        });
+
+        it('should refuse if dates are not parsable', (done) => {
+            const dateIn  = 'foo';
+            const dateOut = 'bar';
+            unirest.get(`https://localhost:3006/services/treasury/refunds?dateIn=${dateIn}&dateOut=${dateOut}`)
+                .end((response) => {
+                    assert.equal(400, response.code);
+                    done();
+                });
+        });
+    });
 });
