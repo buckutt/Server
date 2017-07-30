@@ -6,6 +6,7 @@ const assert = require('assert');
 describe('Basket', () => {
     it('should support payment', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     Buyer_id    : process.env.GJId,
@@ -34,6 +35,7 @@ describe('Basket', () => {
 
     it('should support empty basket', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([])
             .end((response) => {
                 assert.equal(200, response.code);
@@ -43,6 +45,7 @@ describe('Basket', () => {
 
     it('should support reloads', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     credit   : 50 * 100,
@@ -68,6 +71,7 @@ describe('Basket', () => {
 
     it('should support promotions', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     Buyer_id    : process.env.GJId,
@@ -101,6 +105,7 @@ describe('Basket', () => {
 
     it('should support payment, reloads and promotions', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     Buyer_id    : process.env.GJId,
@@ -157,6 +162,7 @@ describe('Basket', () => {
 
     it('should not accept anything else than an array of payments, reloads or promotions', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {}
             ])
@@ -202,6 +208,7 @@ describe('Basket', () => {
 
     it('should not accept if the user tries to reload too much', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     credit   : 5000 * 100,
@@ -256,6 +263,7 @@ describe('Basket', () => {
 
     it('should not accept if the user reload not enough', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     credit   : 1 * 100,
@@ -274,6 +282,7 @@ describe('Basket', () => {
 
     it('should not accept reload when sending invalid credit', (done) => {
         unirest.post('https://localhost:3006/services/basket')
+            .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
                     credit   : {},

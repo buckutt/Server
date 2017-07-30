@@ -1,6 +1,6 @@
 const config = require('../../config');
 
-module.exports = (user, connectType = 'pin', pointId) => {
+module.exports = (user, pointId) => {
     const now    = new Date();
     const result = { canSell: false, canReload: false };
 
@@ -14,11 +14,6 @@ module.exports = (user, connectType = 'pin', pointId) => {
             right.period.start <= now && right.period.end > now &&
             right.Point_id === pointId) {
             const configRight = config.rights[right.name];
-
-            if (right.name === 'admin' && connectType !== 'pin') {
-                result.canReload = true;
-                result.canSell   = true;
-            }
 
             if (configRight && configRight.canSell) {
                 result.canSell = true;
