@@ -16,6 +16,7 @@ describe('History', () => {
             })
             .end(() => {
                 unirest.post('https://localhost:3006/services/basket')
+                    .header('Authorization', `Bearer ${process.env.sellerToken}`)
                     .send([
                         // Repeated to not reach the 100€ limit
                         {

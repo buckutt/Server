@@ -112,6 +112,7 @@ describe('Transfers', () => {
 
         it('should not transfer if reciever would have more than 100€', (done) => {
             unirest.post('https://localhost:3006/services/basket')
+                .header('Authorization', `Bearer ${process.env.sellerToken}`)
                 .send([
                     {
                         credit   : 98.5 * 100,

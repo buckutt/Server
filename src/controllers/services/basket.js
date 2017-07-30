@@ -53,7 +53,7 @@ router.post('/services/basket', (req, res, next) => {
 });
 
 router.post('/services/basket', (req, res, next) => {
-    let purchases = req.body.filter(item => item.type === 'purchase');
+    let purchases = req.body.filter(item => typeof item.cost === 'number');
 
     const getArticleCost = purchases.map(purchase => getArticlePrice(purchase));
 
@@ -107,7 +107,7 @@ router.post('/services/basket', (req, res, next) => {
         .reduce((a, b) => a + b);
 
     const reloadOnly = req.body
-        .filter(item => item.type === 'reload')
+        .filter(item => typeof item.credit === 'number')
         .map(item => item.credit)
         .reduce((a, b) => a + b, 0);
 
@@ -140,10 +140,10 @@ router.post('/services/basket', (req, res, next) => {
             .end();
     }
 
-    const userRights = canSellOrReload(req.user, req.connectType);
+    const userRights = canSellOrReload(req.user, req.Point_id);
 
-    const unallowedPurchase = (req.body.find(item => item.type === 'purchase') && !userRights.canSell);
-    const unallowedReload   = (req.body.find(item => item.type === 'reload') && !userRights.canReload);
+    const unallowedPurchase = (req.body.find(item => typeof item.cost === 'number') && !userRights.canSell);
+    const unallowedReload   = (req.body.find(item => typeof item.credit === 'number') && !userRights.canReload);
 
     if (unallowedPurchase || unallowedReload) {
         return next(new APIError(module, 401, 'No right to reload or sell', {
@@ -162,7 +162,7 @@ router.post('/services/basket', (req, res, next) => {
                 Price_id    : item.Price_id,
                 Point_id    : req.Point_id,
                 Promotion_id: item.Promotion_id || null,
-                Seller_id   : item.Seller_id,
+                Seller_id   : req.user.id,
                 alcohol     : item.alcohol,
                 vat         : vat(item)
             });
@@ -190,7 +190,7 @@ router.post('/services/basket', (req, res, next) => {
                 trace    : item.trace || '',
                 Point_id : req.Point_id,
                 Buyer_id : item.Buyer_id,
-                Seller_id: item.Seller_id
+                Seller_id: req.user.id
             });
 
             reloads.push(reload.save());

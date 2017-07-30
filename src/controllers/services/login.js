@@ -98,7 +98,7 @@ router.post('/services/login', (req, res, next) => {
             user.pin      = '';
             user.password = '';
 
-            const userRights = canSellOrReload(user, connectType, req.Point_id);
+            const userRights = canSellOrReload(user, req.Point_id);
 
             user.canSell   = userRights.canSell;
             user.canReload = userRights.canReload;
