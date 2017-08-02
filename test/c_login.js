@@ -78,6 +78,7 @@ describe('Login', () => {
                 sellerToken = response.body.token;
 
                 process.env.sellerId = response.body.user.id;
+                process.env.sellerToken = response.body.token;
 
                 unirest.get('https://localhost:3006/articles')
                     .header('Authorization', `Bearer ${sellerToken}`)

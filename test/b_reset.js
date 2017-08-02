@@ -103,6 +103,7 @@ describe('Before tests', () => {
             sellerUserId   = res.generated_keys[2];
             reloaderUserId = res.generated_keys[3];
 
+
             return r.table('MeanOfLogin').insert([{
                 type     : 'etuMail',
                 data     : 'buck@buckless.fr',
