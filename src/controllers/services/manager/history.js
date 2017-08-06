@@ -94,8 +94,8 @@ router.get('/services/manager/history', (req, res) => {
                     point : reload.point.name,
                     mop   : reload.type,
                     seller: {
-                       lastname : reload.seller.lastname,
-                       firstname: reload.seller.firstname
+                        lastname : reload.seller.lastname,
+                        firstname: reload.seller.firstname
                     }
                 })
             );
