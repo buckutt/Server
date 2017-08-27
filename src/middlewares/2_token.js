@@ -60,6 +60,7 @@ module.exports = function token(connector) {
     }
 
     let connectType;
+    let point;
 
     const pinLoggingAllowed = config.rights.pinLoggingAllowed;
     const now               = connector.date;
@@ -68,6 +69,7 @@ module.exports = function token(connector) {
         .verifyAsync(bearer, secret)
         .then((decoded) => {
             const userId = decoded.id;
+            point        = decoded.point;
             connectType  = decoded.connectType;
 
             return connector.models.User.get(userId).embed({
@@ -79,6 +81,11 @@ module.exports = function token(connector) {
         })
         .then((user) => {
             connector.user = user;
+
+            connector.Point_id = point.id;
+            connector.Event_id = point._through.period.event.id;
+            connector.point    = point;
+            connector.event    = point._through.period.event;
 
             connector.connectType = connectType;
 

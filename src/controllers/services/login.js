@@ -108,7 +108,8 @@ router.post('/services/login', (req, res, next) => {
                 .json({
                     user,
                     token: jwt.sign({
-                        id: user.id,
+                        id   : user.id,
+                        point: req.point,
                         // Will be used by middleware (else how could middleware know if pin or password ?)
                         connectType
                     }, secret, tokenOptions)

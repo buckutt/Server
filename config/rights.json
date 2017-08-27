@@ -6,19 +6,13 @@
         "canReload": false,
         "read": [
             "/events",
-            "/articles",
-            "/articles/search",
-            "/promotions",
-            "/promotions/search",
-            "/sets",
-            "/sets/search",
             "/meansoflogin",
             "/meansoflogin/search",
             "/meansofpayment",
             "/meansofpayment/search",
             "/devices",
             "/devices/search",
-            "/users"
+            "/services/items"
         ],
         "write": [
             "/services/basket"
@@ -29,18 +23,13 @@
         "canReload": true,
         "read": [
             "/events",
-            "/users",
-            "/usersrights",
-            "/usersgroups",
-            "/devicespoints",
             "/devices",
             "/devices/search",
-            "/reloadtypes",
             "/meansoflogin",
             "/meansoflogin/search",
-            "/meanofloginsusers",
             "/meansofpayment",
-            "/meansofpayment/search"
+            "/meansofpayment/search",
+            "/services/items"
         ],
         "write": [
             "/services/basket"
