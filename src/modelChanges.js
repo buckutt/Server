@@ -7,11 +7,11 @@ module.exports = (app) => {
     const emitter = new ModelEmitter();
 
     const listenForModelChanges = (Model) => {
-        const feed = Model.feed()
+        const feed = Model.feed();
 
         feed.subscribe(
-            (event) => emitter.emit('data', event.type, Model._name, { from: event.from, to: event.to })
-        )
+            event => emitter.emit('data', event.type, Model._name, { from: event.from, to: event.to })
+        );
     };
 
     Object.keys(modelsNames)
