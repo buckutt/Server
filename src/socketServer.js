@@ -62,7 +62,6 @@ module.exports.ioServer = (httpServer, app) => {
 
                 initialPromise = initialPromise
                     .then((user) => {
-
                         clients[client.id] = { client, user };
 
                         // Make controllers aware of clients

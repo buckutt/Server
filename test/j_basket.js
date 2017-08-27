@@ -12,10 +12,10 @@ describe('Basket', () => {
                     Buyer_id    : process.env.GJId,
                     Point_id    : process.env.FoyerId,
                     Promotion_id: null,
-                    Seller_id   : process.env.sellerId,
                     Price_id    : process.env.PriceId,
                     cost        : 60,
                     type        : 'purchase',
+                    date        : new Date(),
                     alcohol     : 0,
                     articles    : [
                         {
@@ -48,18 +48,18 @@ describe('Basket', () => {
             .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
-                    credit   : 50 * 100,
-                    trace    : 'card',
-                    Buyer_id : process.env.GJId,
-                    Seller_id: process.env.GJId,
-                    type     : 'reload'
+                    credit  : 50 * 100,
+                    trace   : 'card',
+                    Buyer_id: process.env.GJId,
+                    type    : 'reload',
+                    date    : new Date()
                 },
                 // Without trace
                 {
-                    credit   : 0,
-                    Buyer_id : process.env.GJId,
-                    Seller_id: process.env.GJId,
-                    type     : 'reload'
+                    credit  : 0,
+                    Buyer_id: process.env.GJId,
+                    type    : 'reload',
+                    date    : new Date()
                 }
             ])
             .end((response) => {
@@ -78,9 +78,9 @@ describe('Basket', () => {
                     Point_id    : process.env.FoyerId,
                     Promotion_id: process.env.Formule1EuroId,
                     Price_id    : process.env.PromotionPriceId,
-                    Seller_id   : process.env.sellerId,
                     cost        : 100,
                     type        : 'purchase',
+                    date        : new Date(),
                     alcohol     : 0,
                     articles    : [
                         {
@@ -112,9 +112,9 @@ describe('Basket', () => {
                     Point_id    : process.env.FoyerId,
                     Promotion_id: process.env.Formule1EuroId,
                     Price_id    : process.env.PromotionPriceId,
-                    Seller_id   : process.env.sellerId,
                     cost        : 100,
                     type        : 'purchase',
+                    date        : new Date(),
                     alcohol     : 0,
                     articles    : [
                         {
@@ -130,20 +130,20 @@ describe('Basket', () => {
                     ]
                 },
                 {
-                    credit   : 50 * 101,
-                    trace    : 'card',
-                    Buyer_id : process.env.GJId,
-                    Seller_id: process.env.GJId,
-                    type     : 'reload'
+                    credit  : 50 * 101,
+                    trace   : 'card',
+                    Buyer_id: process.env.GJId,
+                    type    : 'reload',
+                    date    : new Date()
                 },
                 {
                     Buyer_id    : process.env.GJId,
                     Point_id    : process.env.FoyerId,
                     Promotion_id: null,
-                    Seller_id   : process.env.sellerId,
                     Price_id    : process.env.PriceId,
                     cost        : 50,
                     type        : 'purchase',
+                    date        : new Date(),
                     articles    : [
                         {
                             id   : process.env.KinderDeliceId,
@@ -178,44 +178,43 @@ describe('Basket', () => {
             });
     });
 
-    // Disabled for offline requests:
-    // it('should not accept if the user does not have enough credit', (done) => {
-    //     unirest.post('https://localhost:3006/services/basket')
-    //         .send([
-    //             {
-    //                 Buyer_id    : process.env.GJId,
-    //                 Point_id    : process.env.FoyerId,
-    //                 Price_id    : process.env.ExpensivePrice,
-    //                 Promotion_id: null,
-    //                 Seller_id   : process.env.sellerId,
-    //                 cost        : 60,
-    //                 type        : 'purchase',
-    //                 articles    : [
-    //                     {
-    //                         id   : process.env.KinderDeliceId,
-    //                         price: process.env.PriceId,
-    //                         vat  : 0
-    //                     }
-    //                 ]
-    //             }
-    //         ])
-    //         .end((response) => {
-    //             assert.equal(400, response.code);
-    //             assert.equal('Not enough credit', response.body.message);
-    //             done();
-    //         });
-    // });
+    it('should not accept if the user does not have enough credit in online mode', (done) => {
+        unirest.post('https://localhost:3006/services/basket')
+            .send([
+                {
+                    Buyer_id    : process.env.GJId,
+                    Point_id    : process.env.FoyerId,
+                    Price_id    : process.env.ExpensivePrice,
+                    Promotion_id: null,
+                    cost        : 60,
+                    type        : 'purchase',
+                    date        : new Date(),
+                    articles    : [
+                        {
+                            id   : process.env.KinderDeliceId,
+                            price: process.env.PriceId,
+                            vat  : 0
+                        }
+                    ]
+                }
+            ])
+            .end((response) => {
+                assert.equal(400, response.code);
+                assert.equal('Not enough credit', response.body.message);
+                done();
+            });
+    });
 
     it('should not accept if the user tries to reload too much', (done) => {
         unirest.post('https://localhost:3006/services/basket')
             .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
-                    credit   : 5000 * 100,
-                    trace    : 'card',
-                    Buyer_id : process.env.GJId,
-                    Seller_id: process.env.GJId,
-                    type     : 'reload'
+                    credit  : 5000 * 100,
+                    trace   : 'card',
+                    Buyer_id: process.env.GJId,
+                    type    : 'reload',
+                    date    : new Date()
                 }
             ])
             .end((response) => {
@@ -240,10 +239,10 @@ describe('Basket', () => {
                             Buyer_id    : process.env.GJId,
                             Point_id    : process.env.FoyerId,
                             Promotion_id: null,
-                            Seller_id   : process.env.sellerId,
                             Price_id    : process.env.PriceId,
                             cost        : 50,
                             type        : 'purchase',
+                            date        : new Date(),
                             articles    : [
                                 {
                                     id   : process.env.KinderDeliceId,
@@ -266,11 +265,11 @@ describe('Basket', () => {
             .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
-                    credit   : 1 * 100,
-                    trace    : 'card',
-                    Buyer_id : process.env.GJId,
-                    Seller_id: process.env.GJId,
-                    type     : 'reload'
+                    credit  : 1 * 100,
+                    trace   : 'card',
+                    Buyer_id: process.env.GJId,
+                    type    : 'reload',
+                    date    : new Date()
                 }
             ])
             .end((response) => {
@@ -285,11 +284,11 @@ describe('Basket', () => {
             .header('Authorization', `Bearer ${process.env.sellerToken}`)
             .send([
                 {
-                    credit   : {},
-                    trace    : 'card',
-                    Buyer_id : process.env.GJId,
-                    Seller_id: process.env.GJId,
-                    type     : 'reload'
+                    credit  : {},
+                    trace   : 'card',
+                    Buyer_id: process.env.GJId,
+                    type    : 'reload',
+                    date    : new Date()
                 }
             ])
             .end((response) => {
