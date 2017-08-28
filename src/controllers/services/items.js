@@ -1,10 +1,9 @@
-const express                  = require('express');
-const requelize                = require('../../lib/requelize');
-const APIError                 = require('../../errors/APIError');
-const { isUUID }               = require('../../lib/idParser');
-const canSellOrReload          = require('../../lib/canSellOrReload');
-const filterIsRemovedRecursive = require('../../lib/filterIsRemovedRecursive');
-const dbCatch                  = require('../../lib/dbCatch');
+const express         = require('express');
+const requelize       = require('../../lib/requelize');
+const APIError        = require('../../errors/APIError');
+const { isUUID }      = require('../../lib/idParser');
+const canSellOrReload = require('../../lib/canSellOrReload');
+const dbCatch         = require('../../lib/dbCatch');
 
 const router = new express.Router();
 
@@ -17,7 +16,7 @@ router.get('/services/items', (req, res, next) => {
     }
 
     if (!req.query.buyer) {
-        req.groups = [req.device.DefaultGroup_id];
+        req.groups = (req.device.DefaultGroup_id) ? [req.device.DefaultGroup_id] : [];
         return next();
     }
 
@@ -112,50 +111,54 @@ router.get('/services/items', (req, res, next) => {
 
     itemsQuery
         .then((pricesResult) => {
-            const prices = pricesResult.map(price => filterIsRemovedRecursive(price, pricesJoin));
-
             // Take and filter usefull informations for each price
-            prices.forEach((price) => {
+            pricesResult.forEach((price) => {
                 price.promotions.forEach((promotion) => {
-                    const promotionSets = promotion.sets.map(set => ({
-                        id      : set.id,
-                        name    : set.name,
-                        articles: set.articles
-                    }));
+                    if (!promotion.isRemoved) {
+                        const promotionSets = promotion.sets
+                            .filter(set => !set.isRemoved)
+                            .map(set => ({
+                                id      : set.id,
+                                name    : set.name,
+                                articles: set.articles.filter(article => !article.isRemoved)
+                            }));
 
-                    promotions.push({
-                        id   : promotion.id,
-                        name : promotion.name,
-                        price: {
-                            id    : price.id,
-                            amount: price.amount
-                        },
-                        articles: promotion.articles,
-                        sets    : promotionSets
-                    });
+                        promotions.push({
+                            id   : promotion.id,
+                            name : promotion.name,
+                            price: {
+                                id    : price.id,
+                                amount: price.amount
+                            },
+                            articles: promotion.articles.filter(article => !article.isRemoved),
+                            sets    : promotionSets
+                        });
+                    }
                 });
 
                 price.articles.forEach((article) => {
-                    const matchReqPoint = point => point.id === req.point.id;
-                    let category        = article.categories
-                        .find(cat => cat.points.some(matchReqPoint));
+                    if (!article.isRemoved) {
+                        const matchReqPoint = point => point.id === req.point.id;
+                        let category        = article.categories
+                            .filter(category => !category.isRemoved)
+                            .find(cat => cat.points.some(matchReqPoint));
 
-                    category = (category) ?
-                        { id: category.id, name: category.name, priority: category.priority } :
-                        { id: 'default', name: 'Hors catégorie', priority: -1 };
+                        category = (category) ?
+                            { id: category.id, name: category.name, priority: category.priority } :
+                            { id: 'default', name: 'Hors catégorie', priority: -1 };
 
-                    articles.push({
-                        id     : article.id,
-                        name   : article.name,
-                        vat    : article.vat,
-                        alcohol: article.alcohol,
-                        image  : article.image,
-                        price  : {
-                            id    : price.id,
-                            amount: price.amount
-                        },
-                        category
-                    });
+                        articles.push({
+                            id     : article.id,
+                            name   : article.name,
+                            vat    : article.vat,
+                            alcohol: article.alcohol,
+                            price  : {
+                                id    : price.id,
+                                amount: price.amount
+                            },
+                            category
+                        });
+                    }
                 });
             });
 

@@ -38,7 +38,8 @@
       "openUrls": [
             "/services/login",
             "/services/manager/askpin",
-            "/services/manager/generatepin"
+            "/services/manager/generatepin",
+            "/services/articleImage"
       ],
       "loggedUrls": [
             "/services/manager/changepin",
