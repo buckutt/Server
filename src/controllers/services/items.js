@@ -140,7 +140,7 @@ router.get('/services/items', (req, res, next) => {
                     if (!article.isRemoved) {
                         const matchReqPoint = point => point.id === req.point.id;
                         let category        = article.categories
-                            .filter(category => !category.isRemoved)
+                            .filter(cat => !cat.isRemoved)
                             .find(cat => cat.points.some(matchReqPoint));
 
                         category = (category) ?

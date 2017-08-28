@@ -1,5 +1,4 @@
 const express    = require('express');
-const requelize  = require('../../lib/requelize');
 const APIError   = require('../../errors/APIError');
 const { isUUID } = require('../../lib/idParser');
 const dbCatch    = require('../../lib/dbCatch');
@@ -23,8 +22,8 @@ router.get('/services/articleImage', (req, res, next) => {
 
             const image = new Buffer(article.image.split(',')[1], 'base64');
             res.writeHead(200, {
-               'Content-Type': 'image/png',
-               'Content-Length': image.length
+                'Content-Type'  : 'image/png',
+                'Content-Length': image.length
             });
             res.end(image);
         })
