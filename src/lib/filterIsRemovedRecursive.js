@@ -1,0 +1,29 @@
+function identity(doc) {
+    return doc;
+}
+
+function filterIsRemovedRecursive(doc = []) {
+  if (!doc) {
+    return null
+  }
+
+  if (Array.isArray(doc)) {
+    return doc.map(item => filterIsRemovedRecursive(item)).filter(identity)
+  } else if (doc.constructor === Object) {
+    if (doc.isRemoved) {
+      return null
+    }
+
+    let copy = Object.assign({}, doc)
+
+    Object.keys(copy).forEach(key => {
+      copy[key] = filterIsRemovedRecursive(copy[key])
+    })
+
+    return copy
+  } else {
+    return doc
+  }
+}
+
+module.exports = filterIsRemovedRecursive;

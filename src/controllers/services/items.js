@@ -1,9 +1,10 @@
-const express         = require('express');
-const requelize       = require('../../lib/requelize');
-const APIError        = require('../../errors/APIError');
-const { isUUID }      = require('../../lib/idParser');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
+const express                  = require('express');
+const requelize                = require('../../lib/requelize');
+const APIError                 = require('../../errors/APIError');
+const { isUUID }               = require('../../lib/idParser');
+const canSellOrReload          = require('../../lib/canSellOrReload');
+const dbCatch                  = require('../../lib/dbCatch');
+const filterIsRemovedRecursive = require('../../lib/filterIsRemovedRecursive');
 
 const router = new express.Router();
 
@@ -193,8 +194,8 @@ router.get('/services/items', (req, res, next) => {
                 .status(200)
                 .json({
                     buyer: req.buyer,
-                    articles,
-                    promotions
+                    articles: filterIsRemovedRecursive(articles),
+                    promotions: filterIsRemovedRecursive(promotions)
                 })
                 .end();
         })
