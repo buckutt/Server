@@ -3,7 +3,7 @@ function identity(doc) {
 }
 
 function filterIsRemovedRecursive(doc = []) {
-  if (!doc) {
+  if (typeof doc === 'undefined') {
     return null
   }
 
