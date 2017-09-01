@@ -4,7 +4,6 @@ const joi       = require('joi');
 const Article = requelize.model('Article', {
     name     : joi.string().required(),
     stock    : joi.number().default(0),
-    image    : joi.string().optional(),
     // Alcohol amount (Alcool unit or just article maximum sells)
     alcohol  : joi.number().default(0),
     // Optional VAT tax
