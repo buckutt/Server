@@ -110,7 +110,7 @@ router.delete('/:model/:id/:submodel/:subId', (req, res, next) => {
     const leftName  = req.Model._name;
     const leftId    = req.params.id;
     const rightName = req.Model._joins[submodel].model;
-    const rightId   = req.params.subid;
+    const rightId   = req.params.subId;
 
     const filter = Object.assign({}, {
         [leftName] : leftId,
