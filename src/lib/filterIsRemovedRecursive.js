@@ -3,27 +3,26 @@ function identity(doc) {
 }
 
 function filterIsRemovedRecursive(doc = []) {
-  if (typeof doc === 'undefined') {
-    return null
-  }
-
-  if (Array.isArray(doc)) {
-    return doc.map(item => filterIsRemovedRecursive(item)).filter(identity)
-  } else if (doc.constructor === Object) {
-    if (doc.isRemoved) {
-      return null
+    if (typeof doc === 'undefined') {
+        return null;
     }
 
-    let copy = Object.assign({}, doc)
+    if (Array.isArray(doc)) {
+        return doc.map(item => filterIsRemovedRecursive(item)).filter(identity);
+    } else if (doc.constructor === Object) {
+        if (doc.isRemoved) {
+            return null;
+        }
 
-    Object.keys(copy).forEach(key => {
-      copy[key] = filterIsRemovedRecursive(copy[key])
-    })
+        const copy = Object.assign({}, doc);
 
-    return copy
-  } else {
-    return doc
-  }
+        Object.keys(copy).forEach((key) => {
+            copy[key] = filterIsRemovedRecursive(copy[key]);
+        });
+
+        return copy;
+    }
+    return doc;
 }
 
 module.exports = filterIsRemovedRecursive;

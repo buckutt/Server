@@ -193,8 +193,8 @@ router.get('/services/items', (req, res, next) => {
             res
                 .status(200)
                 .json({
-                    buyer: req.buyer,
-                    articles: filterIsRemovedRecursive(articles),
+                    buyer     : req.buyer,
+                    articles  : filterIsRemovedRecursive(articles),
                     promotions: filterIsRemovedRecursive(promotions)
                 })
                 .end();
