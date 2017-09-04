@@ -11,6 +11,9 @@ const Price = requelize.model('Price', {
 Price.on('creating', (inst) => { inst.createdAt = new Date(); });
 Price.on('saving', (inst) => { inst.editedAt = new Date(); });
 
+// performance in items
+Price.index('pointAndNotRemoved', (row) => ([ row('Point_id'), row('isRemoved') ]));
+
 Price.belongsTo('Fundation', 'fundation');
 Price.belongsTo('Group', 'group');
 Price.belongsTo('Period', 'period');
