@@ -65,6 +65,7 @@ router.get('/services/items', (req, res, next) => {
                     !group.isRemoved)
                 .map(group => group.id);
 
+
             next();
         })
         .catch(err => dbCatch(module, err, next));
@@ -93,21 +94,18 @@ router.get('/services/items', (req, res, next) => {
     };
 
     const itemsQuery = models.Price
+        .getAll([ req.point.id, false ], { index: 'pointAndNotRemoved' })
+        .filter(doc => requelize.r.expr(req.groups).contains(doc('Group_id')))
         .embed(pricesJoin)
-        .filter(requelize.r.row('isRemoved').eq(false).and(
-            requelize.r.row('Point_id').eq(req.point.id).and(
-                requelize.r.row('period')('start').le(now).and(
-                    requelize.r.row('period')('end').ge(now).and(
-                        requelize.r.row('period')('isRemoved').eq(false).and(
-                            requelize.r.row('point')('isRemoved').eq(false).and(
-                                requelize.r.row('fundation')('isRemoved').eq(false)
-                            )
-                        )
+        .filter(requelize.r.row('period')('start').le(now).and(
+            requelize.r.row('period')('end').ge(now).and(
+                requelize.r.row('period')('isRemoved').eq(false).and(
+                    requelize.r.row('point')('isRemoved').eq(false).and(
+                        requelize.r.row('fundation')('isRemoved').eq(false)
                     )
                 )
             )
         ))
-        .filter(doc => requelize.r.expr(req.groups).contains(doc('Group_id')))
         .run();
 
     itemsQuery
@@ -115,51 +113,44 @@ router.get('/services/items', (req, res, next) => {
             // Take and filter usefull informations for each price
             pricesResult.forEach((price) => {
                 price.promotions.forEach((promotion) => {
-                    if (!promotion.isRemoved) {
-                        const promotionSets = promotion.sets
-                            .filter(set => !set.isRemoved)
-                            .map(set => ({
-                                id      : set.id,
-                                name    : set.name,
-                                articles: set.articles.filter(article => !article.isRemoved)
-                            }));
+                    const promotionSets = promotion.sets
+                        .map(set => ({
+                            id      : set.id,
+                            name    : set.name,
+                            articles: set.articles
+                        }));
 
-                        promotions.push({
-                            id   : promotion.id,
-                            name : promotion.name,
-                            price: {
-                                id    : price.id,
-                                amount: price.amount
-                            },
-                            articles: promotion.articles.filter(article => !article.isRemoved),
-                            sets    : promotionSets
-                        });
-                    }
+                    promotions.push({
+                        id   : promotion.id,
+                        name : promotion.name,
+                        price: {
+                            id    : price.id,
+                            amount: price.amount
+                        },
+                        articles: promotion.articles,
+                        sets    : promotionSets
+                    });
                 });
 
                 price.articles.forEach((article) => {
-                    if (!article.isRemoved) {
-                        const matchReqPoint = point => point.id === req.point.id;
-                        let category        = article.categories
-                            .filter(cat => !cat.isRemoved)
-                            .find(cat => cat.points.some(matchReqPoint));
+                    const matchReqPoint = point => point.id === req.point.id;
+                    let category        = article.categories.find(cat => cat.points.some(matchReqPoint));
 
-                        category = (category) ?
-                            { id: category.id, name: category.name, priority: category.priority } :
-                            { id: 'default', name: 'Hors catégorie', priority: -1 };
+                    category = (category) ?
+                        { id: category.id, name: category.name, priority: category.priority } :
+                        { id: 'default', name: 'Hors catégorie', priority: -1 };
 
-                        articles.push({
-                            id     : article.id,
-                            name   : article.name,
-                            vat    : article.vat,
-                            alcohol: article.alcohol,
-                            price  : {
-                                id    : price.id,
-                                amount: price.amount
-                            },
-                            category
-                        });
-                    }
+                    articles.push({
+                        id     : article.id,
+                        name   : article.name,
+                        vat    : article.vat,
+                        alcohol: article.alcohol,
+                        price  : {
+                            id    : price.id,
+                            amount: price.amount
+                        },
+                        category
+                    });
                 });
             });
 
@@ -175,6 +166,7 @@ router.get('/services/items', (req, res, next) => {
                 .filter((promotion, i, initialPromotion) => (
                     i === initialPromotion.findIndex(promotion2 => promotion.id === promotion2.id)
                 ));
+
 
             // Get the displayed price of a single article inside a promotion
             promotions = promotions.map((promotion) => {
