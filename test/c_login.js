@@ -11,7 +11,7 @@ process.env.TOKEN = '';
 
 describe('Login', () => {
     it('should refuse requests before auth', (done) => {
-        unirest.post('https://localhost:3006/articles')
+        unirest.post('https://localhost:3006/services/items')
             .send([])
             .end((response) => {
                 assert.equal(401, response.code);
@@ -30,7 +30,7 @@ describe('Login', () => {
             .end((response) => {
                 assert.equal(200, response.code);
 
-                unirest.get('https://localhost:3006/articles')
+                unirest.get('https://localhost:3006/services/items')
                     .header('Authorization', `Bearer ${response.body.token}`)
                     .end((response2) => {
                         assert.equal(401, response2.code);
@@ -80,7 +80,7 @@ describe('Login', () => {
                 process.env.sellerId = response.body.user.id;
                 process.env.sellerToken = response.body.token;
 
-                unirest.get('https://localhost:3006/articles')
+                unirest.get('https://localhost:3006/services/items')
                     .header('Authorization', `Bearer ${sellerToken}`)
                     .end((response2) => {
                         assert.equal(200, response2.code);
@@ -90,12 +90,11 @@ describe('Login', () => {
             });
     });
 
-    it('should also works when requesting an allowed url containing an id', (done) => {
-        unirest.get('https://localhost:3006/articles/3f2504e0-4f89-11d3-9a0c-0305e82c3301')
+    it('should also works when requesting an allowed url', (done) => {
+        unirest.get('https://localhost:3006/services/items')
             .header('Authorization', `Bearer ${sellerToken}`)
             .end((response) => {
-                // No result but allowed
-                assert.equal(404, response.code);
+                assert.equal(200, response.code);
 
                 done();
             });
@@ -113,7 +112,7 @@ describe('Login', () => {
     });
 
     it('should refuse when no scheme nor token is provided', (done) => {
-        unirest.get('https://localhost:3006/articles')
+        unirest.get('https://localhost:3006/services/items')
             .header('Authorization', null)
             .end((response) => {
                 assert.equal(400, response.code);
@@ -125,7 +124,7 @@ describe('Login', () => {
     });
 
     it('should refuse when only scheme is provided', (done) => {
-        unirest.get('https://localhost:3006/articles')
+        unirest.get('https://localhost:3006/services/items')
             .header('Authorization', 'Bearer')
             .end((response) => {
                 assert.equal(400, response.code);
@@ -137,7 +136,7 @@ describe('Login', () => {
     });
 
     it('should refuse when a wrong scheme is provided', (done) => {
-        unirest.get('https://localhost:3006/articles')
+        unirest.get('https://localhost:3006/services/items')
             .header('Authorization', 'foo bar')
             .end((response) => {
                 assert.equal(400, response.code);
@@ -240,7 +239,7 @@ describe('Login', () => {
             exp: 3000
         }, config.app.secret);
 
-        unirest.get('https://localhost:3006/articles')
+        unirest.get('https://localhost:3006/services/items')
             .header('Authorization', `Bearer ${outdatedToken}`)
             .end((response) => {
                 assert.equal(401, response.code);
