@@ -15,6 +15,14 @@ MeanOfLogin.on('saving', (inst) => { inst.editedAt = new Date(); });
 
 MeanOfLogin.index('type');
 
+// performance in login
+MeanOfLogin.index('login', (row) => ([
+    row('type'),
+    row('data'),
+    row('blocked'),
+    row('isRemoved')
+]));
+
 MeanOfLogin.belongsTo('User', 'user');
 
 module.exports = MeanOfLogin;

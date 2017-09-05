@@ -48,12 +48,12 @@ router.post('/services/login', (req, res, next) => {
     log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
 
     models.MeanOfLogin
-        .getAll(infos.type, { index: 'type' })
-        .filter({
-            data     : infos.data,
-            isRemoved: false,
-            blocked  : false
-        })
+        .getAll([
+            infos.type,
+            infos.data,
+            false,
+            false
+        ], { index: 'login' })
         .limit(1)
         .embed({
             user: {

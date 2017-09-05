@@ -4,7 +4,7 @@ const assert = require('assert');
 
 /* global unirest, q */
 
-describe('Issue #99', () => {
+describe('Issue #184', () => {
     it('should allow search endpoint', (done) => {
         unirest.post('https://localhost:3006/services/login')
             .send({
@@ -13,7 +13,6 @@ describe('Issue #99', () => {
                 password   : 'buckless'
             })
             .end((response) => {
-                console.log(response.body);
                 assert.equal(200, response.code);
                 assert.equal(true, response.body.hasOwnProperty('user'));
 
@@ -24,7 +23,7 @@ describe('Issue #99', () => {
                     matches: '^Ice'
                 });
 
-                unirest.get(`https://localhost:3006/articles/search?q[]=${q1}`)
+                unirest.get(`https://localhost:3006/meansofpayment/search?q[]=${q1}`)
                     .header('Authorization', `Bearer ${token}`)
                     .end((response2) => {
                         assert.equal(200, response2.code);

@@ -1,9 +1,9 @@
-const express         = require('express');
-const requelize       = require('../../lib/requelize');
-const APIError        = require('../../errors/APIError');
-const { isUUID }      = require('../../lib/idParser');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
+const express                  = require('express');
+const requelize                = require('../../lib/requelize');
+const APIError                 = require('../../errors/APIError');
+const canSellOrReload          = require('../../lib/canSellOrReload');
+const dbCatch                  = require('../../lib/dbCatch');
+const filterIsRemovedRecursive = require('../../lib/filterIsRemovedRecursive');
 
 const router = new express.Router();
 
@@ -15,29 +15,35 @@ router.get('/services/items', (req, res, next) => {
         return next(new APIError(module, 401, 'No right to reload or sell'));
     }
 
-    if (!req.query.buyer) {
+    if (!req.query.buyer || !req.query.molType) {
         req.groups = (req.device.DefaultGroup_id) ? [req.device.DefaultGroup_id] : [];
         return next();
     }
 
-    if (!isUUID(req.query.buyer)) {
-        return next(new APIError(module, 400, 'The provided user is not valid'));
-    }
-
-    const buyerQuery = req.app.locals.models.User
-        .get(req.query.buyer)
+    const buyerQuery = req.app.locals.models.MeanOfLogin
+        .getAll([
+            req.query.molType,
+            req.query.buyer,
+            false,
+            false
+        ], { index: 'login' })
+        .limit(1)
         .embed({
-            groups: {
-                _through: {
-                    period: true
-                }
-            },
-            purchases: {
-                price: {
-                    period: true
+            user: {
+                groups: {
+                    _through: {
+                        period: true
+                    }
+                },
+                purchases: {
+                    price: {
+                        period: true
+                    }
                 }
             }
         })
+        .map((mol) => mol('user'))
+        .nth(0)
         .run();
 
     buyerQuery
