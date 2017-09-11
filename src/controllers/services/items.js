@@ -10,12 +10,18 @@ const router = new express.Router();
 router.get('/services/items', (req, res, next) => {
     const userRights = canSellOrReload(req.user, req.point.id);
 
-    // If the user can only reload but don't need buyer informations, he doesn't need the service.
-    if (!userRights.canSell && (!userRights.canReload || !req.query.buyer)) {
+    if (!userRights.canSell && !userRights.canReload) {
         return next(new APIError(module, 401, 'No right to reload or sell'));
     }
 
     if (!req.query.buyer || !req.query.molType) {
+        if (!userRights.canSell) {
+            return res
+                .status(200)
+                .json({})
+                .end();
+        }
+
         req.groups = (req.device.DefaultGroup_id) ? [req.device.DefaultGroup_id] : [];
         return next();
     }
@@ -43,12 +49,15 @@ router.get('/services/items', (req, res, next) => {
             }
         })
         .map((mol) => mol('user'))
-        .nth(0)
         .run();
 
     buyerQuery
-        .then((buyer) => {
-            req.buyer          = buyer;
+        .then((buyers) => {
+            if (buyers.length === 0) {
+                return next(new APIError(module, 404, 'Buyer not found'));
+            }
+
+            req.buyer          = buyers[0];
             req.buyer.pin      = '';
             req.buyer.password = '';
 
@@ -62,7 +71,7 @@ router.get('/services/items', (req, res, next) => {
             }
 
             const now  = new Date();
-            req.groups = buyer.groups
+            req.groups = req.buyer.groups
                 .filter(group =>
                     (group._through.period.start.getTime() <= now &&
                     group._through.period.end.getTime() >= now) &&
