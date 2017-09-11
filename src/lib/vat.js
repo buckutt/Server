@@ -1,4 +1,8 @@
 module.exports = (item) => {
+    if (item.cost === 0) {
+        return 0;
+    }
+
     if (!item.Promotion_id) {
         return item.articles[0].vat * item.cost;
     }
