@@ -1,12 +1,14 @@
-const bcrypt_         = require('bcryptjs');
-const express         = require('express');
-const jwt             = require('jsonwebtoken');
-const Promise         = require('bluebird');
-const config          = require('../../../config');
-const logger          = require('../../lib/log');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
-const APIError        = require('../../errors/APIError');
+const bcrypt_                  = require('bcryptjs');
+const express                  = require('express');
+const jwt                      = require('jsonwebtoken');
+const Promise                  = require('bluebird');
+const config                   = require('../../../config');
+const logger                   = require('../../lib/log');
+const { r }                    = require('../../lib/requelize');
+const canSellOrReload          = require('../../lib/canSellOrReload');
+const filterIsRemovedRecursive = require('../../lib/filterIsRemovedRecursive');
+const dbCatch                  = require('../../lib/dbCatch');
+const APIError                 = require('../../errors/APIError');
 
 const log = logger(module);
 
@@ -62,6 +64,7 @@ router.post('/services/login', (req, res, next) => {
                 }
             }
         })
+        .filter(r.row('user')('isRemoved').eq(false))
         .then((mol) => {
             if (mol.length === 0) {
                 const errDetails = {
@@ -73,6 +76,8 @@ router.post('/services/login', (req, res, next) => {
             }
 
             user = mol[0].user;
+
+            user.rights = filterIsRemovedRecursive(user.rights);
 
             if (connectType === 'pin') {
                 return bcrypt.compareAsync(req.body.pin.toString(), user.pin);
