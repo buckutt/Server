@@ -16,11 +16,11 @@ const log = logger(module);
  * @return {Object}      Mail to send
  */
 function generateMessage(mail, key) {
-    const from     = config.from;
+    const from     = config.askpin.from;
     const to       = mail;
-    const subject  = config.subject;
+    const subject  = config.askpin.subject;
     const template = dots.template(config.askpin.template);
-    const html     = template({ link: `${config.managerUrl}/#/generate?key=${key}` });
+    const html     = template({ link: `${config.askpin.managerUrl}/#/generate?key=${key}` });
 
     return { from, to, subject, html };
 }
