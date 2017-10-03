@@ -40,7 +40,7 @@ router.put('/services/manager/generatepin', (req, res, next) => {
 
             return user.save();
         })
-        .then(() => res.status(200).json({}).end())
+        .then(() => res.status(200).json({ success: true }).end())
         .catch(err => dbCatch(module, err, next));
 });
 
