@@ -32,13 +32,10 @@ router.put('/services/manager/changepin', (req, res, next) => {
                 reject(new APIError(module, 401, 'PIN is wrong'));
             })
         )
-        .then(() =>
-            models.User
-               .get(req.user.id)
-               .run()
-        )
+        .then(() => models.User.where({ id: req.user.id }).fetch())
         .then((user) => {
-            user.pin = req.body.pin;
+            user.set('pin', req.body.pin);
+            user.set('updated_at', new Date());
 
             return user.save();
         })

@@ -1,20 +1,19 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Category';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'categories',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Category = requelize.model('Category', {
-    name     : joi.string().required(),
-    priority : joi.number().default(0),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        articles() {
+            return this.belongsToMany('Article', 'articles_categories', 'category_id', 'article_id');
+        },
 
-Category.on('creating', (inst) => { inst.createdAt = new Date(); });
-Category.on('saving', (inst) => { inst.editedAt = new Date(); });
+        points() {
+            return this.belongsToMany('Point', 'categories_points', 'category_id', 'point_id');
+        }
+    });
 
-Category.index('name');
-
-Category.belongsToMany('Article', 'articles');
-Category.belongsToMany('Point', 'points');
-
-module.exports = Category;
+    return { Model, name };
+};

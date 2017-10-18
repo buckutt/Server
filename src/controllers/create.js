@@ -18,26 +18,28 @@ router.post('/:model/', (req, res, next) => {
 
     if (Array.isArray(req.body)) {
         // Multiple is
-        insts    = req.body.map(data => new req.Model(data));
+        insts = req.body.map(data => new req.Model(data));
     } else {
         // Only one instance
-        insts    = [new req.Model(req.body)];
+        insts = [new req.Model(req.body)];
     }
 
-    let allDone;
-
-    if (req.query.embed) {
-        allDone = insts.map(inst => inst.saveAll(req.query.embed));
-    } else {
-        allDone = insts.map(inst => inst.save());
-    }
-
-    Promise.all(allDone)
+    Promise.all(insts.map(inst => inst.save()))
         .then(results => req.Model
-                .getAll(...results.map(i => i.id))
-                .embed(req.query.embed)
-                .run())
+            .where('id', 'in', results.map(i => i.id))
+            .fetchAll({
+                withRelated: req.query.embed
+            })
+        )
+        .then(results => results.toJSON())
         .then((results) => {
+            req.app.locals.modelChanges.emit(
+                'data',
+                'create',
+                modelParser.modelsNames[req.params.model],
+                { from: null, to: results }
+            );
+
             res
                 .status(200)
                 .json((results.length === 1) ? results[0] : results)

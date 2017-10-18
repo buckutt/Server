@@ -1,26 +1,35 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Purchase';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'purchases',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Purchase = requelize.model('Purchase', {
-    createdAt     : joi.date().default(() => new Date(), 'default date is now'),
-    editedAt      : joi.date(),
-    articlesAmount: joi.array().items({
-        id   : joi.string(),
-        price: joi.string()
-    }).optional(),
-    vat      : joi.number().default(0),
-    alcohol  : joi.number().default(0),
-    isRemoved: joi.boolean().default(false)
-});
+        price() {
+            return this.belongsTo('Price');
+        },
 
-Purchase.on('creating', (inst) => { inst.createdAt = new Date(); });
-Purchase.on('saving', (inst) => { inst.editedAt = new Date(); });
+        point() {
+            return this.belongsTo('Point');
+        },
 
-Purchase.belongsTo('Price', 'price');
-Purchase.belongsTo('Point', 'point');
-Purchase.belongsTo('Promotion', 'promotion');
-Purchase.belongsTo('User', 'buyer', 'Buyer_id');
-Purchase.belongsTo('User', 'seller', 'Seller_id');
-Purchase.belongsToMany('Article', 'articles');
+        promotion() {
+            return this.belongsTo('Promotion');
+        },
 
-module.exports = Purchase;
+        buyer() {
+            return this.belongsTo('User', 'buyer_id');
+        },
+
+        seller() {
+            return this.belongsTo('User', 'seller_id');
+        },
+
+        articles() {
+            return this.belongsToMany('Article', 'articles_purchases').withPivot(['count']);
+        }
+    });
+
+    return { Model, name };
+};

@@ -1,22 +1,23 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Reload';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'reloads',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Reload = requelize.model('Reload', {
-    credit   : joi.number().required(),
-    type     : joi.string().required(),
-    trace    : joi.string().allow('').required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        point() {
+            return this.belongsTo('Point');
+        },
 
-Reload.on('creating', (inst) => { inst.createdAt = new Date(); });
-Reload.on('saving', (inst) => { inst.editedAt = new Date(); });
+        buyer() {
+            return this.belongsTo('User', 'buyer_id');
+        },
 
-Reload.index('type');
+        seller() {
+            return this.belongsTo('User', 'seller_id');
+        }
+    });
 
-Reload.belongsTo('Point', 'point');
-Reload.belongsTo('User', 'buyer', 'Buyer_id');
-Reload.belongsTo('User', 'seller', 'Seller_id');
-
-module.exports = Reload;
+    return { Model, name };
+};

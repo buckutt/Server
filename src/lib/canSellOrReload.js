@@ -10,9 +10,8 @@ module.exports = (user, pointId) => {
     }
 
     for (const right of user.rights) {
-        if (!right.isRemoved && !right.period.isRemoved &&
-            right.period.start <= now && right.period.end > now &&
-            right.Point_id === pointId) {
+        if (right.period.start <= now && right.period.end > now &&
+            right.point_id === pointId) {
             const configRight = config.rights[right.name];
 
             if (configRight && configRight.canSell) {

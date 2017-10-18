@@ -1,22 +1,23 @@
-const { ReqlRuntimeError } = require('rethinkdbdash/lib/error');
-const APIError             = require('../errors/APIError');
+const APIError      = require('../errors/APIError');
+const { bookshelf } = require('./bookshelf');
 
 module.exports = function dbCatch(module_, err, next) {
-    if (err.message === 'DocumentNotFound' || err === 'Document not found' || err.msg === 'Document not found') {
-        return next(new APIError(module_, 404, 'Document not found'));
+    console.log(err);
+    if (err.constraint && err.constraint.endsWith('_unique')) {
+        return next(new APIError(module_, 400, 'Duplicate Entry', err.message));
     }
 
     /* istanbul ignore next */
-    if (err.message === 'ValidationError') {
+    if (err instanceof bookshelf.Model.NotFoundError) {
+        return next(new APIError(module_, 404, 'Not Found', err.message));
+    }
+
+    /* istanbul ignore next */
+    if (err instanceof bookshelf.Model.NoRowsUpdatedError) {
         return next(new APIError(module_, 400, 'Invalid model', err.message));
     }
 
-    /* istanbul ignore next */
-    if (err.message === 'InvalidWrite') {
-        return next(new APIError(module_, 500, 'Couldn\'t write to disk', err));
-    }
-
-    if (err instanceof APIError || err instanceof ReqlRuntimeError) {
+    if (err instanceof APIError) {
         return next(err);
     }
 

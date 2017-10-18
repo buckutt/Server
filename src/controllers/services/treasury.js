@@ -24,9 +24,11 @@ router.get('/services/treasury/purchases', (req, res, next) => {
         const dateOut = new Date(req.query.dateOut);
 
         if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
-            initialQuery = initialQuery
-                .where('created_at', '>=', dateIn)
-                .where('created_at', '<=', dateOut);
+            pricePeriod = {
+                'price.period': q => q
+                    .where('start', '<=', dateIn)
+                    .where('end', '>=', dateOut)
+            };
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
@@ -38,10 +40,7 @@ router.get('/services/treasury/purchases', (req, res, next) => {
                 'price.period': q => q.where({ event_id: req.query.event })
             };
         } else {
-            const prevCall = pricePeriod['price.period'];
-            pricePeriod = {
-                'price.period': q => prevCall(q).andWhere({ event_id: req.query.event })
-            };
+            pricePeriod['price.period'] = q => pricePeriod['price.period'](q).andWhere({ event_id: req.query.event });
         }
     }
 
@@ -71,7 +70,7 @@ router.get('/services/treasury/purchases', (req, res, next) => {
             // Remove deleted purchases, transform price relation to an outer join
             const purchases = results
                 .toJSON()
-                .filter(p => !p.deleted_at && p.price.id && price.period.id);
+                .filter(p => !p.deleted_at && p.price.id);
 
             const groupedPurchases = groupBy(purchases, 'price_id');
 

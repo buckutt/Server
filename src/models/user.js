@@ -1,47 +1,27 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'User';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'users',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const User = requelize.model('User', {
-    firstname  : joi.string().required(),
-    lastname   : joi.string().required(),
-    nickname   : joi.string().allow('').default(''),
-    pin        : joi.string().required(),
-    password   : joi.string().required(),
-    recoverKey : joi.string().allow('').default(''),
-    mail       : joi.string().required(),
-    credit     : joi.number().default(0),
-    isTemporary: joi.boolean().default(false),
-    createdAt  : joi.date().default(() => new Date(), 'default date is now'),
-    editedAt   : joi.date(),
-    isRemoved  : joi.boolean().default(false)
-});
+        meansOfLogin() {
+            return this.hasMany('MeanOfLogin');
+        },
 
-User.on('creating', (inst) => { inst.createdAt = new Date(); });
+        memberships() {
+            return this.hasMany('Membership');
+        },
 
-User.on('saving', (inst) => {
-    inst.editedAt  = new Date();
-    inst.firstname = inst.firstname.toLowerCase();
-    inst.lastname  = inst.lastname.toLowerCase();
-    inst.nickname  = inst.nickname.toLowerCase();
-});
+        rights() {
+            return this.hasMany('Right');
+        },
 
-User.index('firstname');
-User.index('lastname');
-User.index('nickname');
-User.index('mail');
-User.index('recoverKey');
+        purchases() {
+            return this.hasMany('Purchase', 'buyer_id');
+        }
+    });
 
-User.belongsToMany('Group', 'groups', 'GroupUser');
-User.belongsToMany('Right', 'rights');
-User.hasMany('MeanOfLogin', 'meansOfLogin');
-
-User.hasMany('Purchase', 'purchases', 'Buyer_id');
-User.hasMany('Purchase', 'sells', 'Seller_id');
-
-User.hasMany('Reload', 'reloads', 'Buyer_id');
-User.hasMany('Reload', 'reloadsMade', 'Seller_id');
-
-User.hasMany('Transfer', 'transfers', 'Reciever_id');
-User.hasMany('Transfer', 'transfersMade', 'Sender_id');
-
-module.exports = User;
+    return { Model, name };
+};

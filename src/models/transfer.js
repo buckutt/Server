@@ -1,17 +1,19 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Transfer';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'transfers',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Transfer = requelize.model('Transfer', {
-    amount   : joi.number().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        sender() {
+            return this.belongsTo('User', 'sender_id');
+        },
 
-Transfer.on('creating', (inst) => { inst.createdAt = new Date(); });
-Transfer.on('saving', (inst) => { inst.editedAt = new Date(); });
+        reciever() {
+            return this.belongsTo('User', 'reciever_id');
+        }
+    });
 
-Transfer.belongsTo('User', 'sender', 'Sender_id');
-Transfer.belongsTo('User', 'reciever', 'Reciever_id');
-
-module.exports = Transfer;
+    return { Model, name };
+};

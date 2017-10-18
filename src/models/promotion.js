@@ -1,23 +1,23 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Promotion';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'promotions',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Promotion = requelize.model('Promotion', {
-    name     : joi.string().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        sets() {
+            return this.belongsToMany('Set', 'promotions_sets');
+        },
 
-Promotion.on('creating', (inst) => { inst.createdAt = new Date(); });
-Promotion.on('saving', (inst) => { inst.editedAt = new Date(); });
+        prices() {
+            return this.hasMany('Price');
+        },
 
-Promotion.index('name');
+        purchases() {
+            return this.hasMany('Purchase');
+        }
+    });
 
-Promotion.belongsToMany('Price', 'prices');
-// n:n instead of 1:n to allow one promotion containing multiple times the same article
-Promotion.belongsToMany('Article', 'articles');
-// n:n instead of 1:n to allow one promotion containing multiple times the same set
-Promotion.belongsToMany('Set', 'sets');
-Promotion.hasMany('Purchase', 'purchases');
-
-module.exports = Promotion;
+    return { Model, name };
+};

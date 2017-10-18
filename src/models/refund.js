@@ -1,21 +1,19 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Refund';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'refunds',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Refund = requelize.model('Refund', {
-    amount   : joi.number().required(),
-    type     : joi.string().required(),
-    trace    : joi.string().allow('').required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        buyer() {
+            return this.belongsTo('User', 'buyer_id');
+        },
 
-Refund.on('creating', (inst) => { inst.createdAt = new Date(); });
-Refund.on('saving', (inst) => { inst.editedAt = new Date(); });
+        seller() {
+            return this.belongsTo('User', 'seller_id');
+        }
+    });
 
-Refund.index('type');
-
-Refund.belongsTo('User', 'buyer', 'Buyer_id');
-Refund.belongsTo('User', 'seller', 'Seller_id');
-
-module.exports = Refund;
+    return { Model, name };
+};

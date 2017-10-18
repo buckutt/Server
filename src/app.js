@@ -1,5 +1,6 @@
 const fs            = require('fs');
 const path          = require('path');
+const EventEmitter  = require('events');
 const cors          = require('cors');
 const bodyParser    = require('body-parser');
 const compression   = require('compression');
@@ -10,13 +11,11 @@ const https         = require('https');
 const randomstring  = require('randomstring');
 const config        = require('../config');
 const controllers   = require('./controllers');
-const models        = require('./models');
 const socketServer  = require('./socketServer');
 const logger        = require('./lib/log');
-const requelize     = require('./lib/requelize');
+const bookshelf     = require('./lib/bookshelf');
 const APIError      = require('./errors/APIError');
 const sslConfig     = require('../scripts/sslConfig');
-const baseSeed      = require('../scripts/seed');
 const { addDevice } = require('../scripts/addDevice');
 
 const log = logger(module);
@@ -26,7 +25,7 @@ const LOCK_FILE = path.join(__dirname, '..', 'ready.lock');
 const app = express();
 
 app.locals.config = config;
-app.locals.models = models;
+app.locals.models = bookshelf.models;
 
 /**
  * Middlewares
@@ -79,7 +78,7 @@ app.start = () => {
         ca  : './ssl/certificates/ca/ca-crt.pem'
     };
 
-    let startingQueue = requelize.sync();
+    let startingQueue = bookshelf.sync();
 
     /* istanbul ignore if */
     if (!fs.existsSync(sslFilesPath.key) ||
@@ -95,7 +94,7 @@ app.start = () => {
             .then(() => {
                 log.info('Seeding database...');
 
-                return baseSeed();
+                return bookshelf.knex.seed.run();
             })
             .then(() => {
                 log.info('Creating admin device...');
@@ -123,13 +122,13 @@ app.start = () => {
             rejectUnauthorized: false
         }, app);
 
-        app.locals.modelChanges = require('./modelChanges')(app);
+        app.locals.modelChanges = new EventEmitter();
 
         socketServer.ioServer(server, app);
 
         return new Promise((resolve, reject) => {
             server.listen(config.http.port, config.http.hostname, (err) => {
-                    /* istanbul ignore if */
+                /* istanbul ignore if */
                 if (err) {
                     return reject(err);
                 }

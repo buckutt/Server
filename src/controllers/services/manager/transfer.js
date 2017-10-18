@@ -1,10 +1,9 @@
-const bcrypt_   = require('bcryptjs');
-const express   = require('express');
-const Promise   = require('bluebird');
-const logger    = require('../../../lib/log');
-const dbCatch   = require('../../../lib/dbCatch');
-const requelize = require('../../../lib/requelize');
-const APIError  = require('../../../errors/APIError');
+const bcrypt_  = require('bcryptjs');
+const express  = require('express');
+const Promise  = require('bluebird');
+const logger   = require('../../../lib/log');
+const dbCatch  = require('../../../lib/dbCatch');
+const APIError = require('../../../errors/APIError');
 
 const log = logger(module);
 
@@ -16,26 +15,23 @@ const router = new express.Router();
 
 // Get the reciever user
 router.post('/services/manager/transfer', (req, res, next) => {
-    log.info(`Transfer from ${req.user.id} to ${req.body.Reciever_id} by ${req.body.amount}`);
+    log.info(`Transfer from ${req.user.id} to ${req.body.reciever_id} by ${req.body.amount}`);
 
-    req.Reciever_id = req.body.Reciever_id;
+    req.reciever_id = req.body.reciever_id;
 
-    if (!req.Reciever_id) {
-        return next(new APIError(module, 400, 'Invalid reciever', { receiver: req.Reciever_id }));
+    if (!req.reciever_id) {
+        return next(new APIError(module, 400, 'Invalid reciever', { receiver: req.reciever_id }));
     }
 
     req.app.locals.models.User
-        .parse(false)
-        .filter(requelize.r.row('isRemoved').eq(false))
-        .filter(requelize.r.row('id').eq(req.Reciever_id))
-        .nth(0)
-        .default(null)
+        .where({ id: req.reciever_id })
+        .fetch()
         .then((user) => {
             if (!user) {
                 return next(new APIError(module, 400, 'Invalid reciever'));
             }
 
-            req.recieverUser = user;
+            req.recieverUser = user.toJSON();
             next();
         })
         .catch(() => next(new APIError(400, 'Invalid reciever')));
@@ -67,7 +63,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
 
     if (req.user.credit - amount < 0) {
         return next(new APIError(module, 400, 'Not enough sender credit', {
-            sender: req.Sender_id,
+            sender: req.sender_id,
             credit: req.user.credit,
             amount
         }));
@@ -75,7 +71,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
 
     if (req.recieverUser.credit + amount > 100 * 100) {
         return next(new APIError(module, 400, 'Too much reciever credit', {
-            receiver: req.Reciever_id,
+            receiver: req.reciever_id,
             credit  : req.user.credit,
             amount
         }));
@@ -85,24 +81,26 @@ router.post('/services/manager/transfer', (req, res, next) => {
         amount
     });
 
-    newTransfer.Sender_id   = req.user.id;
-    newTransfer.Reciever_id = req.recieverUser.id;
+    newTransfer.set('sender_id', req.user.id);
+    newTransfer.set('reciever_id', req.recieverUser.id);
 
-    req.app.locals.models.User
-        .get(newTransfer.Reciever_id)
-        .run()
+    models.User
+        .where({ id: newTransfer.get('reciever_id') })
+        .fetch()
         .then((reciever) => {
-            reciever.credit += amount;
+            reciever.set('credit', reciever.get('credit') + amount);
+            reciever.set('updated_at', new Date());
 
             return reciever.save();
         })
         .then(() =>
-            req.app.locals.models.User
-                .get(newTransfer.Sender_id)
-                .run()
+            models.User
+                .where({ id: newTransfer.get('sender_id') })
+                .fetch()
         )
         .then((sender) => {
-            sender.credit -= amount;
+            sender.set('credit', sender.get('credit') - amount);
+            sender.set('updated_at', new Date());
 
             return sender.save();
         })
@@ -110,7 +108,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
             newTransfer.save()
         )
         .then(() => {
-            if (newTransfer.Reciever_id === newTransfer.Sender_id) {
+            if (newTransfer.get('reciever_id') === newTransfer.get('sender_id')) {
                 amount = 0;
             }
 
