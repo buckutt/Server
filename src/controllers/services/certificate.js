@@ -1,7 +1,7 @@
 const express   = require('express');
 const dbCatch   = require('../../lib/dbCatch');
 const addDevice = require('../../../scripts/addDevice');
-const logger          = require('../../lib/log');
+const logger    = require('../../lib/log');
 
 const log = logger(module);
 
@@ -21,15 +21,17 @@ router.get('/services/certificate', (req, res, next) => {
     let device;
     let fileName;
 
-    models.Device.get(deviceId).run()
+    models.Device
+        .where({ id: deviceId })
+        .fetch()
         .then((device_) => {
             device = device_;
 
-            return addDevice.genClient({ password, deviceName: device.name });
+            return addDevice.genClient({ password, deviceName: device.get('name') });
         })
         .then((result) => {
-            device.fingerprint = result.fingerprint;
-            fileName           = result.fileName;
+            device.set('fingerprint', result.fingerprint);
+            fileName = result.fileName;
 
             return device.save();
         })

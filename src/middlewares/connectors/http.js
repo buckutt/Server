@@ -44,8 +44,8 @@ module.exports.marshal = function marshal(mw) {
 
 module.exports.unmarshal = function unmarshal(req, res, next) {
     req.fingerprint = req.connector.fingerprint;
-    req.Point_id    = req.connector.Point_id;
-    req.Event_id    = req.connector.Event_id;
+    req.point_id    = req.connector.point_id;
+    req.event_id    = req.connector.event_id;
     req.device      = req.connector.device;
     req.point       = req.connector.point;
     req.event       = req.connector.event;

@@ -1,24 +1,19 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Device';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'devices',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Device = requelize.model('Device', {
-    fingerprint     : joi.string().optional(),
-    name            : joi.string().required(),
-    doubleValidation: joi.boolean().default(false),
-    alcohol         : joi.boolean().default(false),
-    showPicture     : joi.boolean().default(false),
-    createdAt       : joi.date().default(() => new Date(), 'default date is now'),
-    editedAt        : joi.date(),
-    isRemoved       : joi.boolean().default(false)
-});
+        defaultGroup() {
+            return this.belongsTo('Group', 'defaultGroup_id');
+        },
 
-Device.on('creating', (inst) => { inst.createdAt = new Date(); });
-Device.on('saving', (inst) => { inst.editedAt = new Date(); });
+        wikets() {
+            return this.hasMany('Wiket');
+        }
+    });
 
-Device.index('name');
-Device.index('fingerprint');
-
-Device.belongsTo('Group', 'defaultGroup', 'DefaultGroup_id');
-Device.belongsToMany('Point', 'points', 'DevicePoint');
-
-module.exports = Device;
+    return { Model, name };
+};

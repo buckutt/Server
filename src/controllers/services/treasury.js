@@ -1,83 +1,91 @@
-const express    = require('express');
-const requelize  = require('../../lib/requelize');
-const APIError   = require('../../errors/APIError');
-const { isUUID } = require('../../lib/idParser');
-const dbCatch    = require('../../lib/dbCatch');
+const express            = require('express');
+const { groupBy, sumBy } = require('lodash');
+const APIError           = require('../../errors/APIError');
+const { isUUID }         = require('../../lib/idParser');
+const dbCatch            = require('../../lib/dbCatch');
 
 const router = new express.Router();
 
 router.get('/services/treasury/purchases', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Purchase
-        .filter(requelize.r.row('isRemoved').eq(false))
-        .embed({
-            price: {
-                period  : true,
-                articles: true
-            },
-            articles : true,
-            promotion: true
-        });
+    let initialQuery = models.Purchase;
+    let price        = 'price';
+    let pricePeriod  = 'price.period';
 
     if (req.query.period) {
         if (isUUID(req.query.period)) {
-            initialQuery = initialQuery.filter(doc => doc('price')('Period_id').eq(req.query.period));
+            pricePeriod = {
+                'price.period': q => q.where({ id: req.query.period })
+            };
         }
-    }
-
-    if (req.query.dateIn) {
+    } else if (req.query.dateIn) {
         const dateIn  = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
         if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
-            initialQuery = initialQuery
-                .filter(doc =>
-                    doc('createdAt').ge(dateIn).and(
-                        doc('createdAt').le(dateOut)
-                    )
-                );
+            pricePeriod = {
+                'price.period': q => q
+                    .where('start', '<=', dateIn)
+                    .where('end', '>=', dateOut)
+            };
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
     }
 
     if (req.query.event) {
-        initialQuery = initialQuery.filter(doc => doc('price')('period')('Event_id').eq(req.query.event));
+        if (typeof pricePeriod === 'string') {
+            pricePeriod = {
+                'price.period': q => q.where({ event_id: req.query.event })
+            };
+        } else {
+            pricePeriod['price.period'] = q => pricePeriod['price.period'](q).andWhere({ event_id: req.query.event });
+        }
     }
 
     if (req.query.point) {
-        initialQuery = initialQuery.filter(doc => doc('Point_id').eq(req.query.point));
+        initialQuery = initialQuery.where({ point_id: req.query.point });
     }
 
     if (req.query.fundation) {
-        initialQuery = initialQuery.filter(doc => doc('price')('Fundation_id').eq(req.query.fundation));
+        price = {
+            price: q => q.where({ fundation_id: req.query.fundation })
+        };
     }
 
     initialQuery = initialQuery
-        .parse(false)
-        .group(purchase => purchase('price')('id'))
-        .run();
+        .fetchAll({
+            withRelated: [
+                price,
+                pricePeriod,
+                'price.article',
+                'price.promotion'
+            ],
+            withDeleted: true
+        });
 
     initialQuery
-        .then((groups) => {
-            const result = groups.map((group) => {
-                const first = group.reduction[0];
+        .then((results) => {
+            // Remove deleted purchases, transform price relation to an outer join
+            const purchases = results
+                .toJSON()
+                .filter(p => !p.deleted_at && p.price.id);
 
-                const treasuryEntry = {};
+            const groupedPurchases = groupBy(purchases, 'price_id');
 
-                treasuryEntry.count    = group.reduction.length;
-                treasuryEntry.totalVAT = group.reduction.map(purchase => purchase.vat).reduce((a, b) => a + b, 0);
-                treasuryEntry.totalTI  = group.reduction
-                    .map(purchase => purchase.price.amount)
-                    .reduce((a, b) => a + b, 0);
-                treasuryEntry.price    = first.price.amount;
-                treasuryEntry.name     = first.promotion ? first.promotion.name : first.articles[0].name;
+            const mappedPurchases = Object.values(groupedPurchases)
+                .map(p => ({
+                    price   : p[0].price.amount,
+                    id      : p[0].price.id,
+                    totalTI : sumBy(p, 'price.amount'),
+                    totalVAT: sumBy(p, 'vat'),
+                    count   : p.length,
+                    name    : (p[0].price.article) ? p[0].price.article.name : p[0].price.promotion.name
+                }))
+                .sort((a, b) => a.name.localeCompare(b.name));
 
-                return treasuryEntry;
-            });
-
-            res.status(200).json(result).end();
+            res.status(200).json(mappedPurchases).end();
         })
         .catch(err => dbCatch(module, err, next));
 });
@@ -85,12 +93,11 @@ router.get('/services/treasury/purchases', (req, res, next) => {
 router.get('/services/treasury/reloads', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Reload
-        .filter(requelize.r.row('isRemoved').eq(false));
+    let initialQuery = models.Reload;
 
     if (req.query.point) {
         if (isUUID(req.query.point)) {
-            initialQuery = initialQuery.filter(doc => doc('Point_id').eq(req.query.point));
+            initialQuery = initialQuery.where({ point_id: req.query.point });
         }
     }
 
@@ -100,28 +107,26 @@ router.get('/services/treasury/reloads', (req, res, next) => {
 
         if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
-            .filter(doc =>
-                doc('createdAt').ge(dateIn).and(
-                    doc('createdAt').le(dateOut)
-                )
-            );
+                .where('created_at', '>=', dateIn)
+                .where('created_at', '<=', dateOut);
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
     }
 
     initialQuery = initialQuery
-        .parse(false)
-        .group('type')
-        .map(doc => doc('credit'))
-        .sum()
-        .run();
+        .query(q => q
+            .select('type')
+            .sum('credit as credit')
+            .groupBy('type')
+        )
+        .fetchAll();
 
     initialQuery
         .then((credits) => {
             res
                 .status(200)
-                .json(credits)
+                .json(credits.toJSON())
                 .end();
         })
         .catch(err => dbCatch(module, err, next));
@@ -130,8 +135,7 @@ router.get('/services/treasury/reloads', (req, res, next) => {
 router.get('/services/treasury/refunds', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Refund
-        .filter(requelize.r.row('isRemoved').eq(false));
+    let initialQuery = models.Refund;
 
     if (req.query.dateIn) {
         const dateIn = new Date(req.query.dateIn);
@@ -139,28 +143,26 @@ router.get('/services/treasury/refunds', (req, res, next) => {
 
         if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
-            .filter(doc =>
-                doc('createdAt').ge(dateIn).and(
-                    doc('createdAt').le(dateOut)
-                )
-            );
+                .where('created_at', '>=', dateIn)
+                .where('created_at', '<=', dateOut);
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
     }
 
     initialQuery = initialQuery
-        .parse(false)
-        .group('type')
-        .map(doc => doc('amount'))
-        .sum()
-        .run();
+        .query(q => q
+            .select('type')
+            .sum('amount as amount')
+            .groupBy('type')
+        )
+        .fetchAll();
 
     initialQuery
         .then((amounts) => {
             res
                 .status(200)
-                .json(amounts)
+                .json(amounts.toJSON())
                 .end();
         })
         .catch(err => dbCatch(module, err, next));

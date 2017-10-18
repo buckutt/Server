@@ -1,25 +1,39 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Price';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'prices',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Price = requelize.model('Price', {
-    amount   : joi.number().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        article() {
+            return this.belongsTo('Article');
+        },
 
-Price.on('creating', (inst) => { inst.createdAt = new Date(); });
-Price.on('saving', (inst) => { inst.editedAt = new Date(); });
+        fundation() {
+            return this.belongsTo('Fundation');
+        },
 
-// performance in items
-Price.index('pointAndNotRemoved', (row) => ([ row('Point_id'), row('isRemoved') ]));
+        group() {
+            return this.belongsTo('Group');
+        },
 
-Price.belongsTo('Fundation', 'fundation');
-Price.belongsTo('Group', 'group');
-Price.belongsTo('Period', 'period');
-Price.belongsTo('Point', 'point');
-Price.hasMany('Purchase', 'purchases');
-Price.belongsToMany('Promotion', 'promotions');
-Price.belongsToMany('Article', 'articles');
+        period() {
+            return this.belongsTo('Period');
+        },
 
-module.exports = Price;
+        point() {
+            return this.belongsTo('Point');
+        },
+
+        promotion() {
+            return this.belongsTo('Promotion');
+        },
+
+        purchases() {
+            return this.hasMany('Purchase');
+        }
+    });
+
+    return { Model, name };
+};

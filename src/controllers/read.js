@@ -1,12 +1,14 @@
-const express     = require('express');
-const idParser    = require('../lib/idParser');
-const logger      = require('../lib/log');
-const modelParser = require('../lib/modelParser');
-const requelize   = require('../lib/requelize');
-const dbCatch     = require('../lib/dbCatch');
+const express       = require('express');
+const qs            = require('qs');
+const url           = require('url');
+const idParser      = require('../lib/idParser');
+const logger        = require('../lib/log');
+const modelParser   = require('../lib/modelParser');
+const queryFilterer = require('../lib/queryFilterer');
+const dbCatch       = require('../lib/dbCatch');
+const APIError      = require('../errors/APIError');
 
 const log = logger(module);
-const r   = requelize.r;
 
 /**
  * Read controller. Handles reading one element, or multiple.
@@ -22,22 +24,7 @@ router.get('/:model', (req, res, next) => {
 
     // Order
     if (req.query.orderBy) {
-        if (req.query.sort === 'asc') {
-            // Order ASC
-            request = request.orderBy({
-                index: r.asc(req.query.orderBy)
-            });
-        } else if (req.query.sort === 'dsc') {
-            // Order DSC
-            request = request.orderBy({
-                index: r.desc(req.query.orderBy)
-            });
-        } else {
-            // Order Default
-            request = request.orderBy({
-                index: req.query.orderBy
-            });
-        }
+        request = request.orderBy(req.query.orderBy, req.query.sort || 'asc');
     }
 
     // Limit
@@ -45,50 +32,74 @@ router.get('/:model', (req, res, next) => {
         request = request.limit(req.query.limit);
     }
 
-    // Skip/Offset
+    // Offset
     if (req.query.offset) {
-        request = request.skip(req.query.offset);
+        request = request.offset(req.query.offset);
+    }
+
+    // Support encoded JSON (express doesn't)
+    const q = qs.parse(url.parse(req.url).query).q;
+    let filters;
+
+    if (q) {
+        try {
+            filters = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
+        } catch (e) {
+            /* istanbul ignore next */
+            return next(new APIError(module, 400, 'Invalid search object', e));
+        }
+
+        request = queryFilterer(request, filters);
     }
 
     // Embed multiple relatives
-    if (req.query.embed) {
-        request = request.embed(req.query.embed);
-    }
+    const withRelated = (req.query.embed) ? req.query.embed : [];
 
     request
-        .run()
+        .fetchAll({ withRelated })
         .then(results =>
             res
                 .status(200)
-                .json(results)
+                .json(results.toJSON())
                 .end()
         )
         .catch(err => dbCatch(module, err, next));
 });
 
 router.get('/:model/:id?', (req, res, next) => {
-    // id === search => next to be used by search controller
-    if (req.params.id === 'search') {
-        return next();
-    }
+    let request = req.Model.where({ id: req.params.id });
 
-    let request = req.Model
-        .get(req.params.id)
-        .default(r.error('Document not found'));
+    // Support encoded JSON (express doesn't)
+    const q = qs.parse(url.parse(req.url).query).q;
+    let filters;
+
+    if (q) {
+        try {
+            filters = (Array.isArray(q)) ? q.map(subQ => JSON.parse(subQ)) : JSON.parse(q);
+        } catch (e) {
+            /* istanbul ignore next */
+            return next(new APIError(module, 400, 'Invalid search object', e));
+        }
+
+        request = queryFilterer(request, filters);
+    }
 
     // Embed multiple relatives
-    if (req.query.embed) {
-        request = request.embed(req.query.embed);
-    }
+    const withRelated = (req.query.embed) ? req.query.embed : [];
 
     request
-        .run()
-        .then(instance =>
+        .fetch({ withRelated })
+        .then(result => (result ? result.toJSON() : null))
+        .then((instance) => {
+            if (!instance) {
+                return next(new APIError(module, 404, 'Document not found'));
+            }
+
             res
                 .status(200)
                 .json(instance)
-                .end()
-        )
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 

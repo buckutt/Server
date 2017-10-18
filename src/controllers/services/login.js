@@ -1,14 +1,12 @@
-const bcrypt_                  = require('bcryptjs');
-const express                  = require('express');
-const jwt                      = require('jsonwebtoken');
-const Promise                  = require('bluebird');
-const config                   = require('../../../config');
-const logger                   = require('../../lib/log');
-const { r }                    = require('../../lib/requelize');
-const canSellOrReload          = require('../../lib/canSellOrReload');
-const filterIsRemovedRecursive = require('../../lib/filterIsRemovedRecursive');
-const dbCatch                  = require('../../lib/dbCatch');
-const APIError                 = require('../../errors/APIError');
+const bcrypt_         = require('bcryptjs');
+const express         = require('express');
+const jwt             = require('jsonwebtoken');
+const Promise         = require('bluebird');
+const config          = require('../../../config');
+const logger          = require('../../lib/log');
+const canSellOrReload = require('../../lib/canSellOrReload');
+const dbCatch         = require('../../lib/dbCatch');
+const APIError        = require('../../errors/APIError');
 
 const log = logger(module);
 
@@ -50,34 +48,30 @@ router.post('/services/login', (req, res, next) => {
     log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
 
     models.MeanOfLogin
-        .getAll([
-            infos.type,
-            infos.data,
-            false,
-            false
-        ], { index: 'login' })
-        .limit(1)
-        .embed({
-            user: {
-                rights: {
-                    period: true
-                }
-            }
+        .where({
+            type   : infos.type,
+            data   : infos.data,
+            blocked: false
         })
-        .filter(r.row('user')('isRemoved').eq(false))
+        .fetch({
+            withRelated: [
+                'user',
+                'user.rights',
+                'user.rights.period'
+            ]
+        })
+        .then(mol => ((mol) ? mol.toJSON() : null))
         .then((mol) => {
-            if (mol.length === 0) {
+            if (!mol || !mol.user.id) {
                 const errDetails = {
-                    mol  : mol.type,
+                    mol  : infos.type,
                     point: req.Point_id
                 };
 
                 return next(new APIError(module, 401, 'User not found', errDetails));
             }
 
-            user = mol[0].user;
-
-            user.rights = filterIsRemovedRecursive(user.rights);
+            user = mol.user;
 
             if (connectType === 'pin') {
                 return bcrypt.compareAsync(req.body.pin.toString(), user.pin);
@@ -103,7 +97,7 @@ router.post('/services/login', (req, res, next) => {
             user.pin      = '';
             user.password = '';
 
-            const userRights = canSellOrReload(user, req.Point_id);
+            const userRights = canSellOrReload(user, req.point_id);
 
             user.canSell   = userRights.canSell;
             user.canReload = userRights.canReload;
@@ -115,6 +109,7 @@ router.post('/services/login', (req, res, next) => {
                     token: jwt.sign({
                         id   : user.id,
                         point: req.point,
+                        event: req.event,
                         // Will be used by middleware (else how could middleware know if pin or password ?)
                         connectType
                     }, secret, tokenOptions)

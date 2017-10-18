@@ -2,12 +2,10 @@ const express     = require('express');
 const idParser    = require('../lib/idParser');
 const logger      = require('../lib/log');
 const modelParser = require('../lib/modelParser');
-const requelize   = require('../lib/requelize');
 const dbCatch     = require('../lib/dbCatch');
 const APIError    = require('../errors/APIError');
 
 const log = logger(module);
-const r   = requelize.r;
 
 /**
  * Read submodel controller. Handles reading the children of one element (based on a relation).
@@ -20,30 +18,28 @@ router.get('/:model/:id/:submodel', (req, res, next) => {
 
     const submodel = req.params.submodel;
 
-    if (!req.Model._joins.hasOwnProperty(submodel)) {
-        return next(new APIError(module, 404, 'Document not found: submodel does not exist', { submodel }));
-    }
-
-    const embed = {};
-    // If embed on the submodel, do something like { submodel: whatever he wants }
-    // Else just the submodel, so { submodel: true }
+    let withRelated = [];
     if (req.query.embed) {
-        embed[submodel] = req.query.embed;
+        withRelated = [submodel].concat(req.query.embed);
+        withRelated[submodel] = req.query.embed;
     } else {
-        embed[submodel] = true;
+        withRelated = [submodel];
     }
 
     req.Model
-        .get(req.params.id)
-        .default(r.error('Document not found'))
-        .embed(embed)
-        .run()
-        .then(instance =>
+        .where({ id: req.params.id })
+        .fetch({ withRelated })
+        .then(result => (result ? result.toJSON() : null))
+        .then((instance) => {
+            if (!instance || !instance[submodel]) {
+                return next(new APIError(module, 404, 'Document not found'));
+            }
+
             res
                 .status(200)
                 .json(instance[submodel])
-                .end()
-        )
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 
@@ -52,46 +48,57 @@ router.post('/:model/:id/:submodel/:subId', (req, res, next) => {
         ${req.params.model}(${req.params.id}) ${JSON.stringify(req.query)}`;
     log.info(info, req.details);
 
-    const submodel = req.params.submodel;
+    const Model                   = req.Model;
+    const { id, subId, submodel } = req.params;
 
-    if (!req.Model._joins.hasOwnProperty(submodel)) {
+    // create empty instance
+    const forged = new req.Model();
+
+    if (!forged[submodel] || !forged[submodel]().attach) {
         return next(new APIError(module, 404, 'Document not found: submodel does not exist', { submodel }));
     }
 
-    const through   = req.Model._joins[submodel].tableName;
-    const leftName  = req.Model._name;
-    const rightName = req.Model._joins[submodel].model;
-    const { id, subId } = req.params;
+    // get relationship data
+    const relationship = forged[submodel]();
 
-    req.Model
-        .get(id)
-        .run()
-        .then((leftModel) => {
-            if (!leftModel) {
-                throw new APIError(module, 404, 'Left document does not exist');
+    // extract submodel class
+    const SubModel = relationship.model;
+
+    let left;
+
+    Model
+        .where({ id })
+        .fetch()
+        .then((left_) => {
+            left = left_;
+
+            if (!left) {
+                return Promise.reject(new APIError(module, 404, 'Left document does not exist'));
             }
 
-            // Check right model
-            return r.table(req.Model._joins[submodel].model).get(subId);
+            return SubModel.where({ id: subId }).fetch();
         })
-        .then((rightModel) => {
-            if (!rightModel) {
-                throw new APIError(module, 404, 'Right document does not exist');
+        .then((right) => {
+            if (!right) {
+                return Promise.reject(new APIError(module, 404, 'Right document does not exist'));
             }
 
-            return r
-                .table(through)
-                .insert(Object.assign({
-                    [leftName] : id,
-                    [rightName]: subId
-                }, req.body));
+            return left[submodel]().attach(right);
         })
-        .then(() =>
+        .then((rightCollection) => {
+            console.log(rightCollection.last());
+            // req.app.locals.modelChanges.emit(
+            //     'data',
+            //     'create',
+            //     modelParser.modelsNames[req.params.model],
+            //     { from: null, to: rightCollection.last() }
+            // );
+
             res
                 .status(200)
                 .json({})
-                .end()
-        )
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 
@@ -100,40 +107,60 @@ router.delete('/:model/:id/:submodel/:subId', (req, res, next) => {
         ${req.params.model}(${req.params.id}) ${JSON.stringify(req.query)}`;
     log.info(info, req.details);
 
-    const submodel = req.params.submodel;
+    const Model                   = req.Model;
+    const { id, subId, submodel } = req.params;
 
-    if (!req.Model._joins.hasOwnProperty(submodel)) {
-        return next(new APIError(module, 404, 'Document not found', `Submodel ${submodel} does not exist`));
+    // create empty instance
+    const forged = new req.Model();
+
+    if (!forged[submodel]) {
+        return next(new APIError(module, 404, 'Document not found: submodel does not exist', { submodel }));
     }
 
-    const JoinModel = requelize.models[req.Model._joins[submodel].tableName];
-    const leftName  = req.Model._name;
-    const leftId    = req.params.id;
-    const rightName = req.Model._joins[submodel].model;
-    const rightId   = req.params.subId;
+    // get relationship data
+    const relationship = forged[submodel]();
 
-    const filter = Object.assign({}, {
-        [leftName] : leftId,
-        [rightName]: rightId
-    }, req.query.filter);
+    // extract submodel class
+    const SubModel = relationship.model;
 
-    JoinModel
-        .filter(filter)
-        .nth(0)
-        .default(null)
-        .then((rel) => {
-            if (!rel) {
-                throw new APIError(module, 404, 'Document not found');
+    let left;
+    let right;
+
+    Model
+        .where({ id })
+        .fetch()
+        .then((left_) => {
+            left = left_;
+
+            if (!left) {
+                return Promise.reject(new APIError(module, 404, 'Left document does not exist'));
             }
 
-            return JoinModel.get(rel.id).delete();
+            return SubModel.where({ id: subId }).fetch();
         })
-        .then(() =>
+        .then((right_) => {
+            right = right_;
+
+            if (!right) {
+                return Promise.reject(new APIError(module, 404, 'Right document does not exist'));
+            }
+
+            return left[submodel]().detach(right);
+        })
+        .then(() => {
+            console.log(right);
+            // req.app.locals.modelChanges.emit(
+            //     'data',
+            //     'create',
+            //     modelParser.modelsNames[req.params.model],
+            //     { from: null, to: right }
+            // );
+
             res
                 .status(200)
                 .json({})
-                .end()
-        )
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 

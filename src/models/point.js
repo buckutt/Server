@@ -1,23 +1,35 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Point';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'points',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Point = requelize.model('Point', {
-    name     : joi.string().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        prices() {
+            return this.hasMany('Price');
+        },
 
-Point.on('creating', (inst) => { inst.createdAt = new Date(); });
-Point.on('saving', (inst) => { inst.editedAt = new Date(); });
+        purchases() {
+            return this.hasMany('Purchase');
+        },
 
-Point.index('name');
+        reloads() {
+            return this.hasMany('Reload');
+        },
 
-Point.hasMany('Price', 'prices');
-Point.hasMany('Purchase', 'purchases');
-Point.hasMany('Reload', 'reloads');
-Point.hasMany('Right', 'rights');
-Point.belongsToMany('Device', 'devices', 'DevicePoint');
-Point.belongsToMany('Category', 'categories');
+        rights() {
+            return this.hasMany('Right');
+        },
 
-module.exports = Point;
+        wikets() {
+            return this.hasMany('Wiket');
+        },
+
+        categories() {
+            return this.belongsToMany('Category', 'categories_points', 'point_id', 'category_id');
+        }
+    });
+
+    return { Model, name };
+};

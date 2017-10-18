@@ -39,14 +39,17 @@ router.get('/services/manager/askpin', (req, res, next) => {
 
     let user;
 
-    models.User.getAll(mail, { index: 'mail' })
-        .then((users) => {
-            if (!users.length) {
+    models.User
+        .where({ mail })
+        .fetch()
+        .then((user_) => {
+            user = user_;
+
+            if (!user) {
                 return Promise.reject(new APIError(module, 404, 'Incorrect mail'));
             }
 
-            user = users[0];
-            user.recoverKey = randomstring.generate();
+            user.set('recoverKey', randomstring.generate());
 
             return user.save();
         })

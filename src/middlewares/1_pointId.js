@@ -4,76 +4,71 @@ const APIError = require('../errors/APIError');
  * Retrieve the point id from the SSL certificate fingerprint
  * @param {Object} connector HTTP/Socket.IO connector
  */
-module.exports = (connector) => {
-    const Device = connector.models.Device;
+module.exports = connector => connector.models.Device
+    .where({
+        fingerprint: connector.fingerprint
+    })
+    .fetch({
+        withRelated: [
+            'wikets',
+            'wikets.point',
+            'wikets.period',
+            'wikets.period.event'
+        ]
+    })
+    .then(res => ((res) ? res.toJSON() : null))
+    .then((device) => {
+        /* istanbul ignore if */
+        if (!device || device.wikets.length === 0) {
+            return Promise.reject(
+                new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint })
+            );
+        }
 
-    let device;
+        let minPeriod = Infinity;
 
-    return Device
-        .getAll(connector.fingerprint, {
-            index: 'fingerprint'
-        })
-        .filter({ isRemoved: false })
-        .embed({
-            points: {
-                _through: {
-                    period: {
-                        event: true
-                    }
-                }
-            }
-        })
-        .run()
-        .then((devices) => {
-            /* istanbul ignore if */
-            if (devices.length === 0 || devices[0].points.length === 0) {
-                return Promise.reject(new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint }));
-            }
+        let handled = false;
 
-            device = devices[0];
+        device.wikets.forEach((wiket) => {
+            const period = wiket.period;
+            const point = wiket.point;
 
-            let minPeriod = Infinity;
+            const diff = period.end - period.start;
 
-            let handled = false;
-
-            device.points.forEach((point) => {
-                const diff = point._through.period.end - point._through.period.start;
-
-                if (point._through.period.start > connector.date || point._through.period.end < connector.date) {
-                    return;
-                }
-
-                if (diff < minPeriod) {
-                    connector.Point_id = point.id;
-                    connector.Event_id = point._through.period.event.id;
-                    minPeriod          = diff;
-
-                    connector.device = device;
-                    connector.point  = point;
-                    connector.event  = point._through.period.event;
-
-                    connector.details = {
-                        device: connector.device.name,
-                        event : connector.event.name,
-                        point : connector.point.name,
-                        path  : connector.path,
-                        method: connector.method
-                    };
-
-                    handled = true;
-                }
-            });
-
-            if (!handled) {
-                return Promise.reject(new APIError(module, 404, 'No assigned points'));
+            if (period.start > connector.date || period.end < connector.date) {
+                return;
             }
 
-            connector.header('event', connector.Event_id);
-            connector.header('eventName', connector.event.name);
-            connector.header('point', connector.Point_id);
-            connector.header('pointName', connector.point.name);
-            connector.header('device', device.id);
+            if (diff < minPeriod) {
+                connector.point_id = point.id;
+                connector.event_id = period.event.id;
+                minPeriod          = diff;
 
-            return Promise.resolve();
+                connector.device = device;
+                connector.point  = point;
+                connector.event  = period.event;
+
+                connector.details = {
+                    device: connector.device.name,
+                    event : connector.event.name,
+                    point : connector.point.name,
+                    path  : connector.path,
+                    method: connector.method
+                };
+
+                handled = true;
+            }
         });
-};
+
+        if (!handled) {
+            return Promise.reject(new APIError(module, 404, 'No assigned points'));
+        }
+
+        connector.header('event', connector.event_id);
+        connector.header('eventName', connector.event.name);
+        connector.header('point', connector.point_id);
+        connector.header('pointName', connector.point.name);
+        connector.header('device', device.id);
+
+        return Promise.resolve();
+    });

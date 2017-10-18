@@ -1,22 +1,19 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Group';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'groups',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Group = requelize.model('Group', {
-    name     : joi.string().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isOpen   : joi.boolean().default(true),
-    isPublic : joi.boolean().default(false),
-    isRemoved: joi.boolean().default(false)
-});
+        prices() {
+            return this.hasMany('Price');
+        },
 
-Group.on('creating', (inst) => { inst.createdAt = new Date(); });
-Group.on('saving', (inst) => { inst.editedAt = new Date(); });
+        memberships() {
+            return this.hasMany('Membership');
+        }
+    });
 
-Group.index('name');
-
-Group.hasMany('Event', 'events');
-Group.hasMany('Price', 'prices');
-Group.belongsToMany('User', 'users', 'GroupUser');
-
-module.exports = Group;
+    return { Model, name };
+};

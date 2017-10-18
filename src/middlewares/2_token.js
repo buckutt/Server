@@ -61,6 +61,7 @@ module.exports = function token(connector) {
 
     let connectType;
     let point;
+    let event;
 
     const pinLoggingAllowed = config.rights.pinLoggingAllowed;
     const now               = connector.date;
@@ -70,22 +71,31 @@ module.exports = function token(connector) {
         .then((decoded) => {
             const userId = decoded.id;
             point        = decoded.point;
+            event        = decoded.event;
             connectType  = decoded.connectType;
 
-            return connector.models.User.get(userId).embed({
-                rights: {
-                    period: true,
-                    point : true
-                }
-            });
+            return connector.models.User
+                .where({ id: userId })
+                .fetch({
+                    withRelated: [
+                        'rights',
+                        'rights.period',
+                        'rights.point'
+                    ]
+                });
         })
+        .then(res => ((res) ? res.toJSON() : null))
         .then((user) => {
+            if (!user) {
+                return Promise.reject(new APIError(module, 500, 'User has been deleted'));
+            }
+
             connector.user = user;
 
-            connector.Point_id = point.id;
-            connector.Event_id = point._through.period.event.id;
+            connector.point_id = point.id;
+            connector.event_id = event.id;
             connector.point    = point;
-            connector.event    = point._through.period.event;
+            connector.event    = event;
 
             connector.connectType = connectType;
 
@@ -97,13 +107,9 @@ module.exports = function token(connector) {
                         return false;
                     }
 
-                    if (right.isRemoved || right.period.isRemoved) {
-                        return false;
-                    }
-
                     if (right.period.start <= now && right.period.end > now) {
                         if (right.name !== 'admin' && right.point) {
-                            return (!right.point.isRemoved && right.point.id === connector.Point_id);
+                            return (!right.point.isRemoved && right.point.id === connector.point_id);
                         }
 
                         return true;

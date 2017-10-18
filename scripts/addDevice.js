@@ -3,11 +3,11 @@ const path      = require('path');
 const execSync  = require('child_process').execSync;
 const Promise   = require('bluebird');
 const inquirer  = require('inquirer');
-const models    = require('../src/models');
-const requelize = require('../src/lib/requelize');
+const bookshelf = require('../src/lib/bookshelf');
 const logger    = require('../src/lib/log');
 
-const log = logger(module);
+const log    = logger(module);
+const models = bookshelf.models;
 
 function createDir(opts) {
     const cwd = path.join(__dirname, '..', 'ssl', 'certificates', opts.deviceName);
@@ -24,20 +24,18 @@ function createDir(opts) {
 function setDeviceConfig(opts, fingerprint) {
     log.info('Inserting device in database');
 
-    const device      = new models.Device({ name: opts.deviceName, fingerprint });
-    const devicePoint = new models.DevicePoint({ Period_id: opts.periodId });
+    const device = new models.Device({ name: opts.deviceName, fingerprint });
+    const wiket  = new models.Wiket({
+        period_id: opts.periodId,
+        point_id : opts.pointId
+    });
 
-    return models.Point.get(opts.pointId)
-        .then((point) => {
-            device.points = (device.points || []).concat({
-                document: point,
-                through : devicePoint,
-                saveAll : {
-                    period: true
-                }
-            });
-
-            return device.saveAll({ points: true });
+    return device
+        .save()
+        .then((device_) => {
+            const createdDevice = device_.toJSON();
+            wiket.set('device_id', createdDevice.id);
+            return wiket.save();
         });
 }
 
@@ -91,26 +89,26 @@ function genClient(opts) {
 }
 
 function getAdminPeriodPoint(opts) {
-    return models.r
-        .table('Period')
-        .getAll('Défaut', { index: 'name' })
-        .pluck('id')
-        .run()
+    return models.Period
+        .where({ name: 'Défaut' })
+        .fetch({ columns: ['id'] })
         .then((res) => {
-            if (res.length === 0) {
+            if (!res) {
                 return Promise.reject(new Error('Database not seed'));
             }
 
-            opts.periodId = res[0].id;
+            opts.periodId = res.id;
 
-            return models.r
-                .table('Point')
-                .getAll('Internet', { index: 'name' })
-                .pluck('id')
-                .run();
+            return models.Point
+                .where({ name: 'Internet' })
+                .fetch({ columns: ['id'] });
         })
         .then((res) => {
-            opts.pointId = res[0].id;
+            if (!res) {
+                return Promise.reject(new Error('Database not seed'));
+            }
+
+            opts.pointId = res.id;
         });
 }
 
@@ -135,16 +133,12 @@ if (require.main === module) {
     let periods;
     let points;
 
-    requelize.sync()
-        .then(() => requelize.r
-            .table('Period')
-            .pluck('id', 'name')
-            .run()
-        )
+    bookshelf.sync()
+        .then(() => models.Period.fetchAll({ columns: ['id', 'name'] }))
         .then((res) => {
             periods = res;
 
-            return requelize.r.table('Point').pluck('id', 'name').run();
+            return models.Point.fetchAll({ columns: ['id', 'name'] });
         })
         .then((res) => {
             points = res;
@@ -159,13 +153,13 @@ if (require.main === module) {
                     type   : 'list',
                     name   : 'point',
                     message: 'Default point :',
-                    choices: points.map(point => `${point.name} - ${point.id}`)
+                    choices: points.map(point => `${point.get('name')} - ${point.get('id')}`)
                 },
                 {
                     type   : 'list',
                     name   : 'period',
                     message: 'Default period :',
-                    choices: periods.map(period => `${period.name} - ${period.id}`)
+                    choices: periods.map(period => `${period.get('name')} - ${period.get('id')}`)
                 },
                 {
                     type   : 'password',

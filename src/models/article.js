@@ -1,29 +1,27 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Article';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'articles',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Article = requelize.model('Article', {
-    name     : joi.string().required(),
-    stock    : joi.number().default(0),
-    // Alcohol amount (Alcool unit or just article maximum sells)
-    alcohol  : joi.number().default(0),
-    // Optional VAT tax
-    vat      : joi.number().default(0),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        prices() {
+            return this.hasMany('Price');
+        },
 
-Article.on('creating', (inst) => { inst.createdAt = new Date(); });
-Article.on('saving', (inst) => { inst.editedAt = new Date(); });
+        categories() {
+            return this.belongsToMany('Category', 'articles_categories', 'article_id', 'category_id');
+        },
 
-Article.index('name');
+        sets() {
+            return this.belongsToMany('Set', 'articles_sets');
+        },
 
-Article.belongsToMany('Category', 'categories');
-// n:n instead of 1:n to allow one set containing multiple times the same article
-Article.belongsToMany('Set', 'sets');
-// n:n instead of 1:n to allow one promotion containing multiple times the same article
-Article.belongsToMany('Promotion', 'promotions');
-Article.belongsToMany('Purchase', 'purchases');
-Article.belongsToMany('Price', 'prices');
+        purchases() {
+            return this.belongsToMany('Purchase', 'articles_purchases');
+        }
+    });
 
-module.exports = Article;
+    return { Model, name };
+};
