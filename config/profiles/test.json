@@ -13,12 +13,28 @@
         "secret": "NgWlfDWCbX4mPuxau1FmG3TPLHm7iglEA3mp1f8nrlT7zKDn8ZZAwWQOqUArvQBFfMEbFSAMnUHzgQW1FkczTiZYjPZWqdseNtk2"
     },
     "db": {
-        "host": "localhost",
-        "name": "buckless_test"
+        "client": "pg",
+        "connection": {
+            "database": "buckless_test",
+            "user"    : "buckless",
+            "password": "buckless"
+        },
+        "pool": {
+            "min": 2,
+            "max": 10
+        },
+        "migrations": {
+            "tableName": "knex_migrations"
+        },
+        "seeds": {
+            "directory": "seeds"
+        }
     },
     "mailer": {
-        "streamTransport": true,
-        "newLine": "unix"
+        "smtp": {
+            "streamTransport": true,
+            "newLine": "unix"
+        }
     },
     "askpin": {
         "from": "noreply@buckless.com",

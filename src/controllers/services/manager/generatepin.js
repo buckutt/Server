@@ -28,15 +28,19 @@ router.put('/services/manager/generatepin', (req, res, next) => {
 
     let user;
 
-    models.User.getAll(recoverKey, { index: 'recoverKey' })
-        .then((users) => {
-            if (!users.length) {
+    models.User
+        .where({ recoverKey })
+        .fetch()
+        .then((user_) => {
+            user = user_;
+
+            if (!user) {
                 return Promise.reject(new APIError(module, 401, 'Invalid key'));
             }
 
-            user            = users[0];
-            user.pin        = req.body.pin;
-            user.recoverKey = '';
+            user.set('pin', req.body.pin);
+            user.set('recoverKey', '');
+            user.set('updated_at', new Date());
 
             return user.save();
         })

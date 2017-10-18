@@ -1,5 +1,6 @@
-const express = require('express');
-const logger  = require('../../../lib/log');
+const express     = require('express');
+const { flatten } = require('lodash');
+const logger      = require('../../../lib/log');
 
 const log = logger(module);
 
@@ -14,82 +15,84 @@ router.get('/services/manager/history', (req, res) => {
     const models = req.app.locals.models;
 
     // TODO: optimize filters
-    const purchaseQuery = models.Purchase
-        .filter({
-            Buyer_id : req.user.id,
-            isRemoved: false
-        })
-        .embed({
-            seller   : true,
-            price    : true,
-            articles : true,
-            promotion: true,
-            point    : true
+    const purchaseQuery = () => models.Purchase
+        .where({ buyer_id: req.user.id })
+        .fetchAll({
+            withRelated: [
+                'seller',
+                'price',
+                'price.article',
+                'price.promotion',
+                'articles',
+                'point'
+            ],
+            withDeleted: true
         });
 
-    const reloadQuery = models.Reload
-        .filter({
-            Buyer_id : req.user.id,
-            isRemoved: false
-        })
-        .embed({
-            seller: true,
-            point : true
+    const reloadQuery = () => models.Reload
+        .where({ buyer_id: req.user.id })
+        .fetchAll({
+            withRelated: [
+                'seller',
+                'point'
+            ]
         });
 
-    const refundQuery = models.Refund
-        .filter({
-            Buyer_id : req.user.id,
-            isRemoved: false
-        })
-        .embed({
-            seller: true
+    const refundQuery = () => models.Refund
+        .where({ buyer_id: req.user.id })
+        .fetchAll({
+            withRelated: [
+                'seller'
+            ]
         });
 
-    const transferFromQuery = models.Transfer
-        .filter({
-            Reciever_id: req.user.id,
-            isRemoved  : false
-        })
-        .embed({
-            sender: true
+    const transferFromQuery = () => models.Transfer
+        .where({ reciever_id: req.user.id })
+        .fetchAll({
+            withRelated: [
+                'sender'
+            ]
         });
 
-    const transferToQuery = models.Transfer
-        .filter({
-            Sender_id: req.user.id,
-            isRemoved: false
-        })
-        .embed({
-            reciever: true
+    const transferToQuery = () => models.Transfer
+        .where({ sender_id: req.user.id })
+        .fetchAll({
+            withRelated: [
+                'reciever'
+            ]
         });
 
     let history = [];
 
-    purchaseQuery.run()
+    purchaseQuery()
         .then((result) => {
-            history = result.map(purchase =>
-                ({
-                    type  : purchase.promotion ? 'promotion' : 'purchase',
-                    date  : purchase.createdAt,
+            history = result
+                .toJSON()
+                .filter(p => !p.deleted_at)
+                .map(purchase => ({
+                    type  : purchase.price.promotion ? 'promotion' : 'purchase',
+                    date  : purchase.created_at,
                     amount: -1 * purchase.price.amount,
                     point : purchase.point.name,
                     seller: {
                         lastname : purchase.seller.lastname,
                         firstname: purchase.seller.firstname
                     },
-                    articles : purchase.articles.map(article => article.name),
-                    promotion: purchase.promotion ? purchase.promotion.name : ''
-                })
-            );
+                    articles: flatten(
+                        purchase.articles.map(article =>
+                            Array(article._pivot_count).fill(article.name)
+                        )
+                    ),
+                    promotion: purchase.price.promotion ? purchase.price.promotion.name : ''
+                }));
 
-            return reloadQuery.run();
+            return reloadQuery();
         })
         .then((result) => {
-            const reloads = result.map(reload =>
+            const reloads = result.toJSON().map(reload =>
                 ({
                     type  : 'reload',
-                    date  : reload.createdAt,
+                    date  : reload.created_at,
                     amount: reload.credit,
                     point : reload.point.name,
                     mop   : reload.type,
@@ -102,13 +105,13 @@ router.get('/services/manager/history', (req, res) => {
 
             history = history.concat(reloads);
 
-            return refundQuery.run();
+            return refundQuery();
         })
         .then((result) => {
-            const refunds = result.map(refund =>
+            const refunds = result.toJSON().map(refund =>
                 ({
                     type  : 'refund',
-                    date  : refund.createdAt,
+                    date  : refund.created_at,
                     amount: -1 * refund.amount,
                     point : 'Internet',
                     mop   : refund.type,
@@ -121,13 +124,13 @@ router.get('/services/manager/history', (req, res) => {
 
             history = history.concat(refunds);
 
-            return transferFromQuery.run();
+            return transferFromQuery();
         })
         .then((result) => {
-            const transfersFrom = result.map(transfer =>
+            const transfersFrom = result.toJSON().map(transfer =>
                 ({
                     type  : 'transfer',
-                    date  : transfer.createdAt,
+                    date  : transfer.created_at,
                     amount: transfer.amount,
                     point : 'Internet',
                     mop   : '',
@@ -140,13 +143,13 @@ router.get('/services/manager/history', (req, res) => {
 
             history = history.concat(transfersFrom);
 
-            return transferToQuery.run();
+            return transferToQuery();
         })
         .then((result) => {
-            const transfersTo = result.map(transfer =>
+            const transfersTo = result.toJSON().map(transfer =>
                 ({
                     type  : 'transfer',
-                    date  : transfer.createdAt,
+                    date  : transfer.created_at,
                     amount: -1 * transfer.amount,
                     point : 'Internet',
                     mop   : '',

@@ -4,13 +4,9 @@ const assert  = require('assert');
 const unirest = require('unirest');
 const app     = require('../src/app');
 
+const bookshelf     = require('../src/lib/bookshelf');
 const sslConfig     = require('../scripts/sslConfig');
-const requelize     = require('../src/lib/requelize');
-const seed          = require('../scripts/seed');
 const { addDevice } = require('../scripts/addDevice');
-
-// Define models
-require('../src/models');
 
 describe('Should start the test application', () => {
     before(function (done) {
@@ -18,8 +14,8 @@ describe('Should start the test application', () => {
 
         sslConfig('test', 'test');
 
-        requelize.sync()
-            .then(() => seed())
+        bookshelf.sync()
+            .then(() => bookshelf.knex.seed.run())
             .then(() => addDevice({ admin: true, deviceName: 'test', password: 'test' }))
             .then(() => app.start())
             .then(() => done())

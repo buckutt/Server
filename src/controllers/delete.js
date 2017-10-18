@@ -16,15 +16,22 @@ router.delete('/:model/:id', (req, res, next) => {
 
     // First, get the model
     req.Model
-        .get(req.params.id)
-        .embed(req.query.embed)
-        .run()
-        .then(inst => inst.delete())
-        .then(() =>
+        .where({ id: req.params.id })
+        .fetch()
+        .then(inst => inst.destroy())
+        .then((inst) => {
+            req.app.locals.modelChanges.emit(
+                'data',
+                'delete',
+                modelParser.modelsNames[req.params.model],
+                { from: inst, to: null }
+            );
+
             res
                 .status(200)
-                .end()
-        )
+                .json({})
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 

@@ -1,6 +1,7 @@
-const express = require('express');
-const requelize = require('../../../lib/requelize');
-const logger       = require('../../../lib/log');
+const express       = require('express');
+const leven         = require('leven');
+const { bookshelf } = require('../../../lib/bookshelf');
+const logger        = require('../../../lib/log');
 
 const log = logger(module);
 
@@ -13,26 +14,30 @@ router.get('/services/manager/searchuser', (req, res) => {
     log.info(`Search user ${req.query.name}`, req.details);
 
     const models = req.app.locals.models;
-    const r      = requelize.r;
-    const name   = req.query.name.split(' ');
+    const name   = req.query.name;
 
     models.User
-        .filter(doc =>
-             name
-                .map(partName => r.or(
-                    doc('firstname').match(`(?i).*${partName}.*`),
-                    doc('lastname').match(`(?i).*${partName}.*`)
-                ))
-                .reduce((a, b) => a || b)
+        .query(user =>
+            user.where(
+                bookshelf.knex.raw('concat(lower(firstname), \' \', lower(lastname))'),
+                'like',
+                `%${name.toLowerCase()}%`
+            )
         )
-        .filter(r.row('isRemoved').eq(false))
-        .run()
+        .fetchAll()
         .then((users) => {
-            const cleanedUsers = users.map(user => ({
-                id       : user.id,
-                firstname: user.firstname,
-                lastname : user.lastname
-            }));
+            const cleanedUsers = users.toJSON()
+                .map(user => ({
+                    id       : user.id,
+                    firstname: user.firstname,
+                    lastname : user.lastname
+                }))
+                .sort((a, b) => {
+                    const aName = `${a.firstname} ${a.lastname}`;
+                    const bName = `${b.firstname} ${b.lastname}`;
+
+                    return leven(name, bName) - leven(name, aName);
+                });
 
             res
                 .status(200)

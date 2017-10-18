@@ -16,27 +16,39 @@ router.put('/:model/:id', (req, res, next) => {
 
     // First, get the model
     req.Model
-        .get(req.params.id)
-        .run()
+        .where({ id: req.params.id })
+        .fetch()
         .then((inst) => {
+            const previous = inst.toJSON();
+
             // Update based on body values
-            Object.keys(req.body).forEach((k) => {
-                inst[k] = req.body[k];
+            Object.keys(req.body).forEach((key) => {
+                inst.set(key, req.body[key]);
             });
+
+            // Has to be set manually because of the previous select
+            inst.set('updated_at', new Date());
+
+            req.app.locals.modelChanges.emit(
+                'data',
+                'update',
+                modelParser.modelsNames[req.params.model],
+                { from: previous, to: inst.toJSON() }
+            );
 
             return inst.save();
         })
         .then((result) => {
-            if (req.query.embed) {
-                return req.Model.get(result.id).embed(req.query.embed).run();
-            }
+            const withRelated = (req.query.embed) ? req.query.embed : [];
 
-            return result;
+            return req.Model
+                .where({ id: result.id })
+                .fetch({ withRelated });
         })
         .then((result) => {
             res
                 .status(200)
-                .json(result)
+                .json(result.toJSON())
                 .end();
         })
         .catch(err => dbCatch(module, err, next));

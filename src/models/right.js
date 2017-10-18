@@ -1,20 +1,23 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Right';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'rights',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Right = requelize.model('Right', {
-    name     : joi.string().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        point() {
+            return this.belongsTo('Point');
+        },
 
-Right.on('creating', (inst) => { inst.createdAt = new Date(); });
-Right.on('saving', (inst) => { inst.editedAt = new Date(); });
+        period() {
+            return this.belongsTo('Period');
+        },
 
-Right.index('name');
+        user() {
+            return this.belongsTo('User');
+        }
+    });
 
-Right.belongsTo('Period', 'period');
-Right.belongsTo('Point', 'point');
-Right.belongsToMany('User', 'users');
-
-module.exports = Right;
+    return { Model, name };
+};

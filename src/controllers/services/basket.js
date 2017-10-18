@@ -1,24 +1,24 @@
-const express         = require('express');
-const Promise         = require('bluebird');
-const { memoize }     = require('lodash');
-const APIError        = require('../../errors/APIError');
-const logger          = require('../../lib/log');
-const vat             = require('../../lib/vat');
-const { r }           = require('../../lib/requelize');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
+const express              = require('express');
+const Promise              = require('bluebird');
+const { memoize, countBy } = require('lodash');
+const APIError             = require('../../errors/APIError');
+const logger               = require('../../lib/log');
+const vat                  = require('../../lib/vat');
+const { bookshelf }        = require('../../lib/bookshelf');
+const canSellOrReload      = require('../../lib/canSellOrReload');
+const dbCatch              = require('../../lib/dbCatch');
 
 const log = logger(module);
 
-const getArticlePrice    = memoize(purchase => r.table('Price').get(purchase.Price_id)('amount').run());
-const getPromotionPrices = memoize(item => Promise.all(
-    item.articles.map(article => r.table('Price').get(article.price)('amount').run())
-));
+const getArticleCost = memoize((Price, article) =>
+    Price
+        .where({ id: article.price_id })
+        .fetch()
+        .then(price => price.get('amount'))
+);
 
-/* istanbul ignore next */
 setInterval(() => {
-    getArticlePrice.cache.clear();
-    getPromotionPrices.cache.clear();
+    getArticleCost.cache.clear();
 }, 60 * 1000);
 
 /**
@@ -38,26 +38,28 @@ router.post('/services/basket', (req, res, next) => {
         return res.status(200).json({}).end();
     }
 
-    req.Buyer_id = req.body[0].Buyer_id;
+    req.buyer_id = req.body[0].buyer_id;
 
-    if (!req.Buyer_id) {
+    if (!req.buyer_id) {
         return next(new APIError(module, 400, 'Invalid buyer'));
     }
 
     req.app.locals.models.User
-        .get(req.Buyer_id).run()
+        .where({ id: req.buyer_id })
+        .fetch()
         .then((user) => {
-            req.buyer = user;
+            req.buyer = user.toJSON();
             next();
         });
 });
 
 router.post('/services/basket', (req, res, next) => {
+    const { Price } = req.app.locals.models;
     let purchases = req.body.filter(item => typeof item.cost === 'number');
 
-    const getArticleCost = purchases.map(purchase => getArticlePrice(purchase));
+    const getArticleCosts = purchases.map(purchase => getArticleCost(Price, purchase));
 
-    const initialPromise = Promise.all(getArticleCost)
+    const initialPromise = Promise.all(getArticleCosts)
         .then((articleCosts) => {
             purchases = purchases.map((purchase, i) => {
                 purchase.cost = articleCosts[i];
@@ -66,7 +68,11 @@ router.post('/services/basket', (req, res, next) => {
             });
         });
 
-    const getPromotionsCosts = purchases.map(item => getPromotionPrices(item));
+    const getPromotionsCosts = purchases.map(item =>
+        Promise.all(
+            item.articles.map(article => getArticleCost(Price, article))
+        )
+    );
 
     initialPromise
         .then(() => Promise.all(getPromotionsCosts))
@@ -93,8 +99,6 @@ router.post('/services/basket', (req, res, next) => {
     const reloads       = [];
     // Stock reduciton queries
     const stocks        = [];
-    // Purchases-Articles queries: prevent from uniqify
-    const purchasesRels = [];
 
     const totalCost = req.body
         .map((item) => {
@@ -119,12 +123,12 @@ router.post('/services/basket', (req, res, next) => {
         return next(new APIError(module, 400, 'Not enough credit'));
     }
 
-    if (req.event.config.maxPerAccount && req.buyer.credit - totalCost > req.event.config.maxPerAccount) {
+    if (req.event.maxPerAccount && req.buyer.credit - totalCost > req.event.maxPerAccount) {
         const max = (req.event.config.maxPerAccount / 100).toFixed(2);
         return next(new APIError(module, 400, `Maximum exceeded : ${max}€`, { user: req.user.id }));
     }
 
-    if (req.event.config.minReload && reloadOnly < req.event.config.minReload && reloadOnly > 0) {
+    if (req.event.minReload && reloadOnly < req.event.minReload && reloadOnly > 0) {
         const min = (req.event.config.minReload / 100).toFixed(2);
         return next(new APIError(module, 400, `Can not reload less than : ${min}€`));
     }
@@ -143,7 +147,7 @@ router.post('/services/basket', (req, res, next) => {
             .end();
     }
 
-    const userRights = canSellOrReload(req.user, req.Point_id);
+    const userRights = canSellOrReload(req.user, req.point_id);
 
     const unallowedPurchase = (req.body.find(item => typeof item.cost === 'number') && !userRights.canSell);
     const unallowedReload   = (req.body.find(item => typeof item.credit === 'number') && !userRights.canReload);
@@ -160,69 +164,74 @@ router.post('/services/basket', (req, res, next) => {
         if (typeof item.cost === 'number') {
             // Purchases
             const articlesIds = item.articles.map(article => article.id);
+            const countIds    = countBy(articlesIds);
+
             const purchase = new models.Purchase({
-                Buyer_id    : item.Buyer_id,
-                Price_id    : item.Price_id,
-                Point_id    : req.Point_id,
-                Promotion_id: item.Promotion_id || null,
-                Seller_id   : req.user.id,
+                buyer_id    : item.buyer_id,
+                price_id    : item.price_id,
+                point_id    : req.point_id,
+                promotion_id: item.promotion_id || null,
+                seller_id   : req.user.id,
                 alcohol     : item.alcohol,
                 vat         : vat(item)
             });
 
-            purchasesRels.push(articlesIds);
-
             // Stock reduction
-            articlesIds.forEach((article) => {
+            articlesIds.forEach((articleId) => {
                 const stockReduction = models.Article
-                    .get(article)
-                    .update({
-                        stock: r.row('stock').sub(1)
-                    })
-                    .run();
+                    .query()
+                    .where({ id: articleId })
+                    .decrement('stock');
 
                 stocks.push(stockReduction);
             });
 
-            purchases.push(purchase.save());
+            const savePurchase = purchase
+                .save()
+                .then(() => Promise.all(
+                    Object.keys(countIds).map((articleId) => {
+                        const count = countIds[articleId];
+
+                        return bookshelf
+                            .knex('articles_purchases')
+                            .insert({
+                                article_id : articleId,
+                                purchase_id: purchase.id,
+                                count,
+                                created_at : new Date(),
+                                updated_at : new Date(),
+                                deleted_at : null
+                            });
+                    })
+                ));
+
+            purchases.push(savePurchase);
         } else if (typeof item.credit === 'number') {
             // Reloads
             const reload = new models.Reload({
                 credit   : item.credit,
                 type     : item.type,
                 trace    : item.trace || '',
-                Point_id : req.Point_id,
-                Buyer_id : item.Buyer_id,
-                Seller_id: req.user.id
+                point_id : req.point_id,
+                buyer_id : item.buyer_id,
+                seller_id: req.user.id
             });
 
             reloads.push(reload.save());
         }
     });
 
-    const updateCredit = r.table('User')
-        .get(req.buyer.id)
+    const updateCredit = bookshelf.knex('users')
+        .where({ id: req.buyer.id })
         .update({
-            credit: newCredit
-        })
-        .run();
+            credit    : newCredit,
+            updated_at: new Date()
+        });
 
     const everythingSaving = [updateCredit].concat(reloads).concat(stocks);
 
     Promise
         .all(purchases)
-        .then((purchases_) => {
-            const allRels = purchases_.map(({ id }, i) =>
-                models.r.table('Article_Purchase').insert(purchasesRels[i].map(articleId =>
-                    ({
-                        Article : articleId,
-                        Purchase: id
-                    })
-                ))
-            );
-
-            return Promise.all(allRels);
-        })
         .then(() => Promise.all(everythingSaving))
         .then(() =>
             res

@@ -1,25 +1,31 @@
-const requelize = require('../lib/requelize');
-const joi       = require('joi');
+module.exports = (bookshelf) => {
+    const name = 'Period';
+    const Model = bookshelf.Model.extend({
+        tableName    : 'periods',
+        hasTimestamps: true,
+        uuid         : true,
+        softDelete   : true,
 
-const Period = requelize.model('Period', {
-    name     : joi.string().required(),
-    start    : joi.date().required(),
-    end      : joi.date().required(),
-    createdAt: joi.date().default(() => new Date(), 'default date is now'),
-    editedAt : joi.date(),
-    isRemoved: joi.boolean().default(false)
-});
+        event() {
+            return this.belongsTo('Event');
+        },
 
-Period.on('creating', (inst) => { inst.createdAt = new Date(); });
-Period.on('saving', (inst) => { inst.editedAt = new Date(); });
+        wikets() {
+            return this.hasMany('Wiket');
+        },
 
-Period.index('name');
+        memberships() {
+            return this.hasMany('Membership');
+        },
 
-Period.belongsTo('Event', 'event');
-Period.hasMany('Event', 'events');
-Period.hasMany('DevicePoint', 'devicePoints');
-Period.hasMany('GroupUser', 'groupUsers');
-Period.hasMany('Price', 'prices');
-Period.hasMany('Right', 'rights');
+        prices() {
+            return this.hasMany('Price');
+        },
 
-module.exports = Period;
+        rights() {
+            return this.hasMany('Right');
+        }
+    });
+
+    return { Model, name };
+};

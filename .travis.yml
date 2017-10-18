@@ -3,12 +3,14 @@ sudo: false
 
 services:
   - docker
+  - postgresql
 
 node_js:
   - 8
 
-addons:
-  rethinkdb: 2.3
+before_script:
+  - psql -c "create user buckless with password 'buckless';" -U postgres
+  - psql -c "create database buckless_test;" -U postgres
 
 script:
   - yarn test:coverage
