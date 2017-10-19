@@ -71,7 +71,7 @@ router.get('/services/treasury/purchases', (req, res, next) => {
             // Remove deleted purchases, transform price relation to an outer join
             const purchases = results
                 .toJSON()
-                .filter(p => !p.deleted_at && p.price.id && price.period && price.period.id);
+                .filter(p => !p.deleted_at && p.price.id && p.price.period && p.price.period.id);
 
             const groupedPurchases = groupBy(purchases, 'price_id');
 
