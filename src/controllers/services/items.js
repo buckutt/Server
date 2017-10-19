@@ -111,7 +111,7 @@ router.get('/services/items', (req, res, next) => {
             ]
         })
         .then(prices => ((prices) ? prices.toJSON() : null))
-        .filter(price => price.period && price.point && price.fundation)
+        .filter(price => price.period.id && price.point.id && price.fundation.id)
         .then((prices) => {
             prices.forEach((price) => {
                 if (price.promotion && price.promotion.id) {
