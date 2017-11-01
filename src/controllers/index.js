@@ -16,6 +16,8 @@ for (const key of Object.keys(middlewares)) {
 
 router.use(unmarshal);
 
+router.get('/', (_, res) => res.status(200).json({}).end());
+
 /**
  * Recursively use every subrouters, manager's services first, then app services
  */
