@@ -35,9 +35,13 @@ module.exports.marshal = function marshal(mw) {
         };
 
         return mw(req.connector)
-            .then(() => next())
+            .then(() => {
+                next();
+                return null;
+            })
             .catch((err) => {
                 next(err);
+                return null;
             });
     };
 };
