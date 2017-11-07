@@ -13,13 +13,7 @@ router.get('/services/treasury/purchases', (req, res, next) => {
     let price        = 'price';
     let pricePeriod  = 'price.period';
 
-    if (req.query.period) {
-        if (isUUID(req.query.period)) {
-            pricePeriod = {
-                'price.period': q => q.where({ id: req.query.period })
-            };
-        }
-    } else if (req.query.dateIn) {
+    if (req.query.dateIn && req.query.dateOut) {
         const dateIn  = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
@@ -30,19 +24,14 @@ router.get('/services/treasury/purchases', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
+    } else {
+        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     if (req.query.event) {
-        if (typeof pricePeriod === 'string') {
-            pricePeriod = {
-                'price.period': q => q.where({ event_id: req.query.event })
-            };
-        } else {
-            const prevCall = pricePeriod['price.period'];
-            pricePeriod = {
-                'price.period': q => prevCall(q).andWhere({ event_id: req.query.event })
-            };
-        }
+        pricePeriod = {
+            'price.period': q => q.where({ event_id: req.query.event })
+        };
     }
 
     if (req.query.point) {
@@ -102,7 +91,7 @@ router.get('/services/treasury/reloads', (req, res, next) => {
         }
     }
 
-    if (req.query.dateIn) {
+    if (req.query.dateIn && req.query.dateOut) {
         const dateIn = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
@@ -113,6 +102,8 @@ router.get('/services/treasury/reloads', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
+    } else {
+        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     initialQuery = initialQuery
@@ -138,7 +129,7 @@ router.get('/services/treasury/refunds', (req, res, next) => {
 
     let initialQuery = models.Refund;
 
-    if (req.query.dateIn) {
+    if (req.query.dateIn && req.query.dateOut) {
         const dateIn = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
@@ -149,6 +140,8 @@ router.get('/services/treasury/refunds', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
+    } else {
+        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     initialQuery = initialQuery
