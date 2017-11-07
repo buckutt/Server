@@ -174,7 +174,8 @@ router.get('/services/items', (req, res, next) => {
             promotions = promotions.map((promotion) => {
                 promotion.sets = promotion.sets.map((set) => {
                     set.articles = set.articles
-                        .map(article => articles.find(a => a.id === article.id));
+                        .map(article => articles.find(a => a.id === article.id))
+                        .filter(article => article);
                     return set;
                 });
 
