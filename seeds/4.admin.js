@@ -21,7 +21,7 @@ exports.seed = function (knex) {
                 })
             ])
         )
-        .then(() => {
+        .then(() =>
             knex('meansoflogin').insert([
                 item({
                     id     : uuid(),
@@ -30,9 +30,9 @@ exports.seed = function (knex) {
                     blocked: false,
                     user_id
                 })
-            ]);
-        })
-        .then(() => {
+            ])
+        )
+        .then(() =>
             knex('rights').insert([
                 item({
                     id  : uuid(),
@@ -40,6 +40,6 @@ exports.seed = function (knex) {
                     user_id,
                     period_id
                 })
-            ]);
-        });
+            ])
+        );
 };

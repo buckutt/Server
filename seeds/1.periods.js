@@ -13,10 +13,11 @@ exports.seed = function (knex) {
                 })
             ])
         )
-        .then(() => knex('events')
-            .where('id', event_id)
-            .update({
-                defaultPeriod_id: period_id
-            })
+        .then(() =>
+            knex('events')
+                .where('id', event_id)
+                .update({
+                    defaultPeriod_id: period_id
+                })
         );
 };
