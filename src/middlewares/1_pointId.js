@@ -29,36 +29,38 @@ module.exports = connector => connector.models.Device
 
         let handled = false;
 
-        device.wikets.forEach((wiket) => {
-            const period = wiket.period;
-            const point = wiket.point;
+        device.wikets
+            .filter(wiket => wiket.period.event && wiket.period.event.id)
+            .forEach((wiket) => {
+                const period = wiket.period;
+                const point = wiket.point;
 
-            const diff = period.end - period.start;
+                const diff = period.end - period.start;
 
-            if (period.start > connector.date || period.end < connector.date) {
-                return;
-            }
+                if (period.start > connector.date || period.end < connector.date) {
+                    return;
+                }
 
-            if (diff < minPeriod) {
-                connector.point_id = point.id;
-                connector.event_id = period.event.id;
-                minPeriod          = diff;
+                if (diff < minPeriod) {
+                    connector.point_id = point.id;
+                    connector.event_id = period.event.id;
+                    minPeriod          = diff;
 
-                connector.device = device;
-                connector.point  = point;
-                connector.event  = period.event;
+                    connector.device = device;
+                    connector.point  = point;
+                    connector.event  = period.event;
 
-                connector.details = {
-                    device: connector.device.name,
-                    event : connector.event.name,
-                    point : connector.point.name,
-                    path  : connector.path,
-                    method: connector.method
-                };
+                    connector.details = {
+                        device: connector.device.name,
+                        event : connector.event.name,
+                        point : connector.point.name,
+                        path  : connector.path,
+                        method: connector.method
+                    };
 
-                handled = true;
-            }
-        });
+                    handled = true;
+                }
+            });
 
         if (!handled) {
             return Promise.reject(new APIError(module, 404, 'No assigned points'));
