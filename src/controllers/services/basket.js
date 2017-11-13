@@ -1,6 +1,6 @@
 const express              = require('express');
 const Promise              = require('bluebird');
-const { memoize, countBy } = require('lodash');
+const { countBy }          = require('lodash');
 const APIError             = require('../../errors/APIError');
 const logger               = require('../../lib/log');
 const vat                  = require('../../lib/vat');
@@ -10,16 +10,10 @@ const dbCatch              = require('../../lib/dbCatch');
 
 const log = logger(module);
 
-const getPriceAmount = memoize((Price, priceId) =>
-    Price
-        .where({ id: priceId })
-        .fetch()
-        .then(price => price.get('amount'))
-);
-
-setInterval(() => {
-    getPriceAmount.cache.clear();
-}, 60 * 1000);
+const getPriceAmount = (Price, priceId) => Price
+    .where({ id: priceId })
+    .fetch()
+    .then(price => price.get('amount'));
 
 /**
  * Basket controller. Handles purchases and reloads
@@ -70,7 +64,7 @@ router.post('/services/basket', (req, res, next) => {
 
     const getPromotionsCosts = purchases.map(item =>
         Promise.all(
-            item.articles.map(article => getPriceAmount(Price, article.price_id))
+            item.articles.map(article => getPriceAmount(Price, article.price))
         )
     );
 
