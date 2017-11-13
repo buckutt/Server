@@ -53,7 +53,7 @@ router.get('/services/manager/askpin', (req, res, next) => {
 
             return user.save();
         })
-        .then(() => mailer.sendMail(generateMessage(mail, user.recoverKey)))
+        .then(() => mailer.sendMail(generateMessage(mail, user.get('recoverKey'))))
         .then(() => res.status(200).json({ success: true }).end())
         .catch(err => dbCatch(module, err, next));
 });

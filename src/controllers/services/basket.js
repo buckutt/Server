@@ -10,15 +10,15 @@ const dbCatch              = require('../../lib/dbCatch');
 
 const log = logger(module);
 
-const getArticleCost = memoize((Price, article) =>
+const getPriceAmount = memoize((Price, priceId) =>
     Price
-        .where({ id: article.price_id })
+        .where({ id: priceId })
         .fetch()
         .then(price => price.get('amount'))
 );
 
 setInterval(() => {
-    getArticleCost.cache.clear();
+    getPriceAmount.cache.clear();
 }, 60 * 1000);
 
 /**
@@ -57,7 +57,7 @@ router.post('/services/basket', (req, res, next) => {
     const { Price } = req.app.locals.models;
     let purchases = req.body.filter(item => typeof item.cost === 'number');
 
-    const getArticleCosts = purchases.map(purchase => getArticleCost(Price, purchase));
+    const getArticleCosts = purchases.map(purchase => getPriceAmount(Price, purchase.price_id));
 
     const initialPromise = Promise.all(getArticleCosts)
         .then((articleCosts) => {
@@ -70,7 +70,7 @@ router.post('/services/basket', (req, res, next) => {
 
     const getPromotionsCosts = purchases.map(item =>
         Promise.all(
-            item.articles.map(article => getArticleCost(Price, article))
+            item.articles.map(article => getPriceAmount(Price, article.price_id))
         )
     );
 
