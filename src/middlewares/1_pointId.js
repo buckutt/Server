@@ -29,8 +29,10 @@ module.exports = connector => connector.models.Device
 
         let handled = false;
 
+        // Filters: allow an empty point but not a deleted point
         device.wikets
-            .filter(wiket => wiket.period.event && wiket.period.event.id)
+            .filter(wiket => wiket.period.event && wiket.period.event.id
+                && ((wiket.point_id && wiket.point.id) || !wiket.point_id))
             .forEach((wiket) => {
                 const period = wiket.period;
                 const point = wiket.point;
