@@ -127,7 +127,7 @@ app.start = () => {
         socketServer.ioServer(server, app);
 
         return new Promise((resolve, reject) => {
-            server.listen(config.http.port, config.http.hostname, (err) => {
+            server.listen(config.http.port, config.http.host, (err) => {
                 /* istanbul ignore if */
                 if (err) {
                     return reject(err);
