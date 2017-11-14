@@ -164,6 +164,16 @@ router.get('/services/manager/history', (req, res) => {
                 .concat(transfersTo)
                 .sort((a, b) => b.date - a.date);
 
+            // Offset
+            if (req.query.offset) {
+                history = history.slice(req.query.offset);
+            }
+
+            // Limit
+            if (req.query.limit) {
+                history = history.slice(0, req.query.limit);
+            }
+
             res
                 .status(200)
                 .json(history)
