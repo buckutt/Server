@@ -1,8 +1,9 @@
-const express     = require('express');
-const idParser    = require('../lib/idParser');
-const logger      = require('../lib/log');
-const modelParser = require('../lib/modelParser');
-const dbCatch     = require('../lib/dbCatch');
+const express                      = require('express');
+const idParser                     = require('../lib/idParser');
+const logger                       = require('../lib/log');
+const modelParser                  = require('../lib/modelParser');
+const { embedParser, embedFilter } = require('../lib/embedParser');
+const dbCatch                      = require('../lib/dbCatch');
 
 const log = logger(module);
 
@@ -39,16 +40,21 @@ router.put('/:model/:id', (req, res, next) => {
             return inst.save();
         })
         .then((result) => {
-            const withRelated = (req.query.embed) ? req.query.embed : [];
+            // Embed multiple relatives
+            const withRelated = (req.query.embed) ? embedParser(req.query.embed) : [];
 
             return req.Model
                 .where({ id: result.id })
                 .fetch({ withRelated });
         })
         .then((result) => {
+            const embedFilters = (req.query.embed) ?
+                req.query.embed.filter(rel => rel.required).map(rel => rel.embed) :
+                [];
+
             res
                 .status(200)
-                .json(result.toJSON())
+                .json(embedFilter(embedFilters, [result.toJSON()])[0])
                 .end();
         })
         .catch(err => dbCatch(module, err, next));
