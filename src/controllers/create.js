@@ -1,8 +1,9 @@
-const express     = require('express');
-const Promise     = require('bluebird');
-const logger      = require('../lib/log');
-const modelParser = require('../lib/modelParser');
-const dbCatch     = require('../lib/dbCatch');
+const express                      = require('express');
+const Promise                      = require('bluebird');
+const logger                       = require('../lib/log');
+const modelParser                  = require('../lib/modelParser');
+const { embedParser, embedFilter } = require('../lib/embedParser');
+const dbCatch                      = require('../lib/dbCatch');
 
 const log = logger(module);
 
@@ -24,14 +25,18 @@ router.post('/:model/', (req, res, next) => {
         insts = [new req.Model(req.body)];
     }
 
+    // Embed multiple relatives
+    const withRelated = (req.query.embed) ? embedParser(req.query.embed) : [];
+    const embedFilters = (req.query.embed) ?
+        req.query.embed.filter(rel => rel.required).map(rel => rel.embed) :
+        [];
+
     Promise.all(insts.map(inst => inst.save()))
         .then(results => req.Model
             .where('id', 'in', results.map(i => i.id))
-            .fetchAll({
-                withRelated: req.query.embed
-            })
+            .fetchAll({ withRelated })
         )
-        .then(results => results.toJSON())
+        .then(results => embedFilter(embedFilters, results.toJSON()))
         .then((results) => {
             req.app.locals.modelChanges.emit(
                 'data',

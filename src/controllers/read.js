@@ -1,12 +1,13 @@
-const express       = require('express');
-const qs            = require('qs');
-const url           = require('url');
-const idParser      = require('../lib/idParser');
-const logger        = require('../lib/log');
-const modelParser   = require('../lib/modelParser');
-const queryFilterer = require('../lib/queryFilterer');
-const dbCatch       = require('../lib/dbCatch');
-const APIError      = require('../errors/APIError');
+const express                      = require('express');
+const qs                           = require('qs');
+const url                          = require('url');
+const idParser                     = require('../lib/idParser');
+const logger                       = require('../lib/log');
+const modelParser                  = require('../lib/modelParser');
+const { embedParser, embedFilter } = require('../lib/embedParser');
+const queryFilterer                = require('../lib/queryFilterer');
+const dbCatch                      = require('../lib/dbCatch');
+const APIError                     = require('../errors/APIError');
 
 const log = logger(module);
 
@@ -53,14 +54,17 @@ router.get('/:model', (req, res, next) => {
     }
 
     // Embed multiple relatives
-    const withRelated = (req.query.embed) ? req.query.embed : [];
+    const withRelated  = (req.query.embed) ? embedParser(req.query.embed) : [];
+    const embedFilters = (req.query.embed) ?
+        req.query.embed.filter(rel => rel.required).map(rel => rel.embed) :
+        [];
 
     request
         .fetchAll({ withRelated })
         .then(results =>
             res
                 .status(200)
-                .json(results.toJSON())
+                .json(embedFilter(embedFilters, results.toJSON()))
                 .end()
         )
         .catch(err => dbCatch(module, err, next));
@@ -85,11 +89,14 @@ router.get('/:model/:id?', (req, res, next) => {
     }
 
     // Embed multiple relatives
-    const withRelated = (req.query.embed) ? req.query.embed : [];
+    const withRelated  = (req.query.embed) ? embedParser(req.query.embed) : [];
+    const embedFilters = (req.query.embed) ?
+        req.query.embed.filter(rel => rel.required).map(rel => rel.embed) :
+        [];
 
     request
         .fetch({ withRelated })
-        .then(result => (result ? result.toJSON() : null))
+        .then(result => (result ? embedFilter(embedFilters, [result.toJSON()])[0] : null))
         .then((instance) => {
             if (!instance) {
                 return next(new APIError(module, 404, 'Document not found'));

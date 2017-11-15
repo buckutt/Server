@@ -1,9 +1,10 @@
-const express     = require('express');
-const idParser    = require('../lib/idParser');
-const logger      = require('../lib/log');
-const modelParser = require('../lib/modelParser');
-const dbCatch     = require('../lib/dbCatch');
-const APIError    = require('../errors/APIError');
+const express                      = require('express');
+const idParser                     = require('../lib/idParser');
+const logger                       = require('../lib/log');
+const modelParser                  = require('../lib/modelParser');
+const { embedParser, embedFilter } = require('../lib/embedParser');
+const dbCatch                      = require('../lib/dbCatch');
+const APIError                     = require('../errors/APIError');
 
 const log = logger(module);
 
@@ -20,16 +21,19 @@ router.get('/:model/:id/:submodel', (req, res, next) => {
 
     let withRelated = [];
     if (req.query.embed) {
-        withRelated = [submodel].concat(req.query.embed);
-        withRelated[submodel] = req.query.embed;
+        withRelated = [submodel].concat(embedParser(req.query.embed));
     } else {
         withRelated = [submodel];
     }
 
+    const embedFilters = (req.query.embed) ?
+        req.query.embed.filter(rel => rel.required).map(rel => rel.embed) :
+        [];
+
     req.Model
         .where({ id: req.params.id })
         .fetch({ withRelated })
-        .then(result => (result ? result.toJSON() : null))
+        .then(result => (result ? embedFilter(embedFilters, [result.toJSON()])[0] : null))
         .then((instance) => {
             if (!instance || !instance[submodel]) {
                 return next(new APIError(module, 404, 'Document not found'));
