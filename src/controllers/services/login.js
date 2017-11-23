@@ -6,6 +6,7 @@ const config          = require('../../../config');
 const logger          = require('../../lib/log');
 const canSellOrReload = require('../../lib/canSellOrReload');
 const dbCatch         = require('../../lib/dbCatch');
+const { bookshelf }   = require('../../lib/bookshelf');
 const APIError        = require('../../errors/APIError');
 
 const log = logger(module);
@@ -48,9 +49,9 @@ router.post('/services/login', (req, res, next) => {
     log.info(`Login with mol ${infos.type}(${infos.data})`, infos);
 
     models.MeanOfLogin
+        .query(q => q.where(bookshelf.knex.raw('lower(data)'), '=', infos.data.toLowerCase().trim()))
         .where({
             type   : infos.type,
-            data   : infos.data,
             blocked: false
         })
         .fetch({
