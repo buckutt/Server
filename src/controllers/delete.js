@@ -15,10 +15,8 @@ router.delete('/:model/:id', (req, res, next) => {
     log.info(`Delete ${req.params.model} ${req.params.id}`, req.details);
 
     // First, get the model
-    req.Model
-        .where({ id: req.params.id })
-        .fetch()
-        .then(inst => inst.destroy())
+    new req.Model({ id: req.params.id })
+        .destroy()
         .then((inst) => {
             req.app.locals.modelChanges.emit(
                 'data',
