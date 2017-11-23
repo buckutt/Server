@@ -1,9 +1,12 @@
 const express   = require('express');
 const dbCatch   = require('../../lib/dbCatch');
+const APIError  = require('../../errors/APIError');
 const addDevice = require('../../../scripts/addDevice');
 const logger    = require('../../lib/log');
 
 const log = logger(module);
+
+const regexPassword = /^([a-zA-ZÀ-ÿ0-9$%!#]){8,}$/
 
 /**
  * Certificate controller. Handle ssl certificate generation
@@ -15,6 +18,10 @@ router.get('/services/certificate', (req, res, next) => {
     const models   = req.app.locals.models;
     const deviceId = req.query.deviceId;
     const password = req.query.password;
+
+    if (!regexPassword.test(password)) {
+        return next(new APIError(module, 401, 'Password must contain at least 8 characters (a-zA-ZÀ-ÿ0-9$%!#)'));
+    }
 
     log.info(`Generation certificate for device ${deviceId} password ${password}`, req.details);
 
