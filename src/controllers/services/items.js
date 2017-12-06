@@ -135,32 +135,37 @@ router.get('/services/items', (req, res, next) => {
 
                 if (price.article && price.article.id) {
                     const matchReqPoint = point => point.id === req.point.id;
-                    let category        = price.article.categories
-                        .find(cat => cat.points.some(matchReqPoint));
+                    let categories      = price.article.categories
+                        .filter(cat => cat.points.some(matchReqPoint));
 
-                    category = (category) ?
-                        { id: category.id, name: category.name, priority: category.priority } :
-                        { id: 'default', name: 'Hors catégorie', priority: -1 };
+                    categories = (categories.length > 0) ?
+                        categories.map(category => ({ id: category.id, name: category.name, priority: category.priority })) :
+                        [ { id: 'default', name: 'Hors catégorie', priority: -1 } ];
 
-                    articles.push({
-                        id     : price.article.id,
-                        name   : price.article.name,
-                        vat    : price.article.vat,
-                        alcohol: price.article.alcohol,
-                        price  : {
-                            id    : price.id,
-                            amount: price.amount
-                        },
-                        category
+                    categories.forEach((category) => {
+                        articles.push({
+                            id     : price.article.id,
+                            name   : price.article.name,
+                            vat    : price.article.vat,
+                            alcohol: price.article.alcohol,
+                            price  : {
+                                id    : price.id,
+                                amount: price.amount
+                            },
+                            category
+                        });
                     });
                 }
             });
 
-            // Keep the lowest price for each article and promotion
+            // Keep the lowest price (by category) for each article and promotion
             articles = articles
                 .sort((a, b) => (a.price.amount - b.price.amount))
                 .filter((article, i, initialArticles) => (
-                    i === initialArticles.findIndex(article2 => article.id === article2.id)
+                    i === initialArticles.findIndex(article2 =>
+                        article.id === article2.id &&
+                        article.category.id === article2.category.id
+                    )
                 ));
 
             promotions = promotions
