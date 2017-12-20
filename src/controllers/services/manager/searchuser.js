@@ -23,6 +23,7 @@ router.get('/services/manager/searchuser', (req, res) => {
                 'like',
                 `%${name.toLowerCase()}%`
             )
+            .limit(req.query.limit)
         )
         .fetchAll()
         .then((users) => {
