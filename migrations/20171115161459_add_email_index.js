@@ -6,7 +6,7 @@ exports.up = function(knex) {
 exports.down = function(knex) {
     return knex.schema
         .table('meansoflogin', (t) => {
-            t.dropIndex('lower_case_data)');
+            t.dropIndex('lower_case_data');
         })
         .table('users', (t) => {
             t.dropIndex('lower_case_mail');
