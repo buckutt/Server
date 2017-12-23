@@ -1,11 +1,12 @@
-const express      = require('express');
-const randomstring = require('randomstring');
-const dots         = require('dot');
-const APIError     = require('../../../errors/APIError');
-const mailer       = require('../../../lib/mailer');
-const dbCatch      = require('../../../lib/dbCatch');
-const config       = require('../../../../config');
-const logger       = require('../../../lib/log');
+const express       = require('express');
+const randomstring  = require('randomstring');
+const dots          = require('dot');
+const APIError      = require('../../../errors/APIError');
+const mailer        = require('../../../lib/mailer');
+const dbCatch       = require('../../../lib/dbCatch');
+const config        = require('../../../../config');
+const logger        = require('../../../lib/log');
+const { bookshelf } = require('../../../lib/bookshelf');
 
 const log = logger(module);
 
@@ -40,7 +41,7 @@ router.get('/services/manager/askpin', (req, res, next) => {
     let user;
 
     models.User
-        .where({ mail })
+        .query(q => q.where(bookshelf.knex.raw('lower(mail)'), '=', mail.toLowerCase().trim()))
         .fetch()
         .then((user_) => {
             user = user_;

@@ -36,6 +36,7 @@
         ]
       },
       "openUrls": [
+            "/",
             "/services/login",
             "/services/manager/askpin",
             "/services/manager/generatepin",
