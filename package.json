@@ -25,12 +25,14 @@
     "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "bcryptjs": "^2.3.0",
     "bluebird": "^3.4.6",
     "body-parser": "^1.17.2",
     "bookshelf": "^0.10.4",
     "bookshelf-manager": "^0.3.0",
     "bookshelf-paranoia": "^0.11.0",
+    "bookshelf-signals": "^0.1.2",
     "bookshelf-uuid": "^1.0.0",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.2",

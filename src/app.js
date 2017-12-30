@@ -1,22 +1,23 @@
-const fs            = require('fs');
-const path          = require('path');
-const EventEmitter  = require('events');
-const cors          = require('cors');
-const bodyParser    = require('body-parser');
-const compression   = require('compression');
-const cookieParser  = require('cookie-parser');
-const express       = require('express');
-const http          = require('http');
-const https         = require('https');
-const randomstring  = require('randomstring');
-const config        = require('../config');
-const controllers   = require('./controllers');
-const socketServer  = require('./socketServer');
-const logger        = require('./lib/log');
-const bookshelf     = require('./lib/bookshelf');
-const APIError      = require('./errors/APIError');
-const sslConfig     = require('../scripts/sslConfig');
-const { addDevice } = require('../scripts/addDevice');
+const fs                  = require('fs');
+const path                = require('path');
+const EventEmitter        = require('events');
+const cors                = require('cors');
+const bodyParser          = require('body-parser');
+const compression         = require('compression');
+const cookieParser        = require('cookie-parser');
+const express             = require('express');
+const http                = require('http');
+const https               = require('https');
+const randomstring        = require('randomstring');
+const config              = require('../config');
+const controllers         = require('./controllers');
+const socketServer        = require('./socketServer');
+const purchaseWebservices = require('./lib/purchaseWebservices');
+const logger              = require('./lib/log');
+const bookshelf           = require('./lib/bookshelf');
+const APIError            = require('./errors/APIError');
+const sslConfig           = require('../scripts/sslConfig');
+const { addDevice }       = require('../scripts/addDevice');
 
 const log = logger(module);
 
@@ -125,6 +126,8 @@ app.start = () => {
         app.locals.modelChanges = new EventEmitter();
 
         socketServer.ioServer(server, app);
+
+        purchaseWebservices(app);
 
         return new Promise((resolve, reject) => {
             server.listen(config.http.port, config.http.host, (err) => {
