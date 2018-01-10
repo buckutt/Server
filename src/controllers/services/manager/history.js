@@ -9,14 +9,22 @@ const log = logger(module);
  */
 const router = new express.Router();
 
+router.get('/services/manager/history', (req, res, next) => {
+    const adminRight = req.details.rights.find(right => right.name === 'admin' && right.end > new Date());
+    req.history      = {};
+    req.history.user = adminRight ? req.query.buyer : req.user.id;
+
+    next();
+});
+
 router.get('/services/manager/history', (req, res) => {
-    log.info(`Get history for user ${req.user.id}`, req.details);
+    log.info(`Get history for user ${req.history.user}`, req.details);
 
     const models = req.app.locals.models;
 
     // TODO: optimize filters
     const purchaseQuery = () => models.Purchase
-        .where({ buyer_id: req.user.id })
+        .where({ buyer_id: req.history.user })
         .fetchAll({
             withRelated: [
                 'seller',
@@ -30,36 +38,40 @@ router.get('/services/manager/history', (req, res) => {
         });
 
     const reloadQuery = () => models.Reload
-        .where({ buyer_id: req.user.id })
+        .where({ buyer_id: req.history.user })
         .fetchAll({
             withRelated: [
                 'seller',
                 'point'
-            ]
+            ],
+            withDeleted: true
         });
 
     const refundQuery = () => models.Refund
-        .where({ buyer_id: req.user.id })
+        .where({ buyer_id: req.history.user })
         .fetchAll({
             withRelated: [
                 'seller'
-            ]
+            ],
+            withDeleted: true
         });
 
     const transferFromQuery = () => models.Transfer
-        .where({ reciever_id: req.user.id })
+        .where({ reciever_id: req.history.user })
         .fetchAll({
             withRelated: [
                 'sender'
-            ]
+            ],
+            withDeleted: true
         });
 
     const transferToQuery = () => models.Transfer
-        .where({ sender_id: req.user.id })
+        .where({ sender_id: req.history.user })
         .fetchAll({
             withRelated: [
                 'reciever'
-            ]
+            ],
+            withDeleted: true
         });
 
     let history = [];
@@ -68,8 +80,8 @@ router.get('/services/manager/history', (req, res) => {
         .then((result) => {
             history = result
                 .toJSON()
-                .filter(p => !p.deleted_at)
                 .map(purchase => ({
+                    id    : purchase.id,
                     type  : purchase.price.promotion ? 'promotion' : 'purchase',
                     date  : purchase.created_at,
                     amount: -1 * purchase.price.amount,
@@ -83,7 +95,8 @@ router.get('/services/manager/history', (req, res) => {
                             Array(article._pivot_count).fill(article.name)
                         )
                     ),
-                    promotion: purchase.price.promotion ? purchase.price.promotion.name : ''
+                    promotion : purchase.price.promotion ? purchase.price.promotion.name : '',
+                    isCanceled: !!purchase.deleted_at
                 }));
 
             return reloadQuery();
@@ -91,6 +104,7 @@ router.get('/services/manager/history', (req, res) => {
         .then((result) => {
             const reloads = result.toJSON().map(reload =>
                 ({
+                    id    : reload.id,
                     type  : 'reload',
                     date  : reload.created_at,
                     amount: reload.credit,
@@ -99,7 +113,8 @@ router.get('/services/manager/history', (req, res) => {
                     seller: {
                         lastname : reload.seller.lastname,
                         firstname: reload.seller.firstname
-                    }
+                    },
+                    isCanceled: !!reload.deleted_at
                 })
             );
 
@@ -110,6 +125,7 @@ router.get('/services/manager/history', (req, res) => {
         .then((result) => {
             const refunds = result.toJSON().map(refund =>
                 ({
+                    id    : refund.id,
                     type  : 'refund',
                     date  : refund.created_at,
                     amount: -1 * refund.amount,
@@ -118,7 +134,8 @@ router.get('/services/manager/history', (req, res) => {
                     seller: {
                         lastname : refund.seller.lastname,
                         firstname: refund.seller.firstname
-                    }
+                    },
+                    isCanceled: !!refund.deleted_at
                 })
             );
 
@@ -129,6 +146,7 @@ router.get('/services/manager/history', (req, res) => {
         .then((result) => {
             const transfersFrom = result.toJSON().map(transfer =>
                 ({
+                    id    : transfer.id,
                     type  : 'transfer',
                     date  : transfer.created_at,
                     amount: transfer.amount,
@@ -137,7 +155,8 @@ router.get('/services/manager/history', (req, res) => {
                     seller: {
                         lastname : transfer.sender.lastname,
                         firstname: transfer.sender.firstname
-                    }
+                    },
+                    isCanceled: !!transfer.deleted_at
                 })
             );
 
@@ -148,6 +167,7 @@ router.get('/services/manager/history', (req, res) => {
         .then((result) => {
             const transfersTo = result.toJSON().map(transfer =>
                 ({
+                    id    : transfer.id,
                     type  : 'transfer',
                     date  : transfer.created_at,
                     amount: -1 * transfer.amount,
@@ -156,7 +176,8 @@ router.get('/services/manager/history', (req, res) => {
                     seller: {
                         lastname : transfer.reciever.lastname,
                         firstname: transfer.reciever.firstname
-                    }
+                    },
+                    isCanceled: !!transfer.deleted_at
                 })
             );
 
