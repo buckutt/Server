@@ -40,13 +40,15 @@
             "/services/login",
             "/services/manager/askpin",
             "/services/manager/generatepin",
-            "/services/articleImage"
+            "/services/articleImage",
+            "/provider/callback"
       ],
       "loggedUrls": [
             "/services/manager/changepin",
             "/services/manager/history",
             "/services/manager/searchuser",
             "/services/manager/transfer",
+            "/services/manager/reload",
             "userCredit"
       ],
       "pinLoggingAllowed": ["seller", "reloader"]

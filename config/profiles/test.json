@@ -36,10 +36,18 @@
             "newLine": "unix"
         }
     },
+    "urls": {
+        "managerUrl": "https://b.inst.buckless.com"
+    },
     "askpin": {
         "from": "noreply@buckless.com",
         "subject": "Buckless forgotten PIN",
         "template": "Hi !<br> You seems to have forgotten your pin. Follow <a href=\"{{=it.link}}\">this link</a> to generate a new one !",
         "managerUrl": "http://b.inst.buckless.com"
+    },
+    "provider": {
+        "name": "test",
+        "config": {
+        }
     }
 }

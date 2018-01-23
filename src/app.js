@@ -10,6 +10,7 @@ const http                = require('http');
 const https               = require('https');
 const randomstring        = require('randomstring');
 const config              = require('../config');
+const reloadProvider      = require('./reloadProviders');
 const controllers         = require('./controllers');
 const socketServer        = require('./socketServer');
 const purchaseWebservices = require('./lib/purchaseWebservices');
@@ -45,6 +46,11 @@ app.use(compression());
  * Routes
  */
 app.use(controllers);
+reloadProvider(app)
+    .catch((err) => {
+        console.error('No reload provider provided');
+        process.exit(1);
+    });
 
 /**
  * Error handling
