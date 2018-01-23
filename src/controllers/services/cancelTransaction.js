@@ -129,6 +129,11 @@ router.post('/services/cancelTransaction', (req, res, next) => {
         .then(() => new req.app.locals.models[req.transaction.model]({ id: req.transaction.data.id })
             .destroy()
         )
+        .then(() => {
+            usersToUpdate.forEach((user) => {
+                req.app.locals.modelChanges.emit('userCreditUpdate', user);
+            });
+        })
         .then(() => res
             .status(200)
             .json({})

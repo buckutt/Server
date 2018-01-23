@@ -112,6 +112,13 @@ router.post('/services/manager/transfer', (req, res, next) => {
                 amount = 0;
             }
 
+            // Only useful for modelChanges
+            req.user.credit -= amount;
+            req.recieverUser.credit += amount;
+
+            req.app.locals.modelChanges.emit('userCreditUpdate', req.user);
+            req.app.locals.modelChanges.emit('userCreditUpdate', req.recieverUser);
+
             return res
                 .status(200)
                 .json({

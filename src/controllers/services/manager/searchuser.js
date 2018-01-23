@@ -18,12 +18,13 @@ router.get('/services/manager/searchuser', (req, res) => {
 
     models.User
         .query(user =>
-            user.where(
-                bookshelf.knex.raw('concat(lower(firstname), \' \', lower(lastname))'),
-                'like',
-                `%${name.toLowerCase()}%`
-            )
-                .limit(req.query.limit)
+            user
+                .where(
+                    bookshelf.knex.raw('concat(lower(firstname), \' \', lower(lastname))'),
+                    'like',
+                    `%${name.toLowerCase()}%`
+                )
+                .limit(req.query.limit || 5)
         )
         .fetchAll()
         .then((users) => {

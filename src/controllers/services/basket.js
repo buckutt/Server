@@ -227,6 +227,9 @@ router.post('/services/basket', (req, res, next) => {
     Promise
         .all(purchases)
         .then(() => Promise.all(everythingSaving))
+        .then(() => {
+            req.app.locals.modelChanges.emit('userCreditUpdate', req.buyer);
+        })
         .then(() =>
             res
                 .status(200)
