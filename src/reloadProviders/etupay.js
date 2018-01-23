@@ -66,14 +66,15 @@ module.exports = (app) => {
                         .save({ credit }, { method: 'update' });
 
                     const newReload = new Reload({
-                        credit  : transaction.get('amount'),
-                        type    : 'card-online',
-                        trace   : transaction.get('id'),
-                        point_id: req.point_id
-                    })
-                    .save();
+                        credit   : transaction.get('amount'),
+                        type     : 'card',
+                        trace    : transaction.get('id'),
+                        point_id : req.point_id,
+                        buyer_id : transaction.get('user_id'),
+                        seller_id: transaction.get('user_id')
+                    });
 
-                    return Promise.all([userCredit, newReload, transaction.save()]);
+                    return Promise.all([userCredit, newReload.save(), transaction.save()]);
                 }
 
                 return transaction.save();

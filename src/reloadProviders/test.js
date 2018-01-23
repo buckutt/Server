@@ -10,19 +10,21 @@ module.exports = (app) => {
         .where({ id })
         .fetch()
         .then((transaction) => {
-            transaction.transactionId = uuid();
-            transaction.state         = 'ACCEPTED';
+            transaction.set('transactionId', uuid());
+            transaction.set('state', 'ACCEPTED');
 
-            if (transaction.state === 'ACCEPTED') {
-                const credit = knex.raw(`credit + ${transaction.amount}`);
+            if (transaction.get('state') === 'ACCEPTED') {
+                const credit = knex.raw(`credit + ${transaction.get('amount')}`);
 
-                const userCredit = new User({ id: transaction.user_id })
-                    .save({ credit }, { patch: true });
+                const userCredit = User
+                    .forge()
+                    .where({ id: transaction.get('user_id') })
+                    .save({ credit }, { method: 'update' });
 
                 const newReload = new Reload({
-                    credit: transaction.amount,
+                    credit: transaction.get('amount'),
                     type  : 'card-online',
-                    trace : transaction.id
+                    trace : transaction.get('id')
                 })
                     .save();
 
@@ -41,7 +43,7 @@ module.exports = (app) => {
         return transaction
             .save()
             .then(() => {
-                setTimeout(() => validatePayment(transaction.id), 1000);
+                setTimeout(() => validatePayment(transaction.get('id')), 1000);
 
                 return {
                     type: 'url',
