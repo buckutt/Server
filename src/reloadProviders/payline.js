@@ -119,9 +119,10 @@ module.exports = (app) => {
                         .save({ credit }, { patch: true });
 
                     const newReload = new Reload({
-                        credit: transaction.amount,
-                        type  : 'card-online',
-                        trace : transaction.id
+                        credit  : transaction.amount,
+                        type    : 'card-online',
+                        trace   : transaction.id,
+                        point_id: req.point_id
                     })
                     .save();
 

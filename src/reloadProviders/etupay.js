@@ -13,8 +13,6 @@ module.exports = (app) => {
     const Basket      = etupay.Basket;
 
     app.locals.makePayment = (data) => {
-        console.log(data);
-
         const transaction = new Transaction({
             state  : 'pending',
             amount : data.amount,
@@ -44,33 +42,43 @@ module.exports = (app) => {
 
     const router = new express.Router();
 
-    router.post('/callback', etupay.router, (req, res, next) => Transaction
-        .where({ id: req.etupay.serviceData })
-        .fetch()
-        .then((transaction) => {
-            transaction.transactionId = req.etupay.transactionId;
-            transaction.state         = req.etupay.step;
+    router.use(etupay.router);
 
-            if (req.etupay.paid) {
-                const credit = knex.raw(`credit + ${transaction.amount}`);
+    router.post('/callback', (req, res, next) => {
+        Transaction
+            .where({ id: req.etupay.serviceData })
+            .fetch()
+            .then((transaction) => {
+                // this should not happen \o
+                if (!transaction) {
+                    return res.status(404).json({}).end();
+                }
 
-                const userCredit = new User({ id: transaction.user_id })
-                    .save({ credit }, { patch: true });
+                transaction.transactionId = req.etupay.transactionId;
+                transaction.state         = req.etupay.step;
 
-                const newReload = new Reload({
-                    credit: transaction.amount,
-                    type  : 'card-online',
-                    trace : transaction.id
-                })
+                if (req.etupay.paid) {
+                    const credit = knex.raw(`credit + ${transaction.amount}`);
+
+                    const userCredit = new User({ id: transaction.user_id })
+                        .save({ credit }, { patch: true });
+
+                    const newReload = new Reload({
+                        credit  : transaction.amount,
+                        type    : 'card-online',
+                        trace   : transaction.id,
+                        point_id: req.point_id
+                    })
                     .save();
 
-                return Promise.all([userCredit, newReload, transaction.save()]);
-            }
+                    return Promise.all([userCredit, newReload, transaction.save()]);
+                }
 
-            return transaction.save();
-        })
-        .then(() => res.status(200).json({}).end())
-        .catch(err => dbCatch(module, err, next)));
+                return transaction.save();
+            })
+            .then(() => res.status(200).json({}).end())
+            .catch(err => dbCatch(module, err, next));
+    });
 
     app.use('/provider', router);
 };

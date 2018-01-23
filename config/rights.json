@@ -40,7 +40,8 @@
             "/services/login",
             "/services/manager/askpin",
             "/services/manager/generatepin",
-            "/services/articleImage"
+            "/services/articleImage",
+            "/provider/callback"
       ],
       "loggedUrls": [
             "/services/manager/changepin",
