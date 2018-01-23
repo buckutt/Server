@@ -67,7 +67,7 @@ module.exports = (app) => {
 
                     const newReload = new Reload({
                         credit   : transaction.get('amount'),
-                        type     : 'card-online',
+                        type     : 'card',
                         trace    : transaction.get('id'),
                         point_id : req.point_id,
                         buyer_id : transaction.get('user_id'),
