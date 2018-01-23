@@ -197,7 +197,10 @@ router.get('/services/manager/history', (req, res) => {
 
             res
                 .status(200)
-                .json(history)
+                .json({
+                    credit: req.user.credit,
+                    history
+                })
                 .end();
         });
 });
