@@ -139,8 +139,11 @@ router.get('/services/items', (req, res, next) => {
                         .filter(cat => cat.points.some(matchReqPoint));
 
                     categories = (categories.length > 0) ?
-                        categories.map(category => ({ id: category.id, name: category.name, priority: category.priority })) :
-                        [ { id: 'default', name: 'Hors catégorie', priority: -1 } ];
+                        categories
+                            .map(category => (
+                                { id: category.id, name: category.name, priority: category.priority }
+                            )) :
+                        [{ id: 'default', name: 'Hors catégorie', priority: -1 }];
 
                     categories.forEach((category) => {
                         articles.push({

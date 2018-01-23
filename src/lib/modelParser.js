@@ -21,7 +21,8 @@ const modelsNames = {
     rights        : 'Right',
     sets          : 'Set',
     transfers     : 'Transfer',
-    users         : 'User'
+    users         : 'User',
+    webservices   : 'Webservice'
 };
 
 const possibleValues = Object.keys(modelsNames);

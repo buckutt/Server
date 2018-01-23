@@ -1,44 +1,30 @@
-const embedParser = (embed) => {
-    return embed.map((relation) => {
-        if (typeof relation === 'string') {
-            return relation;
-        } else if (!relation.filters) {
-            return relation.embed;
+const hasDot = str => str.indexOf('.') > 0;
+
+const removeLevel = embed => embed
+    .filter(rel => hasDot(rel))
+    .map(rel => rel.split('.').slice(1).join('.'));
+
+const embedParser = embed => embed.map((relation) => {
+    if (typeof relation === 'string') {
+        return relation;
+    } else if (!relation.filters) {
+        return relation.embed;
+    }
+
+    return {
+        [relation.embed]: (query) => {
+            let filteredQuery = query;
+
+            relation.filters.forEach((filter) => {
+                filteredQuery = filteredQuery.where(...filter);
+            });
+
+            return filteredQuery;
         }
+    };
+});
 
-        return {
-            [relation.embed]: (query) => {
-                let filteredQuery = query;
-
-                relation.filters.forEach((filter) => {
-                    filteredQuery = filteredQuery.where(...filter);
-                });
-
-                return filteredQuery;
-            }
-        }
-    });
-}
-const embedFilter = (embed, results) => {
-    const filterList = embed.filter(rel => !hasDot(rel));
-
-    filterList.forEach((filter) => {
-        results = results.filter((result) => {
-            if (Array.isArray(result[filter])) {
-                return result[filter].length > 0;
-            } else if (typeof result[filter] === 'object') {
-                return result[filter] && result[filter].id;
-            }
-
-            return true;
-        });
-    });
-
-    results = results.map(result => propagate(embed, result));
-
-    return results;
-};
-
+/* eslint no-use-before-define: 0 */
 const propagate = (embed, result) => {
     const subEmbed = removeLevel(embed);
 
@@ -57,12 +43,25 @@ const propagate = (embed, result) => {
     return result;
 };
 
-const hasDot = (str) => str.indexOf('.') > 0;
+const embedFilter = (embed, results_) => {
+    const filterList = embed.filter(rel => !hasDot(rel));
+    let results      = results_;
 
-const removeLevel = (embed) => {
-    return embed
-        .filter(rel => hasDot(rel))
-        .map(rel => rel.split('.').slice(1).join('.'));
+    filterList.forEach((filter) => {
+        results = results.filter((result) => {
+            if (Array.isArray(result[filter])) {
+                return result[filter].length > 0;
+            } else if (typeof result[filter] === 'object') {
+                return result[filter] && result[filter].id;
+            }
+
+            return true;
+        });
+    });
+
+    results = results.map(result => propagate(embed, result));
+
+    return results;
 };
 
 module.exports.embedParser = embedParser;

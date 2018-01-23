@@ -47,6 +47,7 @@
             "/services/manager/history",
             "/services/manager/searchuser",
             "/services/manager/transfer",
+            "/services/manager/reload",
             "userCredit"
       ],
       "pinLoggingAllowed": ["seller", "reloader"]

@@ -6,7 +6,7 @@ const logger    = require('../../lib/log');
 
 const log = logger(module);
 
-const regexPassword = /^([a-zA-ZÀ-ÿ0-9$%!#]){8,}$/
+const regexPassword = /^([a-zA-ZÀ-ÿ0-9$%!#]){8,}$/;
 
 /**
  * Certificate controller. Handle ssl certificate generation

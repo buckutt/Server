@@ -1,17 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs     = require('fs');
+const path   = require('path');
 const config = require('../../config');
 
-const knex = require('knex')(config.db);
+const knex      = require('knex')(config.db);
 const bookshelf = require('bookshelf')(knex);
 
 const modelsPath = path.join(__dirname, '..', 'models');
-const models = {};
+const models     = {};
 
 bookshelf.plugin('registry');
 bookshelf.plugin('virtuals');
 bookshelf.plugin('pagination');
 bookshelf.plugin(require('bookshelf-uuid'));
+bookshelf.plugin(require('bookshelf-signals')());
 
 bookshelf.plugin('bookshelf-manager', { root: modelsPath });
 bookshelf.plugin(require('bookshelf-paranoia'), { field: 'deleted_at', sentinel: 'active' });
