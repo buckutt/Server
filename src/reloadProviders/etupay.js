@@ -60,8 +60,10 @@ module.exports = (app) => {
                 if (req.etupay.paid) {
                     const credit = knex.raw(`credit + ${transaction.amount}`);
 
-                    const userCredit = new User({ id: transaction.user_id })
-                        .save({ credit }, { patch: true });
+                    const userCredit = User
+                        .forge()
+                        .where({ id: transaction.user_id })
+                        .save({ credit }, { method: 'update' });
 
                     const newReload = new Reload({
                         credit  : transaction.amount,
