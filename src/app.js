@@ -10,6 +10,7 @@ const http                = require('http');
 const https               = require('https');
 const randomstring        = require('randomstring');
 const config              = require('../config');
+const reloadProvider      = require('./reloadProviders');
 const controllers         = require('./controllers');
 const socketServer        = require('./socketServer');
 const purchaseWebservices = require('./lib/purchaseWebservices');
@@ -79,7 +80,9 @@ app.start = () => {
         ca  : './ssl/certificates/ca/ca-crt.pem'
     };
 
-    let startingQueue = bookshelf.sync();
+    let startingQueue = bookshelf
+        .sync()
+        .then(() => reloadProvider(app));
 
     /* istanbul ignore if */
     if (!fs.existsSync(sslFilesPath.key) ||
