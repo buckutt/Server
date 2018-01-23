@@ -28,7 +28,7 @@ module.exports = (app) => {
                     data.buyer.lastname,
                     data.buyer.email,
                     'checkout',
-                    transaction.id
+                    transaction.get('id')
                 );
 
                 basket.addItem('Rechargement', data.amount, 1);
@@ -54,21 +54,21 @@ module.exports = (app) => {
                     return res.status(404).json({}).end();
                 }
 
-                transaction.transactionId = req.etupay.transactionId;
-                transaction.state         = req.etupay.step;
+                transaction.set('transactionId', req.etupay.transactionId);
+                transaction.set('state', req.etupay.step);
 
                 if (req.etupay.paid) {
-                    const credit = knex.raw(`credit + ${transaction.amount}`);
+                    const credit = knex.raw(`credit + ${transaction.get('amount')}`);
 
                     const userCredit = User
                         .forge()
-                        .where({ id: transaction.user_id })
+                        .where({ id: transaction.get('user_id') })
                         .save({ credit }, { method: 'update' });
 
                     const newReload = new Reload({
-                        credit  : transaction.amount,
+                        credit  : transaction.get('amount'),
                         type    : 'card-online',
-                        trace   : transaction.id,
+                        trace   : transaction.get('id'),
                         point_id: req.point_id
                     })
                     .save();

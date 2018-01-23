@@ -57,7 +57,7 @@ module.exports = (app) => {
                     cancelURL: `${config.urls.managerUrl}/#/reload/failed`,
                     order    : {
                         attributes: ns('order'),
-                        ref     : transaction.id,
+                        ref     : transaction.get('id'),
                         country : 'FR',
                         amount  : data.amount,
                         currency: currencies.eur,
@@ -75,7 +75,7 @@ module.exports = (app) => {
                 });
             })
             .then((result) => {
-                transaction.transactionId = result.token;
+                transaction.set('transactionId', result.token);
 
                 return transaction
                     .save()
@@ -109,21 +109,21 @@ module.exports = (app) => {
                 return Transaction.where({ transactionId: req.query.token }).fetch();
             })
             .then((transaction) => {
-                transaction.state = paymentDetails.result.shortMessage;
-                transaction.longState = paymentDetails.result.longMessage;
+                transaction.set('state', paymentDetails.result.shortMessage);
+                transaction.set('longState', paymentDetails.result.longMessage);
 
-                if (transaction.state === 'ACCEPTED') {
-                    const credit = knex.raw(`credit + ${transaction.amount}`);
+                if (transaction.get('state') === 'ACCEPTED') {
+                    const credit = knex.raw(`credit + ${transaction.get('amount')}`);
 
                     const userCredit = User
                         .forge()
-                        .where({ id: transaction.user_id })
+                        .where({ id: transaction.get('user_id') })
                         .save({ credit }, { method: 'update' });
 
                     const newReload = new Reload({
-                        credit  : transaction.amount,
+                        credit  : transaction.get('amount'),
                         type    : 'card-online',
-                        trace   : transaction.id,
+                        trace   : transaction.get('id'),
                         point_id: req.point_id
                     })
                     .save();
