@@ -10,4 +10,6 @@ module.exports = (app) => {
     }
 
     provider(app);
+
+    return Promise.resolve();
 };

@@ -46,6 +46,11 @@ app.use(compression());
  * Routes
  */
 app.use(controllers);
+reloadProvider(app)
+    .catch((err) => {
+        console.error('No reload provider provided');
+        process.exit(1);
+    });
 
 /**
  * Error handling
@@ -80,9 +85,7 @@ app.start = () => {
         ca  : './ssl/certificates/ca/ca-crt.pem'
     };
 
-    let startingQueue = bookshelf
-        .sync()
-        .then(() => reloadProvider(app));
+    let startingQueue = bookshelf.sync();
 
     /* istanbul ignore if */
     if (!fs.existsSync(sslFilesPath.key) ||
