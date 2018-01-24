@@ -1,7 +1,7 @@
 /* eslint-disable func-names */
 
 const assert              = require('assert');
-const { isInt, pad2, pp } = require('../src/lib/utils');
+const { isInt, pad2, pp } = require('../../src/lib/utils');
 
 describe('utils', () => {
     describe('isInt', () => {

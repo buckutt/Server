@@ -4,6 +4,7 @@ const childProcess = require('child_process');
 const Mocha        = require('mocha');
 
 process.env.NODE_ENV = 'test';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 if (process.argv.indexOf('--coverage') > -1) {
     const cwd = path.join(__dirname, '..');
@@ -27,6 +28,7 @@ if (process.argv.indexOf('--coverage') > -1) {
     const files = Mocha.utils
         .lookupFiles('test/', ['js'], false)
         .map(file => path.resolve(file))
+        .filter(file => file.endsWith('.test.js'))
         .sort();
 
     const mocha = new Mocha({

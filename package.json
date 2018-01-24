@@ -13,9 +13,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node src/app",
-    "test": "npm run test:coverage",
-    "test:nocoverage": "node scripts/test",
-    "test:coverage": "node scripts/test --coverage",
+    "test": "cross-env nyc --reporter=text-summary --reporter=html --reporter=lcov mocha ./test/bootstrap.js",
     "watch": "nodemon src/app.js",
     "dev": "cross-env NODE_ENV=development npm run watch",
     "seed": "cross-env NODE_ENV=development node scripts/seed",
@@ -52,29 +50,26 @@
     "nconf": "^0.8.4",
     "node-etupay": "ungdev/node-etupay",
     "nodemailer": "^4.0.1",
+    "nyc": "^11.2.1",
     "pg": "^7.3.0",
     "qs": "^6.1.0",
     "randomstring": "^1.1.5",
     "rimraf": "^2.5.2",
     "socket.io": "^2.0.3",
-    "source-map-support": "^0.4.15",
-    "sync-exec": "^0.6.2",
     "uuid": "^3.1.0",
     "uws": "^8.14.0",
     "winston": "^2.1.1",
     "winston-tcp-graylog": "^1.0.10"
   },
   "devDependencies": {
+    "axios": "^0.17.0",
     "coveralls": "^2.13.1",
-    "elegant-status": "^1.1.0",
     "eslint": "^4.1.0",
     "eslint-config-airbnb": "^15.0.1",
     "eslint-plugin-import": "^2.6.0",
     "inquirer": "^3.1.1",
-    "istanbul": "^0.4.5",
-    "mocha": "^3.4.2",
-    "nodemon": "^1.11.0",
-    "unirest": "^0.5.1"
+    "mocha": "^4.0.1",
+    "nodemon": "^1.11.0"
   },
   "resolutions": {
     "uws": "0.14.5"
