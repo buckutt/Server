@@ -11,8 +11,25 @@ const router = new express.Router();
 
 router.get('/services/manager/history', (req, res, next) => {
     const adminRight = req.details.rights.find(right => right.name === 'admin' && right.end > new Date());
-    req.history      = {};
-    req.history.user = adminRight ? req.query.buyer : req.user.id;
+
+    if (adminRight) {
+        return req.app.locals.models.User
+            .where({ id: req.query.buyer })
+            .fetch()
+            .then((user) => {
+                req.history = {
+                    user  : req.query.buyer,
+                    credit: user.get('credit')
+                };
+
+                next();
+            });
+    }
+
+    req.history = {
+        user  : req.user.id,
+        credit: req.user.credit
+    };
 
     next();
 });
@@ -198,7 +215,7 @@ router.get('/services/manager/history', (req, res) => {
             res
                 .status(200)
                 .json({
-                    credit: req.user.credit,
+                    credit: req.history.credit,
                     history
                 })
                 .end();
