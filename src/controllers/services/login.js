@@ -92,8 +92,7 @@ router.post('/services/login', (req, res, next) => {
                 };
 
                 reject(new APIError(module, 401, 'User not found', errDetails));
-            })
-        )
+            }))
         .then(() => {
             user.pin      = '';
             user.password = '';

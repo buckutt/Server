@@ -13,7 +13,7 @@ module.exports = {
     route: 'userCredit',
 
     setup(app, clients) {
-        console.log('setting up userCredit')
+        console.log('setting up userCredit');
 
         app.locals.modelChanges.on('userCreditUpdate', (user) => {
             send(clients, user.id, user.credit);

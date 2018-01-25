@@ -13,9 +13,7 @@ function pushToWebservices(rawPurchase) {
     delete purchase.seller.recoverKey;
 
     return models.Webservice.fetchAll().then(webservices => Promise
-        .all(
-            webservices.toJSON().map(webservice => axios.post(webservice.url, purchase))
-        )
+        .all(webservices.toJSON().map(webservice => axios.post(webservice.url, purchase)))
         .catch((err) => {
             log.error('Couldn\'t notify webservice', err.message);
         }));

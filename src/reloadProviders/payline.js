@@ -19,10 +19,10 @@ const actions = {
 };
 
 const modes = {
-    full: 'CPT',
-    differed: 'DIF',
+    full        : 'CPT',
+    differed    : 'DIF',
     nInstalments: 'NX',
-    recurring: 'REC'
+    recurring   : 'REC'
 };
 
 const dateFormat = 'DD/MM/YYYY HH:mm';
@@ -42,38 +42,36 @@ module.exports = (app) => {
 
         return transaction
             .save()
-            .then(() => {
-                return payline.runAction('doWebPayment', {
-                    version: 18,
-                    payment: {
-                        attributes: ns('payment'),
-                        amount        : data.amount,
-                        currency      : currencies.eur,
-                        action        : actions.payment,
-                        mode          : modes.full,
-                        contractNumber: providerConfig.contractNumber
-                    },
-                    returnURL: `${config.urls.managerUrl}/#/reload/success`,
-                    cancelURL: `${config.urls.managerUrl}/#/reload/failed`,
-                    order    : {
-                        attributes: ns('order'),
-                        ref     : transaction.get('id'),
-                        country : 'FR',
-                        amount  : data.amount,
-                        currency: currencies.eur,
-                        date    : moment().format(dateFormat)
-                    },
-                    notificationURL: `${config.urls.managerUrl}/api/provider/callback`,
-                    // selectedContractList: [ config.contractNumber ],
-                    buyer: {
-                        attributes: ns('buyer'),
-                        firstName: data.buyer.firstname,
-                        lastName: data.buyer.lastname,
-                        email: data.buyer.email
-                    },
-                    merchantName: config.merchantName
-                });
-            })
+            .then(() => payline.runAction('doWebPayment', {
+                version: 18,
+                payment: {
+                    attributes    : ns('payment'),
+                    amount        : data.amount,
+                    currency      : currencies.eur,
+                    action        : actions.payment,
+                    mode          : modes.full,
+                    contractNumber: providerConfig.contractNumber
+                },
+                returnURL: `${config.urls.managerUrl}/#/reload/success`,
+                cancelURL: `${config.urls.managerUrl}/#/reload/failed`,
+                order    : {
+                    attributes: ns('order'),
+                    ref       : transaction.get('id'),
+                    country   : 'FR',
+                    amount    : data.amount,
+                    currency  : currencies.eur,
+                    date      : moment().format(dateFormat)
+                },
+                notificationURL: `${config.urls.managerUrl}/api/provider/callback`,
+                // selectedContractList: [ config.contractNumber ],
+                buyer          : {
+                    attributes: ns('buyer'),
+                    firstName : data.buyer.firstname,
+                    lastName  : data.buyer.lastname,
+                    email     : data.buyer.email
+                },
+                merchantName: config.merchantName
+            }))
             .then((result) => {
                 transaction.set('transactionId', result.token);
 
@@ -84,7 +82,7 @@ module.exports = (app) => {
                         res : result.redirectURL
                     }));
             });
-    }
+    };
 
     const router = new express.Router();
 
@@ -121,15 +119,15 @@ module.exports = (app) => {
                         .save({ credit }, { method: 'update' });
 
                     const newReload = new Reload({
-                        credit  : transaction.get('amount'),
-                        type    : 'card',
-                        trace   : transaction.get('id'),
-                        point_id: req.point_id,
+                        credit   : transaction.get('amount'),
+                        type     : 'card',
+                        trace    : transaction.get('id'),
+                        point_id : req.point_id,
                         buyer_id : transaction.get('user_id'),
                         seller_id: transaction.get('user_id')
                     });
 
-                    return Promise.all([ userCredit, newReload.save(), transaction.save() ]);
+                    return Promise.all([userCredit, newReload.save(), transaction.save()]);
                 }
 
                 return transaction.save();
@@ -145,4 +143,4 @@ module.exports = (app) => {
     });
 
     app.use('/provider', router);
-}
+};

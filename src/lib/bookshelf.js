@@ -29,4 +29,6 @@ function sync() {
     return knex.migrate.latest();
 }
 
-module.exports = { knex, bookshelf, models, sync };
+module.exports = {
+    knex, bookshelf, models, sync
+};

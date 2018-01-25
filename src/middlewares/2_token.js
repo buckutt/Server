@@ -122,15 +122,12 @@ module.exports = function token(connector) {
             connector.details.userId = user.id;
             connector.details.user    = `${user.firstname} ${user.lastname}`;
             connector.details.rights  = connector.user.rights.map(right =>
-                ({ name: right.name, end: right.period.end })
-            );
+                ({ name: right.name, end: right.period.end }));
 
             return Promise.resolve();
         })
         .catch(jwt.TokenExpiredError, () =>
-            Promise.reject(new APIError(module, 401, 'Token expired'))
-        )
+            Promise.reject(new APIError(module, 401, 'Token expired')))
         .catch(jwt.JsonWebTokenError, () =>
-            Promise.reject(new APIError(module, 401, 'Invalid token', { bearer }))
-        );
+            Promise.reject(new APIError(module, 401, 'Invalid token', { bearer })));
 };

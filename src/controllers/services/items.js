@@ -90,8 +90,7 @@ router.get('/services/items', (req, res, next) => {
     models.Price
         .query(price => price
             .where('point_id', req.point.id)
-            .whereIn('group_id', req.groups)
-        )
+            .whereIn('group_id', req.groups))
         .fetchAll({
             withRelated: [
                 {
@@ -167,8 +166,7 @@ router.get('/services/items', (req, res, next) => {
                 .filter((article, i, initialArticles) => (
                     i === initialArticles.findIndex(article2 =>
                         article.id === article2.id &&
-                        article.category.id === article2.category.id
-                    )
+                        article.category.id === article2.category.id)
                 ));
 
             promotions = promotions

@@ -107,11 +107,8 @@ router.get('/services/manager/history', (req, res) => {
                         lastname : purchase.seller.lastname,
                         firstname: purchase.seller.firstname
                     },
-                    articles: flatten(
-                        purchase.articles.map(article =>
-                            Array(article._pivot_count).fill(article.name)
-                        )
-                    ),
+                    articles: flatten(purchase.articles.map(article =>
+                        Array(article._pivot_count).fill(article.name))),
                     promotion : purchase.price.promotion ? purchase.price.promotion.name : '',
                     isCanceled: !!purchase.deleted_at
                 }));
@@ -132,8 +129,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: reload.seller.firstname
                     },
                     isCanceled: !!reload.deleted_at
-                })
-            );
+                }));
 
             history = history.concat(reloads);
 
@@ -153,8 +149,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: refund.seller.firstname
                     },
                     isCanceled: !!refund.deleted_at
-                })
-            );
+                }));
 
             history = history.concat(refunds);
 
@@ -174,8 +169,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: transfer.sender.firstname
                     },
                     isCanceled: !!transfer.deleted_at
-                })
-            );
+                }));
 
             history = history.concat(transfersFrom);
 
@@ -195,8 +189,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: transfer.reciever.firstname
                     },
                     isCanceled: !!transfer.deleted_at
-                })
-            );
+                }));
 
             history = history
                 .concat(transfersTo)

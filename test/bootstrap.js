@@ -10,7 +10,7 @@ fs
 
 fs
     .readdirSync(path.join(__dirname, 'integration'))
-    .map(p => require(path.join(__dirname, 'integration', p)))
+    .map(p => require(path.join(__dirname, 'integration', p)));
 
 after(() => {
     process.exit(0);

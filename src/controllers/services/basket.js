@@ -63,10 +63,7 @@ router.post('/services/basket', (req, res, next) => {
         });
 
     const getPromotionsCosts = purchases.map(item =>
-        Promise.all(
-            item.articles.map(article => getPriceAmount(Price, article.price))
-        )
-    );
+        Promise.all(item.articles.map(article => getPriceAmount(Price, article.price))));
 
     initialPromise
         .then(() => Promise.all(getPromotionsCosts))
@@ -130,7 +127,7 @@ router.post('/services/basket', (req, res, next) => {
     const newCredit = req.buyer.credit - totalCost;
 
     // TODO: standardize error response
-    if (isNaN(newCredit)) {
+    if (Number.isNaN(newCredit)) {
         log.error('credit is not a number');
 
         return res
@@ -182,22 +179,20 @@ router.post('/services/basket', (req, res, next) => {
 
             const savePurchase = purchase
                 .save()
-                .then(() => Promise.all(
-                    Object.keys(countIds).map((articleId) => {
-                        const count = countIds[articleId];
+                .then(() => Promise.all(Object.keys(countIds).map((articleId) => {
+                    const count = countIds[articleId];
 
-                        return bookshelf
-                            .knex('articles_purchases')
-                            .insert({
-                                article_id : articleId,
-                                purchase_id: purchase.id,
-                                count,
-                                created_at : new Date(),
-                                updated_at : new Date(),
-                                deleted_at : null
-                            });
-                    })
-                ));
+                    return bookshelf
+                        .knex('articles_purchases')
+                        .insert({
+                            article_id : articleId,
+                            purchase_id: purchase.id,
+                            count,
+                            created_at : new Date(),
+                            updated_at : new Date(),
+                            deleted_at : null
+                        });
+                })));
 
             purchases.push(savePurchase);
         } else if (typeof item.credit === 'number') {
@@ -236,8 +231,7 @@ router.post('/services/basket', (req, res, next) => {
                 .json({
                     newCredit
                 })
-                .end()
-        )
+                .end())
         .catch(err => dbCatch(module, err, next));
 });
 

@@ -17,7 +17,7 @@ router.get('/services/treasury/purchases', (req, res, next) => {
         const dateIn  = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
-        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+        if (!Number.isNaN(dateIn.getTime()) && !Number.isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
                 .where('created_at', '>=', dateIn)
                 .where('created_at', '<=', dateOut);
@@ -95,7 +95,7 @@ router.get('/services/treasury/reloads', (req, res, next) => {
         const dateIn = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
-        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+        if (!Number.isNaN(dateIn.getTime()) && !Number.isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
                 .where('created_at', '>=', dateIn)
                 .where('created_at', '<=', dateOut);
@@ -110,8 +110,7 @@ router.get('/services/treasury/reloads', (req, res, next) => {
         .query(q => q
             .select('type')
             .sum('credit as credit')
-            .groupBy('type')
-        )
+            .groupBy('type'))
         .fetchAll();
 
     initialQuery
@@ -133,7 +132,7 @@ router.get('/services/treasury/refunds', (req, res, next) => {
         const dateIn = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
-        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+        if (!Number.isNaN(dateIn.getTime()) && !Number.isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
                 .where('created_at', '>=', dateIn)
                 .where('created_at', '<=', dateOut);
@@ -148,8 +147,7 @@ router.get('/services/treasury/refunds', (req, res, next) => {
         .query(q => q
             .select('type')
             .sum('amount as amount')
-            .groupBy('type')
-        )
+            .groupBy('type'))
         .fetchAll();
 
     initialQuery
