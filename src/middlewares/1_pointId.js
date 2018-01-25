@@ -19,7 +19,7 @@ module.exports = connector => connector.models.Device
     .then(res => ((res) ? res.toJSON() : null))
     .then((device) => {
         /* istanbul ignore if */
-        if (!device || device.wikets.length === 0) {
+        if (!device || (!device.isUser && device.wikets.length === 0)) {
             return Promise.reject(
                 new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint })
             );
