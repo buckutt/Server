@@ -45,7 +45,6 @@ app.use(compression());
 /**
  * Routes
  */
-app.get('/', (_, res) => res.status(200).json({}).end());
 app.use(controllers);
 reloadProvider(app)
     .catch(() => {
