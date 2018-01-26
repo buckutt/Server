@@ -1,12 +1,12 @@
-const express              = require('express');
-const Promise              = require('bluebird');
-const { countBy }          = require('lodash');
-const APIError             = require('../../errors/APIError');
-const logger               = require('../../lib/log');
-const vat                  = require('../../lib/vat');
-const { bookshelf }        = require('../../lib/bookshelf');
-const canSellOrReload      = require('../../lib/canSellOrReload');
-const dbCatch              = require('../../lib/dbCatch');
+const express         = require('express');
+const Promise         = require('bluebird');
+const { countBy }     = require('lodash');
+const APIError        = require('../../errors/APIError');
+const logger          = require('../../lib/log');
+const vat             = require('../../lib/vat');
+const { bookshelf }   = require('../../lib/bookshelf');
+const canSellOrReload = require('../../lib/canSellOrReload');
+const dbCatch         = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -24,32 +24,47 @@ const router = new express.Router();
 router.post('/services/basket', (req, res, next) => {
     log.info(`Processing basket ${JSON.stringify(req.body)}`, req.details);
 
-    if (!Array.isArray(req.body)) {
+    if (!req.body.buyer || !req.body.molType || !Array.isArray(req.body.basket)) {
         return next(new APIError(module, 400, 'Invalid basket'));
     }
 
-    if (req.body.length === 0) {
+    if (req.body.basket.length === 0) {
         return res.status(200).json({}).end();
     }
 
-    req.buyer_id = req.body[0].buyer_id;
+    req.buyer   = req.body.buyer;
+    req.molType = req.body.molType;
 
-    if (!req.buyer_id) {
+    if (!req.buyer || !req.molType) {
         return next(new APIError(module, 400, 'Invalid buyer'));
     }
 
-    req.app.locals.models.User
-        .where({ id: req.buyer_id })
-        .fetch()
-        .then((user) => {
-            req.buyer = user.toJSON();
+    req.app.locals.models.MeanOfLogin
+        .where({
+            type   : req.molType,
+            data   : req.buyer,
+            blocked: false
+        })
+        .fetch({
+            withRelated: ['user']
+        })
+        .then(mol => ((mol) ? mol.toJSON() : null))
+        .then((mol) => {
+            if (!mol || !mol.user.id) {
+                return next(new APIError(module, 400, 'Invalid buyer'));
+            }
+
+            req.buyer          = mol.user;
+            req.buyer.pin      = '';
+            req.buyer.password = '';
+
             next();
         });
 });
 
 router.post('/services/basket', (req, res, next) => {
     const { Price } = req.app.locals.models;
-    let purchases = req.body.filter(item => typeof item.cost === 'number');
+    let purchases   = req.body.basket.filter(item => typeof item.cost === 'number');
 
     const getArticleCosts = purchases.map(purchase => getPriceAmount(Price, purchase.price_id));
 
@@ -91,7 +106,7 @@ router.post('/services/basket', (req, res, next) => {
     // Stock reduciton queries
     const stocks        = [];
 
-    const totalCost = req.body
+    const totalCost = req.body.basket
         .map((item) => {
             if (typeof item.cost === 'number') {
                 return item.cost;
@@ -101,14 +116,14 @@ router.post('/services/basket', (req, res, next) => {
         })
         .reduce((a, b) => a + b);
 
-    const reloadOnly = req.body
+    const reloadOnly = req.body.basket
         .filter(item => typeof item.credit === 'number')
         .map(item => item.credit)
         .reduce((a, b) => a + b, 0);
 
     const now         = new Date().getTime();
     const minus       = now - 10000;
-    const requestDate = new Date(req.body[0].date).getTime();
+    const requestDate = new Date(req.body.date).getTime();
 
     if (req.buyer.credit < totalCost && (requestDate >= minus && requestDate <= now)) {
         return next(new APIError(module, 400, 'Not enough credit'));
@@ -140,8 +155,8 @@ router.post('/services/basket', (req, res, next) => {
 
     const userRights = canSellOrReload(req.user, req.point_id);
 
-    const unallowedPurchase = (req.body.find(item => typeof item.cost === 'number') && !userRights.canSell);
-    const unallowedReload   = (req.body.find(item => typeof item.credit === 'number') && !userRights.canReload);
+    const unallowedPurchase = (req.body.basket.find(item => typeof item.cost === 'number') && !userRights.canSell);
+    const unallowedReload   = (req.body.basket.find(item => typeof item.credit === 'number') && !userRights.canReload);
 
     if (unallowedPurchase || unallowedReload) {
         return next(new APIError(module, 401, 'No right to reload or sell', {
@@ -151,14 +166,14 @@ router.post('/services/basket', (req, res, next) => {
         }));
     }
 
-    req.body.forEach((item) => {
+    req.body.basket.forEach((item) => {
         if (typeof item.cost === 'number') {
             // Purchases
             const articlesIds = item.articles.map(article => article.id);
             const countIds    = countBy(articlesIds);
 
             const purchase = new models.Purchase({
-                buyer_id    : item.buyer_id,
+                buyer_id    : req.buyer.id,
                 price_id    : item.price_id,
                 point_id    : req.point_id,
                 promotion_id: item.promotion_id || null,
@@ -202,20 +217,25 @@ router.post('/services/basket', (req, res, next) => {
                 type     : item.type,
                 trace    : item.trace || '',
                 point_id : req.point_id,
-                buyer_id : item.buyer_id,
-                seller_id: req.user.id
+                buyer_id : req.buyer.id,
+                seller_id: req.user.id,
             });
 
             reloads.push(reload.save());
         }
     });
 
+    const updatedAt = new Date();
+
     const updateCredit = bookshelf.knex('users')
         .where({ id: req.buyer.id })
         .update({
             credit    : newCredit,
-            updated_at: new Date()
+            updated_at: updatedAt
         });
+
+    req.buyer.credit     = newCredit;
+    req.buyer.updated_at = updatedAt;
 
     const everythingSaving = [updateCredit].concat(reloads).concat(stocks);
 
@@ -228,10 +248,9 @@ router.post('/services/basket', (req, res, next) => {
         .then(() =>
             res
                 .status(200)
-                .json({
-                    newCredit
-                })
-                .end())
+                .json(req.buyer)
+                .end()
+        )
         .catch(err => dbCatch(module, err, next));
 });
 
