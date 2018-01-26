@@ -16,7 +16,11 @@ module.exports = {
         console.log('setting up userCredit');
 
         app.locals.modelChanges.on('userCreditUpdate', (user) => {
-            send(clients, user.id, user.credit);
+            const credit = (typeof user.get === 'function')
+                ? user.get('credit')
+                : user.credit;
+
+            send(clients, user.id, credit);
         });
     },
 

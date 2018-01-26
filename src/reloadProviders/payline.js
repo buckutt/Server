@@ -30,7 +30,6 @@ const dateFormat = 'DD/MM/YYYY HH:mm';
 module.exports = (app) => {
     const payline     = new Payline(providerConfig.id, providerConfig.password, providerConfig.url);
     const Transaction = app.locals.models.Transaction;
-    const User        = app.locals.models.User;
     const Reload      = app.locals.models.Reload;
 
     app.locals.makePayment = (data) => {
@@ -111,12 +110,10 @@ module.exports = (app) => {
                 transaction.set('longState', paymentDetails.result.longMessage);
 
                 if (transaction.get('state') === 'ACCEPTED') {
-                    const credit = knex.raw(`credit + ${transaction.get('amount')}`);
-
-                    const userCredit = User
-                        .forge()
+                    const userCredit = knex('users')
                         .where({ id: transaction.get('user_id') })
-                        .save({ credit }, { method: 'update' });
+                        .increment('credit', transaction.get('amount'))
+                        .returning('credit');
 
                     const newReload = new Reload({
                         credit   : transaction.get('amount'),
@@ -127,7 +124,18 @@ module.exports = (app) => {
                         seller_id: transaction.get('user_id')
                     });
 
-                    return Promise.all([userCredit, newReload.save(), transaction.save()]);
+                    return Promise
+                        .all([userCredit, newReload.save(), transaction.save()])
+                        .then((results) => {
+                            // First [0] : userCredit promise
+                            // Second [0] : returning credit column
+                            const newUserCredit = results[0][0];
+
+                            req.app.locals.modelChanges.emit('userCreditUpdate', {
+                                id    : transaction.get('user_id'),
+                                credit: newUserCredit
+                            });
+                        });
                 }
 
                 return transaction.save();
