@@ -46,9 +46,10 @@ module.exports = connector => connector.models.Device
                     connector.event_id = period.event.id;
                     minPeriod          = diff;
 
-                    connector.device = device;
-                    connector.point  = point;
-                    connector.event  = period.event;
+                    connector.device                 = device;
+                    connector.point                  = point;
+                    connector.event                  = period.event;
+                    connector.device.defaultGroup_id = wiket.defaultGroup_id;
 
                     connector.details = {
                         device: connector.device.name,

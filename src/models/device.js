@@ -6,10 +6,6 @@ module.exports = (bookshelf) => {
         uuid         : true,
         softDelete   : true,
 
-        defaultGroup() {
-            return this.belongsTo('Group', 'defaultGroup_id');
-        },
-
         wikets() {
             return this.hasMany('Wiket');
         }
