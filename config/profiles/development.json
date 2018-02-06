@@ -57,7 +57,7 @@
         "name": "etupay",
         "config": {
             "id": 16,
-            "key": "",
+            "key": "foo",
             "url": "https://etupay.utt.fr/initiate",
             "merchantName": ""
         }

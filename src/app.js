@@ -47,7 +47,7 @@ app.use(compression());
  */
 app.use(controllers);
 reloadProvider(app)
-    .catch((err) => {
+    .catch(() => {
         console.error('No reload provider provided');
         process.exit(1);
     });
@@ -130,6 +130,7 @@ app.start = () => {
         }, app);
 
         app.locals.modelChanges = new EventEmitter();
+        app.locals.server       = server;
 
         socketServer.ioServer(server, app);
 
@@ -146,7 +147,7 @@ app.start = () => {
 
                 fs.writeFileSync(LOCK_FILE, '1');
 
-                resolve();
+                resolve(app);
             });
         });
     });

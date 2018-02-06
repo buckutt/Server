@@ -96,8 +96,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
         .then(() =>
             models.User
                 .where({ id: newTransfer.get('sender_id') })
-                .fetch()
-        )
+                .fetch())
         .then((sender) => {
             sender.set('credit', sender.get('credit') - amount);
             sender.set('updated_at', new Date());
@@ -105,8 +104,7 @@ router.post('/services/manager/transfer', (req, res, next) => {
             return sender.save();
         })
         .then(() =>
-            newTransfer.save()
-        )
+            newTransfer.save())
         .then(() => {
             if (newTransfer.get('reciever_id') === newTransfer.get('sender_id')) {
                 amount = 0;

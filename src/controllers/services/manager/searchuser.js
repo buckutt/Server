@@ -24,8 +24,7 @@ router.get('/services/manager/searchuser', (req, res) => {
                     'like',
                     `%${name.toLowerCase()}%`
                 )
-                .limit(req.query.limit || 5)
-        )
+                .limit(req.query.limit || 5))
         .fetchAll()
         .then((users) => {
             const cleanedUsers = users.toJSON()

@@ -21,7 +21,9 @@ router.post('/services/manager/reload', (req, res, next) => {
     req.app.locals
         .makePayment({
             buyer : req.user,
-            amount: parseInt(req.body.amount, 10)
+            amount: parseInt(req.body.amount, 10),
+            // Used by test reloadProvider
+            point : req.point_id
         })
         .then((result) => {
             res

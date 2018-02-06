@@ -53,4 +53,6 @@ function clone(obj, deep = true) {
     return result;
 }
 
-module.exports = { isInt, pad2, pp, clone };
+module.exports = {
+    isInt, pad2, pp, clone
+};

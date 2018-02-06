@@ -1,12 +1,12 @@
 const uuid     = require('uuid');
 const { knex } = require('../lib/bookshelf');
+const config   = require('../../config');
 
 module.exports = (app) => {
     const Transaction = app.locals.models.Transaction;
-    const User        = app.locals.models.User;
     const Reload      = app.locals.models.Reload;
 
-    const validatePayment = id => Transaction
+    const validatePayment = (id, data) => Transaction
         .where({ id })
         .fetch()
         .then((transaction) => {
@@ -14,21 +14,32 @@ module.exports = (app) => {
             transaction.set('state', 'ACCEPTED');
 
             if (transaction.get('state') === 'ACCEPTED') {
-                const credit = knex.raw(`credit + ${transaction.get('amount')}`);
-
-                const userCredit = User
-                    .forge()
+                const userCredit = knex('users')
                     .where({ id: transaction.get('user_id') })
-                    .save({ credit }, { method: 'update' });
+                    .increment('credit', transaction.get('amount'))
+                    .returning('credit');
 
                 const newReload = new Reload({
-                    credit: transaction.get('amount'),
-                    type  : 'card-online',
-                    trace : transaction.get('id')
-                })
-                    .save();
+                    credit   : transaction.get('amount'),
+                    type     : 'card',
+                    trace    : transaction.get('id'),
+                    point_id : data.point,
+                    buyer_id : transaction.get('user_id'),
+                    seller_id: transaction.get('user_id')
+                });
 
-                return Promise.all([userCredit, newReload, transaction.save()]);
+                return Promise
+                    .all([userCredit, newReload.save(), transaction.save()])
+                    .then((res) => {
+                        // First [0] : userCredit promise
+                        // Second [0] : returning credit column
+                        const newUserCredit = res[0][0];
+
+                        app.locals.modelChanges.emit('userCreditUpdate', {
+                            id    : transaction.get('user_id'),
+                            credit: newUserCredit
+                        });
+                    });
             }
 
             return transaction.save();
@@ -37,17 +48,18 @@ module.exports = (app) => {
     app.locals.makePayment = (data) => {
         const transaction = new Transaction({
             state  : 'pending',
+            amount : data.amount,
             user_id: data.buyer.id
         });
 
         return transaction
             .save()
             .then(() => {
-                setTimeout(() => validatePayment(transaction.get('id')), 1000);
+                setTimeout(() => validatePayment(transaction.get('id'), data), 1000);
 
                 return {
                     type: 'url',
-                    res : 'https://buckless.com'
+                    res : `${config.urls.managerUrl}/#/reload/success`
                 };
             });
     };

@@ -1,3 +1,4 @@
+const bcrypt_  = require('bcryptjs');
 const express  = require('express');
 const Promise  = require('bluebird');
 const APIError = require('../../../errors/APIError');
@@ -9,6 +10,7 @@ const log = logger(module);
 /**
  * GeneratePin controller.
  */
+const bcrypt = Promise.promisifyAll(bcrypt_);
 const router = new express.Router();
 
 
@@ -17,6 +19,10 @@ router.put('/services/manager/generatepin', (req, res, next) => {
 
     if (!req.body.pin) {
         return next(new APIError(module, 401, 'PIN is missing'));
+    }
+
+    if (req.body.pin.length !== 4) {
+        next(new APIError(module, 401, 'PIN has to be clear, not crypted'));
     }
 
     if (!req.body.key) {
@@ -38,7 +44,10 @@ router.put('/services/manager/generatepin', (req, res, next) => {
                 return Promise.reject(new APIError(module, 401, 'Invalid key'));
             }
 
-            user.set('pin', req.body.pin);
+            return bcrypt.hash(req.body.pin, 10);
+        })
+        .then((hash) => {
+            user.set('pin', hash);
             user.set('recoverKey', '');
             user.set('updated_at', new Date());
 

@@ -28,6 +28,10 @@ module.exports = (bookshelf) => {
 
         categories() {
             return this.belongsToMany('Category', 'categories_points', 'point_id', 'category_id');
+        },
+
+        defaultGroup() {
+            return this.belongsTo('Group', 'defaultGroup_id');
         }
     });
 

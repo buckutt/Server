@@ -16,7 +16,7 @@ router.get('/services/treasury/csv/purchases', (req, res, next) => {
         const dateIn  = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
-        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+        if (!Number.isNaN(dateIn.getTime()) && !Number.isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
                 .where('created_at', '>=', dateIn)
                 .where('created_at', '<=', dateOut);
@@ -103,7 +103,7 @@ router.get('/services/treasury/csv/reloads', (req, res, next) => {
         const dateIn = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
-        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+        if (!Number.isNaN(dateIn.getTime()) && !Number.isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
                 .where('created_at', '>=', dateIn)
                 .where('created_at', '<=', dateOut);
@@ -153,7 +153,7 @@ router.get('/services/treasury/csv/refunds', (req, res, next) => {
         const dateIn = new Date(req.query.dateIn);
         const dateOut = new Date(req.query.dateOut);
 
-        if (!isNaN(dateIn.getTime()) && !isNaN(dateOut.getTime())) {
+        if (!Number.isNaN(dateIn.getTime()) && !Number.isNaN(dateOut.getTime())) {
             initialQuery = initialQuery
                 .where('created_at', '>=', dateIn)
                 .where('created_at', '<=', dateOut);

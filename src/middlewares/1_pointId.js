@@ -19,10 +19,8 @@ module.exports = connector => connector.models.Device
     .then(res => ((res) ? res.toJSON() : null))
     .then((device) => {
         /* istanbul ignore if */
-        if (!device || device.wikets.length === 0) {
-            return Promise.reject(
-                new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint })
-            );
+        if (!device || (!device.isUser && device.wikets.length === 0)) {
+            return Promise.reject(new APIError(module, 404, 'Device not found', { fingerprint: connector.fingerprint }));
         }
 
         let minPeriod = Infinity;
@@ -48,9 +46,10 @@ module.exports = connector => connector.models.Device
                     connector.event_id = period.event.id;
                     minPeriod          = diff;
 
-                    connector.device = device;
-                    connector.point  = point;
-                    connector.event  = period.event;
+                    connector.device                 = device;
+                    connector.point                  = point;
+                    connector.event                  = period.event;
+                    connector.device.defaultGroup_id = wiket.defaultGroup_id;
 
                     connector.details = {
                         device: connector.device.name,

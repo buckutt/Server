@@ -23,7 +23,9 @@ function generateMessage(mail, key) {
     const template = dots.template(config.askpin.template);
     const html     = template({ link: `${config.urls.managerUrl}/#/generate?key=${key}` });
 
-    return { from, to, subject, html };
+    return {
+        from, to, subject, html
+    };
 }
 
 

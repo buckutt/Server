@@ -16,6 +16,10 @@ module.exports = (bookshelf) => {
 
         period() {
             return this.belongsTo('Period');
+        },
+
+        defaultGroup() {
+            return this.belongsTo('Group', 'defaultGroup_id');
         }
     });
 

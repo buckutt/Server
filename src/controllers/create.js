@@ -34,8 +34,7 @@ router.post('/:model/', (req, res, next) => {
     Promise.all(insts.map(inst => inst.save()))
         .then(results => req.Model
             .where('id', 'in', results.map(i => i.id))
-            .fetchAll({ withRelated })
-        )
+            .fetchAll({ withRelated }))
         .then(results => embedFilter(embedFilters, results.toJSON()))
         .then((results) => {
             req.app.locals.modelChanges.emit(

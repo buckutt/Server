@@ -11,8 +11,25 @@ const router = new express.Router();
 
 router.get('/services/manager/history', (req, res, next) => {
     const adminRight = req.details.rights.find(right => right.name === 'admin' && right.end > new Date());
-    req.history      = {};
-    req.history.user = adminRight ? req.query.buyer : req.user.id;
+
+    if (adminRight) {
+        return req.app.locals.models.User
+            .where({ id: req.query.buyer })
+            .fetch()
+            .then((user) => {
+                req.history = {
+                    user  : req.query.buyer,
+                    credit: user.get('credit')
+                };
+
+                next();
+            });
+    }
+
+    req.history = {
+        user  : req.user.id,
+        credit: req.user.credit
+    };
 
     next();
 });
@@ -90,11 +107,8 @@ router.get('/services/manager/history', (req, res) => {
                         lastname : purchase.seller.lastname,
                         firstname: purchase.seller.firstname
                     },
-                    articles: flatten(
-                        purchase.articles.map(article =>
-                            Array(article._pivot_count).fill(article.name)
-                        )
-                    ),
+                    articles: flatten(purchase.articles.map(article =>
+                        Array(article._pivot_count).fill(article.name))),
                     promotion : purchase.price.promotion ? purchase.price.promotion.name : '',
                     isCanceled: !!purchase.deleted_at
                 }));
@@ -115,8 +129,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: reload.seller.firstname
                     },
                     isCanceled: !!reload.deleted_at
-                })
-            );
+                }));
 
             history = history.concat(reloads);
 
@@ -136,8 +149,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: refund.seller.firstname
                     },
                     isCanceled: !!refund.deleted_at
-                })
-            );
+                }));
 
             history = history.concat(refunds);
 
@@ -157,8 +169,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: transfer.sender.firstname
                     },
                     isCanceled: !!transfer.deleted_at
-                })
-            );
+                }));
 
             history = history.concat(transfersFrom);
 
@@ -178,8 +189,7 @@ router.get('/services/manager/history', (req, res) => {
                         firstname: transfer.reciever.firstname
                     },
                     isCanceled: !!transfer.deleted_at
-                })
-            );
+                }));
 
             history = history
                 .concat(transfersTo)
@@ -198,7 +208,7 @@ router.get('/services/manager/history', (req, res) => {
             res
                 .status(200)
                 .json({
-                    credit: req.user.credit,
+                    credit: req.history.credit,
                     history
                 })
                 .end();
