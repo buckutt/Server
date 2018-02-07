@@ -13,8 +13,6 @@ module.exports = {
     route: 'userCredit',
 
     setup(app, clients) {
-        console.log('setting up userCredit');
-
         app.locals.modelChanges.on('userCreditUpdate', (user) => {
             const credit = (typeof user.get === 'function')
                 ? user.get('credit')

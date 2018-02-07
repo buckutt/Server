@@ -1,6 +1,7 @@
 const APIError = require('../errors/APIError');
 
 const modelsNames = {
+    alerts        : 'Alert',
     articles      : 'Article',
     categories    : 'Category',
     devices       : 'Device',

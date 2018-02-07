@@ -218,7 +218,7 @@ router.post('/services/basket', (req, res, next) => {
                 trace    : item.trace || '',
                 point_id : req.point_id,
                 buyer_id : req.buyer.id,
-                seller_id: req.user.id,
+                seller_id: req.user.id
             });
 
             reloads.push(reload.save());
@@ -249,8 +249,7 @@ router.post('/services/basket', (req, res, next) => {
             res
                 .status(200)
                 .json(req.buyer)
-                .end()
-        )
+                .end())
         .catch(err => dbCatch(module, err, next));
 });
 

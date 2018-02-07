@@ -12,7 +12,8 @@
             "/meansofpayment/search",
             "/devices",
             "/devices/search",
-            "/services/items"
+            "/services/items",
+            "alert"
         ],
         "write": [
             "/services/basket"
@@ -29,7 +30,8 @@
             "/meansoflogin/search",
             "/meansofpayment",
             "/meansofpayment/search",
-            "/services/items"
+            "/services/items",
+            "alert"
         ],
         "write": [
             "/services/basket"
