@@ -1,12 +1,12 @@
-const express         = require('express');
-const APIError        = require('../../errors/APIError');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
+const express               = require('express');
+const APIError              = require('../../errors/APIError');
+const canSellReloadOrAssign = require('../../lib/canSellReloadOrAssign');
+const dbCatch               = require('../../lib/dbCatch');
 
 const router = new express.Router();
 
 router.get('/services/items', (req, res, next) => {
-    const userRights = canSellOrReload(req.user, req.point.id);
+    const userRights = canSellReloadOrAssign(req.user, req.point.id);
 
     if (!userRights.canSell && !userRights.canReload) {
         return next(new APIError(module, 401, 'No right to reload or sell'));

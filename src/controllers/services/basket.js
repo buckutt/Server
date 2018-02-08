@@ -1,12 +1,12 @@
-const express         = require('express');
-const Promise         = require('bluebird');
-const { countBy }     = require('lodash');
-const APIError        = require('../../errors/APIError');
-const logger          = require('../../lib/log');
-const vat             = require('../../lib/vat');
-const { bookshelf }   = require('../../lib/bookshelf');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
+const express               = require('express');
+const Promise               = require('bluebird');
+const { countBy }           = require('lodash');
+const APIError              = require('../../errors/APIError');
+const logger                = require('../../lib/log');
+const vat                   = require('../../lib/vat');
+const { bookshelf }         = require('../../lib/bookshelf');
+const canSellReloadOrAssign = require('../../lib/canSellReloadOrAssign');
+const dbCatch               = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -153,7 +153,7 @@ router.post('/services/basket', (req, res, next) => {
             .end();
     }
 
-    const userRights = canSellOrReload(req.user, req.point_id);
+    const userRights = canSellReloadOrAssign(req.user, req.point_id);
 
     const unallowedPurchase = (req.body.basket.find(item => typeof item.cost === 'number') && !userRights.canSell);
     const unallowedReload   = (req.body.basket.find(item => typeof item.credit === 'number') && !userRights.canReload);

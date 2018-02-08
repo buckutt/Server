@@ -99,7 +99,6 @@ module.exports = function token(connector) {
 
             connector.connectType = connectType;
 
-
             connector.user.rights = connector.user.rights
                 .filter((right) => {
                     // If pin is not allowed with this right, pass

@@ -45,6 +45,12 @@
         "template": "Hi !<br> You seems to have forgotten your pin. Follow <a href=\"{{=it.link}}\">this link</a> to generate a new one !",
         "managerUrl": "http://b.inst.buckless.com"
     },
+    "assigner": {
+        "ticketProvider": "test",
+        "from": "noreply@buckless.com",
+        "subject": "Buckless — Votre code PIN",
+        "template": "Hi !\nHere is your code PIN to access your own <a href=\"{{=it.link}}\">account</a> : {{=it.pin}}"
+    },
     "provider": {
         "name": "test",
         "config": {

@@ -39,7 +39,7 @@ router.get('/services/deviceEssentials', (req, res, next) => {
             const users = [];
 
             rights.forEach((right) => {
-                if (right.name === 'seller' || right.name === 'reloader') {
+                if (right.name === 'seller' || right.name === 'reloader' || right.name === 'assigner') {
                     const foundUserId    = users.findIndex(user => user.id === right.user.id);
                     const formattedRight = {
                         name : right.name,
