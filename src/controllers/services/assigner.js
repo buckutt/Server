@@ -1,12 +1,12 @@
 const express      = require('express');
 const bcrypt       = require('bcryptjs');
-const dots         = require('dot');
 const { padStart } = require('lodash');
-const config       = require('../../../config');
 const mailer       = require('../../lib/mailer');
 const dbCatch      = require('../../lib/dbCatch');
 const fetchFromAPI = require('../../ticketProviders');
 const APIError     = require('../../errors/APIError');
+const template     = require('../../mailTemplates');
+const config       = require('../../../config');
 
 /**
  * Assigner controller. Handles cards assignment
@@ -68,13 +68,13 @@ router.get('/services/assigner', (req, res, next) => {
                         const from     = config.askpin.from;
                         const to       = user.get('mail');
                         const subject  = config.assigner.subject;
-                        const template = dots.template(config.askpin.template);
-                        const html     = template({
-                            link: `${config.urls.managerUrl}`,
-                            pin
+                        const { html, text } = template('pinAssign', {
+                            pin,
+                            brandname: config.provider.config.merchantName,
+                            link     : `${config.urls.managerUrl}`
                         });
 
-                        return mailer.sendMail({ from, to, subject, html });
+                        return mailer.sendMail({ from, to, subject, html, text });
                     })
                     .then(() => {
                         const mailMol = new MeanOfLogin({
