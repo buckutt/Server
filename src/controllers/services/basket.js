@@ -100,11 +100,11 @@ router.post('/services/basket', (req, res, next) => {
     const models = req.app.locals.models;
 
     // Purchases documents
-    const purchases     = [];
+    const purchases = [];
     // Reloads documents
-    const reloads       = [];
-    // Stock reduciton queries
-    const stocks        = [];
+    const reloads   = [];
+
+    const transactionIds = { purchases: [], reloads: [] };
 
     const totalCost = req.body.basket
         .map((item) => {
@@ -182,20 +182,12 @@ router.post('/services/basket', (req, res, next) => {
                 vat         : vat(item)
             });
 
-            // Stock reduction
-            articlesIds.forEach((articleId) => {
-                const stockReduction = models.Article
-                    .query()
-                    .where({ id: articleId })
-                    .decrement('stock');
-
-                stocks.push(stockReduction);
-            });
-
             const savePurchase = purchase
                 .save()
                 .then(() => Promise.all(Object.keys(countIds).map((articleId) => {
                     const count = countIds[articleId];
+
+                    transactionIds.purchases.push(purchase.id);
 
                     return bookshelf
                         .knex('articles_purchases')
@@ -221,7 +213,11 @@ router.post('/services/basket', (req, res, next) => {
                 seller_id: req.user.id
             });
 
-            reloads.push(reload.save());
+            const saveReload = reload
+                .save()
+                .then(() => transactionIds.reloads.push(reload.id));
+
+            reloads.push(saveReload);
         }
     });
 
@@ -237,19 +233,19 @@ router.post('/services/basket', (req, res, next) => {
     req.buyer.credit     = newCredit;
     req.buyer.updated_at = updatedAt;
 
-    const everythingSaving = [updateCredit].concat(reloads).concat(stocks);
-
     Promise
-        .all(purchases)
-        .then(() => Promise.all(everythingSaving))
+        .all([updateCredit].concat(purchases).concat(reloads))
         .then(() => {
             req.app.locals.modelChanges.emit('userCreditUpdate', req.buyer);
-        })
-        .then(() =>
-            res
+
+            return res
                 .status(200)
-                .json(req.buyer)
-                .end())
+                .json({
+                    transactionIds,
+                    ...req.buyer
+                })
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 
