@@ -99,9 +99,9 @@ router.post('/services/login', (req, res, next) => {
 
             const userRights = rightsDetails(user, req.point_id);
 
-            user.canSell   = userRights.canSell;
-            user.canReload = userRights.canReload;
-            user.canAssign = userRights.canAssign;
+            user.canSell   = userRights.sell;
+            user.canReload = userRights.reload;
+            user.canAssign = userRights.assign;
 
             return res
                 .status(200)

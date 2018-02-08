@@ -2,7 +2,6 @@ const APIError      = require('../errors/APIError');
 const { bookshelf } = require('./bookshelf');
 
 module.exports = function dbCatch(module_, err, next) {
-    console.log(err);
     if (err.constraint && err.constraint.endsWith('_unique')) {
         return next(new APIError(module_, 400, 'Duplicate Entry', err.message));
     }

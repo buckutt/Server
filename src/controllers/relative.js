@@ -90,7 +90,6 @@ router.post('/:model/:id/:submodel/:subId', (req, res, next) => {
             return left[submodel]().attach(right);
         })
         .then((rightCollection) => {
-            console.log(rightCollection.last());
             // req.app.locals.modelChanges.emit(
             //     'data',
             //     'create',
@@ -152,7 +151,6 @@ router.delete('/:model/:id/:submodel/:subId', (req, res, next) => {
             return left[submodel]().detach(right);
         })
         .then(() => {
-            console.log(right);
             // req.app.locals.modelChanges.emit(
             //     'data',
             //     'create',

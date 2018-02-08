@@ -36,8 +36,6 @@ router.get('/services/assigner', (req, res, next) => {
         })
         .then(mol => ((mol) ? mol.toJSON() : null))
         .then((mol) => {
-            console.log('got mol from db ?')
-            console.log(mol);
             if (mol && mol.user.id) {
                 return res
                     .status(200)

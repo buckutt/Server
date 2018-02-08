@@ -2,7 +2,7 @@ const config = require('../../config');
 
 module.exports = (user, pointId) => {
     const now    = new Date();
-    const result = { sell: false, reload: false, admin: false };
+    const result = { sell: false, reload: false, assign: false, admin: false };
 
     /* istanbul ignore if */
     if (!user || !user.rights) {
@@ -18,12 +18,16 @@ module.exports = (user, pointId) => {
                 result.admin = true;
             }
 
-            if (configRight && configRight.sell) {
+            if (configRight && configRight.canSell) {
                 result.sell = true;
             }
 
-            if (configRight && configRight.reload) {
+            if (configRight && configRight.canReload) {
                 result.reload = true;
+            }
+
+            if (configRight && configRight.canAssign) {
+                result.assign = true;
             }
         }
     }
