@@ -15,7 +15,8 @@
             "alert"
         ],
         "write": [
-            "/services/basket"
+            "/services/basket",
+            "/services/cancelTransaction"
         ]
       },
       "reloader": {
