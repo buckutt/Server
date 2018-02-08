@@ -1,12 +1,11 @@
-const express               = require('express');
-const Promise               = require('bluebird');
-const { countBy }           = require('lodash');
-const APIError              = require('../../errors/APIError');
-const logger                = require('../../lib/log');
-const vat                   = require('../../lib/vat');
-const { bookshelf }         = require('../../lib/bookshelf');
-const canSellReloadOrAssign = require('../../lib/canSellReloadOrAssign');
-const dbCatch               = require('../../lib/dbCatch');
+const express       = require('express');
+const { countBy }   = require('lodash');
+const APIError      = require('../../errors/APIError');
+const logger        = require('../../lib/log');
+const vat           = require('../../lib/vat');
+const { bookshelf } = require('../../lib/bookshelf');
+const rightsDetails = require('../../lib/rightsDetails');
+const dbCatch       = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -153,10 +152,10 @@ router.post('/services/basket', (req, res, next) => {
             .end();
     }
 
-    const userRights = canSellReloadOrAssign(req.user, req.point_id);
+    const userRights = rightsDetails(req.user, req.point_id);
 
-    const unallowedPurchase = (req.body.basket.find(item => typeof item.cost === 'number') && !userRights.canSell);
-    const unallowedReload   = (req.body.basket.find(item => typeof item.credit === 'number') && !userRights.canReload);
+    const unallowedPurchase = (req.body.basket.find(item => typeof item.cost === 'number') && !userRights.sell);
+    const unallowedReload   = (req.body.basket.find(item => typeof item.credit === 'number') && !userRights.reload);
 
     if (unallowedPurchase || unallowedReload) {
         return next(new APIError(module, 401, 'No right to reload or sell', {

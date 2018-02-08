@@ -1,13 +1,13 @@
-const bcrypt_               = require('bcryptjs');
-const express               = require('express');
-const jwt                   = require('jsonwebtoken');
-const Promise               = require('bluebird');
-const config                = require('../../../config');
-const logger                = require('../../lib/log');
-const canSellReloadOrAssign = require('../../lib/canSellReloadOrAssign');
-const dbCatch               = require('../../lib/dbCatch');
-const { bookshelf }         = require('../../lib/bookshelf');
-const APIError              = require('../../errors/APIError');
+const bcrypt_       = require('bcryptjs');
+const express       = require('express');
+const jwt           = require('jsonwebtoken');
+const Promise       = require('bluebird');
+const config        = require('../../../config');
+const logger        = require('../../lib/log');
+const rightsDetails = require('../../lib/rightsDetails');
+const dbCatch       = require('../../lib/dbCatch');
+const { bookshelf } = require('../../lib/bookshelf');
+const APIError      = require('../../errors/APIError');
 
 const log = logger(module);
 
@@ -97,7 +97,7 @@ router.post('/services/login', (req, res, next) => {
             user.pin      = '';
             user.password = '';
 
-            const userRights = canSellReloadOrAssign(user, req.point_id);
+            const userRights = rightsDetails(user, req.point_id);
 
             user.canSell   = userRights.canSell;
             user.canReload = userRights.canReload;

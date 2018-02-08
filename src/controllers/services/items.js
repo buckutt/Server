@@ -1,19 +1,19 @@
-const express               = require('express');
-const APIError              = require('../../errors/APIError');
-const canSellReloadOrAssign = require('../../lib/canSellReloadOrAssign');
-const dbCatch               = require('../../lib/dbCatch');
+const express       = require('express');
+const APIError      = require('../../errors/APIError');
+const rightsDetails = require('../../lib/rightsDetails');
+const dbCatch       = require('../../lib/dbCatch');
 
 const router = new express.Router();
 
 router.get('/services/items', (req, res, next) => {
-    const userRights = canSellReloadOrAssign(req.user, req.point.id);
+    const userRights = rightsDetails(req.user, req.point.id);
 
-    if (!userRights.canSell && !userRights.canReload) {
+    if (!userRights.sell && !userRights.reload) {
         return next(new APIError(module, 401, 'No right to reload or sell'));
     }
 
     if (!req.query.buyer || !req.query.molType) {
-        if (!userRights.canSell || !req.device.defaultGroup_id) {
+        if (!userRights.sell || !req.device.defaultGroup_id) {
             return res
                 .status(200)
                 .json({
@@ -65,7 +65,7 @@ router.get('/services/items', (req, res, next) => {
                 .map(membership => membership.group_id);
 
 
-            if (!userRights.canSell || req.groups.length === 0) {
+            if (!userRights.sell || req.groups.length === 0) {
                 return res
                     .status(200)
                     .json({
