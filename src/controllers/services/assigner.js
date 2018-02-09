@@ -45,63 +45,62 @@ router.get('/services/assigner', (req, res, next) => {
                         name  : `${mol.user.firstname} ${mol.user.lastname}`
                     })
                     .end();
-            } else {
-                return fetchFromAPI(ticketId)
-                    .then((userData) => {
-                        pin = padStart(Math.floor(Math.random() * 10000), 4, '0');
-
-                        userData.password = 'none';
-                        userData.pin      = bcrypt.hashSync(pin);
-                        userData.credit   = userData.credit || 0;
-
-                        user = new User(userData);
-
-                        return user.save();
-                    })
-                    .then(() => {
-                        if (!config.assigner.sendPINMail) {
-                            return Promise.resolve();
-                        }
-
-                        const from     = config.askpin.from;
-                        const to       = user.get('mail');
-                        const subject  = config.assigner.subject;
-                        const { html, text } = template('pinAssign', {
-                            pin,
-                            brandname: config.provider.config.merchantName,
-                            link     : `${config.urls.managerUrl}`
-                        });
-
-                        return mailer.sendMail({ from, to, subject, html, text });
-                    })
-                    .then(() => {
-                        const mailMol = new MeanOfLogin({
-                            user_id: user.id,
-                            type   : 'mail',
-                            data   : user.get('mail'),
-                            blocked: false
-                        });
-
-                        const ticketMol = new MeanOfLogin({
-                            user_id: user.id,
-                            type   : 'ticketId',
-                            data   : ticketId,
-                            blocked: false
-                        });
-
-                        return Promise.all([ mailMol.save(), ticketMol.save() ]);
-                    })
-                    .then(() => {
-                        return res
-                            .status(200)
-                            .json({
-                                id    : user.id,
-                                credit: user.get('credit'),
-                                name  : `${user.get('firstname')} ${user.get('lastname')}`
-                            })
-                            .end();
-                    });
             }
+            return fetchFromAPI(ticketId)
+                .then((userData) => {
+                    pin = padStart(Math.floor(Math.random() * 10000), 4, '0');
+
+                    userData.password = 'none';
+                    userData.pin      = bcrypt.hashSync(pin);
+                    userData.credit   = userData.credit || 0;
+
+                    user = new User(userData);
+
+                    return user.save();
+                })
+                .then(() => {
+                    if (!config.assigner.sendPINMail) {
+                        return Promise.resolve();
+                    }
+
+                    const from     = config.askpin.from;
+                    const to       = user.get('mail');
+                    const subject  = config.assigner.subject;
+                    const { html, text } = template('pinAssign', {
+                        pin,
+                        brandname: config.provider.config.merchantName,
+                        link     : `${config.urls.managerUrl}`
+                    });
+
+                    return mailer.sendMail({
+                        from, to, subject, html, text
+                    });
+                })
+                .then(() => {
+                    const mailMol = new MeanOfLogin({
+                        user_id: user.id,
+                        type   : 'mail',
+                        data   : user.get('mail'),
+                        blocked: false
+                    });
+
+                    const ticketMol = new MeanOfLogin({
+                        user_id: user.id,
+                        type   : 'ticketId',
+                        data   : ticketId,
+                        blocked: false
+                    });
+
+                    return Promise.all([mailMol.save(), ticketMol.save()]);
+                })
+                .then(() => res
+                    .status(200)
+                    .json({
+                        id    : user.id,
+                        credit: user.get('credit'),
+                        name  : `${user.get('firstname')} ${user.get('lastname')}`
+                    })
+                    .end());
         })
         .catch(err => dbCatch(module, err, next));
 });
@@ -136,8 +135,7 @@ router.post('/services/assigner/groups', (req, res, next) => {
             res
                 .status(200)
                 .json({})
-                .end()
-        )
+                .end())
         .catch(err => dbCatch(module, err, next));
 });
 

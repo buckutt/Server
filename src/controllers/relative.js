@@ -93,8 +93,7 @@ router.post('/:model/:id/:submodel/:subId', (req, res, next) => {
             res
                 .status(200)
                 .json({})
-                .end()
-        )
+                .end())
         .catch(err => dbCatch(module, err, next));
 });
 

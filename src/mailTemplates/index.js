@@ -3,16 +3,16 @@ const path = require('path');
 const dot  = require('dot');
 
 const templateSettings = {
-  evaluate   :    /\{\{([\s\S]+?)\}\}/g,
-  interpolate: /\{\{=([\s\S]+?)\}\}/g,
-  varname    : 'it',
-  strip      : false,
+    evaluate   : /\{\{([\s\S]+?)\}\}/g,
+    interpolate: /\{\{=([\s\S]+?)\}\}/g,
+    varname    : 'it',
+    strip      : false
 };
 
 const templates = fs
     .readdirSync(__dirname)
     .filter(f => f !== 'index.js')
-    .map(name => {
+    .map((name) => {
         const htmlTpl = fs.readFileSync(path.join(__dirname, name, 'mail.html')).toString();
         const textTpl = fs.readFileSync(path.join(__dirname, name, 'mail.txt')).toString();
 
@@ -32,5 +32,5 @@ module.exports = (name, data) => {
     return {
         html: mail.html(data),
         text: mail.text(data)
-    }
-}
+    };
+};

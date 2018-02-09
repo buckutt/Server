@@ -24,13 +24,13 @@ router.get('/services/manager/searchuser', (req, res) => {
     }
 
     models.User
-        .query(user => {
+        .query((user) => {
             let filter = user
                 .where(
                     bookshelf.knex.raw('concat(lower(firstname), \' \', lower(lastname))'),
                     'like',
                     `%${name.toLowerCase()}%`
-                )
+                );
 
             if (query > 0) {
                 filter = filter.limit(req.query.limit);

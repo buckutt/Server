@@ -1,3 +1,1 @@
-module.exports = (/* ticketId */) => {
-    return Promise.resolve();
-};
+module.exports = (/* ticketId */) => Promise.resolve();

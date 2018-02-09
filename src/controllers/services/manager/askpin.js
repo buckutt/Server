@@ -25,7 +25,9 @@ function generateMessage(mail, key) {
         link     : `${config.urls.managerUrl}/generate?key=${key}`
     });
 
-    return { from, to, subject, html, text };
+    return {
+        from, to, subject, html, text
+    };
 }
 
 

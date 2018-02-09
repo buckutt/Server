@@ -2,7 +2,12 @@ const config = require('../../config');
 
 module.exports = (user, pointId) => {
     const now    = new Date();
-    const result = { sell: false, reload: false, assign: false, admin: false };
+    const result = {
+        sell  : false,
+        reload: false,
+        assign: false,
+        admin : false
+    };
 
     /* istanbul ignore if */
     if (!user || !user.rights) {

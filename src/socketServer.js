@@ -36,15 +36,13 @@ module.exports.ioServer = (httpServer, app) => {
 
         if (process.env.SERVER_PROTOCOL === 'http') {
             client.fingerprint = socket.client.request.headers['x-certificate-fingerprint'];
+        } else if (socket.client.request.connection.getPeerCertificate().fingerprint) {
+            client.fingerprint = socket.client.request.connection.getPeerCertificate()
+                .fingerprint
+                .replace(/:/g, '')
+                .trim();
         } else {
-            if (socket.client.request.connection.getPeerCertificate().fingerprint) {
-                client.fingerprint = socket.client.request.connection.getPeerCertificate()
-                    .fingerprint
-                    .replace(/:/g, '')
-                    .trim();
-            } else {
-                return;
-            }
+            return;
         }
 
         controllers.forEach((controller) => {
