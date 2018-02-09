@@ -17,10 +17,10 @@ router.get('/services/manager/searchuser', (req, res) => {
     const models     = req.app.locals.models;
     const name       = req.query.name;
     const userRights = rightsDetails(req.user, req.point.id);
-    let query        = req.query.limit;
+    let max          = req.query.limit;
 
     if (!userRights.admin) {
-        query = Number.isNaN(parseInt(query, 10)) ? 15 : Math.min(query, 15);
+        max = Number.isNaN(parseInt(max, 10)) ? 15 : Math.min(max, 15);
     }
 
     models.User
@@ -32,8 +32,8 @@ router.get('/services/manager/searchuser', (req, res) => {
                     `%${name.toLowerCase()}%`
                 );
 
-            if (query > 0) {
-                filter = filter.limit(req.query.limit);
+            if (max > 0) {
+                filter = filter.limit(max);
             }
 
             return filter;
