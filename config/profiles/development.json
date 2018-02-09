@@ -53,6 +53,13 @@
         "subject": "Buckless forgotten PIN",
         "template": "Hi !\n You seems to have forgotten your pin. Follow <a href=\"{{=it.link}}\">this link</a> to generate a new one !"
     },
+    "assigner": {
+        "ticketProvider": "test",
+        "sendPINMail": false,
+        "from": "noreply@buckless.com",
+        "subject": "Buckless — Votre code PIN",
+        "template": "Hi !\nHere is your code PIN to access your own <a href=\"{{=it.link}}\">account</a> : {{=it.pin}}"
+    },
     "provider": {
         "name": "etupay",
         "config": {

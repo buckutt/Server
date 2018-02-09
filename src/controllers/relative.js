@@ -89,20 +89,11 @@ router.post('/:model/:id/:submodel/:subId', (req, res, next) => {
 
             return left[submodel]().attach(right);
         })
-        .then((rightCollection) => {
-            console.log(rightCollection.last());
-            // req.app.locals.modelChanges.emit(
-            //     'data',
-            //     'create',
-            //     modelParser.modelsNames[req.params.model],
-            //     { from: null, to: rightCollection.last() }
-            // );
-
+        .then(() =>
             res
                 .status(200)
                 .json({})
-                .end();
-        })
+                .end())
         .catch(err => dbCatch(module, err, next));
 });
 
@@ -152,7 +143,6 @@ router.delete('/:model/:id/:submodel/:subId', (req, res, next) => {
             return left[submodel]().detach(right);
         })
         .then(() => {
-            console.log(right);
             // req.app.locals.modelChanges.emit(
             //     'data',
             //     'create',

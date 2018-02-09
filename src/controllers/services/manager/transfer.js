@@ -103,8 +103,22 @@ router.post('/services/manager/transfer', (req, res, next) => {
 
             return sender.save();
         })
-        .then(() =>
-            newTransfer.save())
+        .then(() => newTransfer.save())
+        .then(() => {
+            const PendingCardUpdate = req.app.locals.models.PendingCardUpdate;
+
+            const pendingCardUpdateSender = new PendingCardUpdate({
+                user_id: req.user.id,
+                amount : -1 * amount
+            });
+
+            const pendingCardUpdateReciever = new PendingCardUpdate({
+                user_id: req.recieverUser.id,
+                amount
+            });
+
+            return Promise.all([pendingCardUpdateSender.save(), pendingCardUpdateReciever.save()]);
+        })
         .then(() => {
             if (newTransfer.get('reciever_id') === newTransfer.get('sender_id')) {
                 amount = 0;

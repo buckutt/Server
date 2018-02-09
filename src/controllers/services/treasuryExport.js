@@ -8,7 +8,8 @@ const router = new express.Router();
 router.get('/services/treasury/csv/purchases', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Purchase;
+    let initialQuery = models.Purchase
+        .query('orderBy', 'created_at', 'DESC');
     let price        = 'price';
     let pricePeriod  = 'price.period';
 
@@ -23,8 +24,6 @@ router.get('/services/treasury/csv/purchases', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
-    } else {
-        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     if (req.query.event) {
@@ -91,7 +90,8 @@ router.get('/services/treasury/csv/purchases', (req, res, next) => {
 router.get('/services/treasury/csv/reloads', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Reload;
+    let initialQuery = models.Reload
+        .query('orderBy', 'created_at', 'DESC');
 
     if (req.query.point) {
         if (isUUID(req.query.point)) {
@@ -110,8 +110,6 @@ router.get('/services/treasury/csv/reloads', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
-    } else {
-        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     initialQuery = initialQuery
@@ -127,14 +125,16 @@ router.get('/services/treasury/csv/reloads', (req, res, next) => {
         .then((reloads) => {
             const header = ['Date', 'Point de vente', 'Vendeur', 'Acheteur', 'Moyen de paiement', 'Montant'];
 
-            const csv = reloads.map(reload => [
-                reload.created_at.toISOString(),
-                reload.point.name,
-                `${reload.seller.firstname} ${reload.seller.lastname}`,
-                `${reload.buyer.firstname} ${reload.buyer.lastname}`,
-                reload.type,
-                reload.amount / 100
-            ].join(',')).join('\n');
+            const csv = reloads
+                .toJSON()
+                .map(reload => [
+                    reload.created_at.toISOString(),
+                    reload.point.name,
+                    `${reload.seller.firstname} ${reload.seller.lastname}`,
+                    `${reload.buyer.firstname} ${reload.buyer.lastname}`,
+                    reload.type,
+                    reload.credit / 100
+                ].join(',')).join('\n');
 
             res
                 .status(200)
@@ -147,7 +147,8 @@ router.get('/services/treasury/csv/reloads', (req, res, next) => {
 router.get('/services/treasury/csv/refunds', (req, res, next) => {
     const models = req.app.locals.models;
 
-    let initialQuery = models.Refund;
+    let initialQuery = models.Refund
+        .query('orderBy', 'created_at', 'DESC');
 
     if (req.query.dateIn && req.query.dateOut) {
         const dateIn = new Date(req.query.dateIn);
@@ -160,28 +161,29 @@ router.get('/services/treasury/csv/refunds', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
-    } else {
-        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
-    initialQuery = initialQuery.fetchAll({
-        withRelated: [
-            'seller',
-            'buyer'
-        ]
-    });
+    initialQuery = initialQuery
+        .fetchAll({
+            withRelated: [
+                'seller',
+                'buyer'
+            ]
+        });
 
     initialQuery
         .then((refunds) => {
             const header = ['Date', 'Vendeur', 'Acheteur', 'Moyen de paiement', 'Montant'];
 
-            const csv = refunds.map(refund => [
-                refund.created_at.toISOString(),
-                `${refund.seller.firstname} ${refund.seller.lastname}`,
-                `${refund.buyer.firstname} ${refund.buyer.lastname}`,
-                refund.type,
-                refund.amount / 100
-            ].join(',')).join('\n');
+            const csv = refunds
+                .toJSON()
+                .map(refund => [
+                    refund.created_at.toISOString(),
+                    `${refund.seller.firstname} ${refund.seller.lastname}`,
+                    `${refund.buyer.firstname} ${refund.buyer.lastname}`,
+                    refund.type,
+                    refund.amount / 100
+                ].join(',')).join('\n');
 
             res
                 .status(200)

@@ -1,12 +1,12 @@
 const express       = require('express');
 const randomstring  = require('randomstring');
-const dots          = require('dot');
 const APIError      = require('../../../errors/APIError');
 const mailer        = require('../../../lib/mailer');
 const dbCatch       = require('../../../lib/dbCatch');
-const config        = require('../../../../config');
 const logger        = require('../../../lib/log');
 const { bookshelf } = require('../../../lib/bookshelf');
+const template      = require('../../../mailTemplates');
+const config        = require('../../../../config');
 
 const log = logger(module);
 
@@ -20,11 +20,13 @@ function generateMessage(mail, key) {
     const from     = config.askpin.from;
     const to       = mail;
     const subject  = config.askpin.subject;
-    const template = dots.template(config.askpin.template);
-    const html     = template({ link: `${config.urls.managerUrl}/#/generate?key=${key}` });
+    const { html, text } = template('pinLink', {
+        brandname: config.provider.config.merchantName,
+        link     : `${config.urls.managerUrl}/generate?key=${key}`
+    });
 
     return {
-        from, to, subject, html
+        from, to, subject, html, text
     };
 }
 

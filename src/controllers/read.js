@@ -54,7 +54,6 @@ router.get('/:model', (req, res, next) => {
     }
 
     // Embed multiple relatives
-    console.log(req.query.embed);
     const withRelated  = (req.query.embed) ? embedParser(req.query.embed) : [];
     const embedFilters = (req.query.embed) ?
         req.query.embed.filter(rel => rel.required).map(rel => rel.embed) :

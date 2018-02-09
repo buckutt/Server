@@ -15,8 +15,8 @@ router.get('/services/deviceEssentials', (req, res, next) => {
             required: true
         },
         {
-            embed  :'user.meansOfLogin',
-            filters: [['blocked', '=', false]],
+            embed  : 'user.meansOfLogin',
+            filters: [['blocked', '=', false]]
         },
         {
             embed   : 'period',
@@ -39,7 +39,7 @@ router.get('/services/deviceEssentials', (req, res, next) => {
             const users = [];
 
             rights.forEach((right) => {
-                if (right.name === 'seller' || right.name === 'reloader') {
+                if (right.name === 'seller' || right.name === 'reloader' || right.name === 'assigner') {
                     const foundUserId    = users.findIndex(user => user.id === right.user.id);
                     const formattedRight = {
                         name : right.name,
@@ -67,7 +67,6 @@ router.get('/services/deviceEssentials', (req, res, next) => {
                         newUser.rights.push(formattedRight);
                         users[foundUserId] = newUser;
                     }
-
                 }
             });
 

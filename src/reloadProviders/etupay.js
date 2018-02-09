@@ -6,10 +6,11 @@ const config   = require('../../config');
 const providerConfig = config.provider.config;
 
 module.exports = (app) => {
-    const Transaction = app.locals.models.Transaction;
-    const Reload      = app.locals.models.Reload;
-    const etupay      = require('node-etupay')(providerConfig);
-    const Basket      = etupay.Basket;
+    const Transaction       = app.locals.models.Transaction;
+    const Reload            = app.locals.models.Reload;
+    const PendingCardUpdate = app.locals.models.PendingCardUpdate;
+    const etupay            = require('node-etupay')(providerConfig);
+    const Basket            = etupay.Basket;
 
     app.locals.makePayment = (data) => {
         const transaction = new Transaction({
@@ -71,8 +72,13 @@ module.exports = (app) => {
                         seller_id: transaction.get('user_id')
                     });
 
+                    const pendingCardUpdate = new PendingCardUpdate({
+                        user_id: transaction.get('user_id'),
+                        amount : -1 * transaction.get('amount')
+                    });
+
                     return Promise
-                        .all([userCredit, newReload.save(), transaction.save()])
+                        .all([userCredit, newReload.save(), transaction.save(), pendingCardUpdate.save()])
                         .then((results) => {
                             // First [0] : userCredit promise
                             // Second [0] : returning credit column

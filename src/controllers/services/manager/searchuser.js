@@ -1,6 +1,7 @@
 const express       = require('express');
 const leven         = require('leven');
 const { bookshelf } = require('../../../lib/bookshelf');
+const rightsDetails = require('../../../lib/rightsDetails');
 const logger        = require('../../../lib/log');
 
 const log = logger(module);
@@ -13,18 +14,30 @@ const router = new express.Router();
 router.get('/services/manager/searchuser', (req, res) => {
     log.info(`Search user ${req.query.name}`, req.details);
 
-    const models = req.app.locals.models;
-    const name   = req.query.name;
+    const models     = req.app.locals.models;
+    const name       = req.query.name;
+    const userRights = rightsDetails(req.user, req.point.id);
+    let query        = req.query.limit;
+
+    if (!userRights.admin) {
+        query = Number.isNaN(parseInt(query, 10)) ? 15 : Math.min(query, 15);
+    }
 
     models.User
-        .query(user =>
-            user
+        .query((user) => {
+            let filter = user
                 .where(
                     bookshelf.knex.raw('concat(lower(firstname), \' \', lower(lastname))'),
                     'like',
                     `%${name.toLowerCase()}%`
-                )
-                .limit(req.query.limit || 5))
+                );
+
+            if (query > 0) {
+                filter = filter.limit(req.query.limit);
+            }
+
+            return filter;
+        })
         .fetchAll()
         .then((users) => {
             const cleanedUsers = users.toJSON()

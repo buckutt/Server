@@ -24,8 +24,6 @@ router.get('/services/treasury/purchases', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
-    } else {
-        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     if (req.query.event) {
@@ -102,8 +100,6 @@ router.get('/services/treasury/reloads', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
-    } else {
-        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     initialQuery = initialQuery
@@ -139,8 +135,6 @@ router.get('/services/treasury/refunds', (req, res, next) => {
         } else {
             return next(new APIError(module, 400, 'Invalid dates'));
         }
-    } else {
-        return next(new APIError(module, 400, 'Dates are missing'));
     }
 
     initialQuery = initialQuery

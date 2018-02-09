@@ -4,35 +4,52 @@
       "seller": {
         "canSell": true,
         "canReload": false,
+        "canAssign": false,
         "read": [
             "/events",
             "/meansoflogin",
-            "/meansoflogin/search",
             "/meansofpayment",
-            "/meansofpayment/search",
             "/devices",
             "/devices/search",
-            "/services/items"
+            "/services/items",
+            "alert"
         ],
         "write": [
-            "/services/basket"
+            "/services/basket",
+            "/services/cancelTransaction"
         ]
       },
       "reloader": {
         "canSell": false,
         "canReload": true,
+        "canAssign": false,
         "read": [
             "/events",
             "/devices",
-            "/devices/search",
             "/meansoflogin",
-            "/meansoflogin/search",
             "/meansofpayment",
             "/meansofpayment/search",
-            "/services/items"
+            "/services/items",
+            "alert"
         ],
         "write": [
             "/services/basket"
+        ]
+      },
+      "assigner": {
+        "canSell": false,
+        "canReload": false,
+        "canAssign": true,
+        "read": [
+          "/users",
+          "/groups",
+          "/meansoflogin",
+          "/services/assigner"
+        ],
+        "write": [
+          "/users",
+          "/meansoflogin",
+          "/services/assigner/groups"
         ]
       },
       "openUrls": [
@@ -51,6 +68,6 @@
             "/services/manager/reload",
             "userCredit"
       ],
-      "pinLoggingAllowed": ["seller", "reloader"]
+      "pinLoggingAllowed": ["seller", "reloader", "assigner"]
    }
 }

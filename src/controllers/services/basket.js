@@ -1,12 +1,11 @@
-const express         = require('express');
-const Promise         = require('bluebird');
-const { countBy }     = require('lodash');
-const APIError        = require('../../errors/APIError');
-const logger          = require('../../lib/log');
-const vat             = require('../../lib/vat');
-const { bookshelf }   = require('../../lib/bookshelf');
-const canSellOrReload = require('../../lib/canSellOrReload');
-const dbCatch         = require('../../lib/dbCatch');
+const express       = require('express');
+const { countBy }   = require('lodash');
+const APIError      = require('../../errors/APIError');
+const logger        = require('../../lib/log');
+const vat           = require('../../lib/vat');
+const { bookshelf } = require('../../lib/bookshelf');
+const rightsDetails = require('../../lib/rightsDetails');
+const dbCatch       = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -100,11 +99,11 @@ router.post('/services/basket', (req, res, next) => {
     const models = req.app.locals.models;
 
     // Purchases documents
-    const purchases     = [];
+    const purchases = [];
     // Reloads documents
-    const reloads       = [];
-    // Stock reduciton queries
-    const stocks        = [];
+    const reloads   = [];
+
+    const transactionIds = { purchases: [], reloads: [] };
 
     const totalCost = req.body.basket
         .map((item) => {
@@ -121,42 +120,35 @@ router.post('/services/basket', (req, res, next) => {
         .map(item => item.credit)
         .reduce((a, b) => a + b, 0);
 
-    const now         = new Date().getTime();
-    const minus       = now - 10000;
-    const requestDate = new Date(req.body.date).getTime();
-
-    if (req.buyer.credit < totalCost && (requestDate >= minus && requestDate <= now)) {
+    if (req.buyer.credit < totalCost && !req.event.useCardData) {
         return next(new APIError(module, 400, 'Not enough credit'));
     }
 
-    if (req.event.maxPerAccount && req.buyer.credit - totalCost > req.event.maxPerAccount) {
-        const max = (req.event.config.maxPerAccount / 100).toFixed(2);
+    if (req.event.maxPerAccount && req.buyer.credit - totalCost > req.event.maxPerAccount && !req.event.useCardData) {
+        const max = (req.event.maxPerAccount / 100).toFixed(2);
         return next(new APIError(module, 400, `Maximum exceeded : ${max}€`, { user: req.user.id }));
     }
 
     if (req.event.minReload && reloadOnly < req.event.minReload && reloadOnly > 0) {
-        const min = (req.event.config.minReload / 100).toFixed(2);
+        const min = (req.event.minReload / 100).toFixed(2);
         return next(new APIError(module, 400, `Can not reload less than : ${min}€`));
     }
 
     const newCredit = req.buyer.credit - totalCost;
 
-    // TODO: standardize error response
     if (Number.isNaN(newCredit)) {
         log.error('credit is not a number');
 
         return res
             .status(400)
-            .json({
-                newCredit: req.buyer.credit
-            })
+            .json(req.buyer)
             .end();
     }
 
-    const userRights = canSellOrReload(req.user, req.point_id);
+    const userRights = rightsDetails(req.user, req.point_id);
 
-    const unallowedPurchase = (req.body.basket.find(item => typeof item.cost === 'number') && !userRights.canSell);
-    const unallowedReload   = (req.body.basket.find(item => typeof item.credit === 'number') && !userRights.canReload);
+    const unallowedPurchase = (req.body.basket.find(item => typeof item.cost === 'number') && !userRights.sell);
+    const unallowedReload   = (req.body.basket.find(item => typeof item.credit === 'number') && !userRights.reload);
 
     if (unallowedPurchase || unallowedReload) {
         return next(new APIError(module, 401, 'No right to reload or sell', {
@@ -182,20 +174,12 @@ router.post('/services/basket', (req, res, next) => {
                 vat         : vat(item)
             });
 
-            // Stock reduction
-            articlesIds.forEach((articleId) => {
-                const stockReduction = models.Article
-                    .query()
-                    .where({ id: articleId })
-                    .decrement('stock');
-
-                stocks.push(stockReduction);
-            });
-
             const savePurchase = purchase
                 .save()
                 .then(() => Promise.all(Object.keys(countIds).map((articleId) => {
                     const count = countIds[articleId];
+
+                    transactionIds.purchases.push(purchase.id);
 
                     return bookshelf
                         .knex('articles_purchases')
@@ -218,10 +202,14 @@ router.post('/services/basket', (req, res, next) => {
                 trace    : item.trace || '',
                 point_id : req.point_id,
                 buyer_id : req.buyer.id,
-                seller_id: req.user.id,
+                seller_id: req.user.id
             });
 
-            reloads.push(reload.save());
+            const saveReload = reload
+                .save()
+                .then(() => transactionIds.reloads.push(reload.id));
+
+            reloads.push(saveReload);
         }
     });
 
@@ -237,20 +225,31 @@ router.post('/services/basket', (req, res, next) => {
     req.buyer.credit     = newCredit;
     req.buyer.updated_at = updatedAt;
 
-    const everythingSaving = [updateCredit].concat(reloads).concat(stocks);
-
     Promise
-        .all(purchases)
-        .then(() => Promise.all(everythingSaving))
+        .all([updateCredit].concat(purchases).concat(reloads))
         .then(() => {
-            req.app.locals.modelChanges.emit('userCreditUpdate', req.buyer);
+            if (req.query.offline) {
+                return 0;
+            }
+
+            return bookshelf.knex('pendingCardUpdates')
+                .where({ user_id: req.user.id })
+                .update({ active: false, deleted_at: new Date() })
+                .returning('amount')
+                .then(amounts => (amounts || []).reduce((a, b) => a + b, 0));
         })
-        .then(() =>
-            res
+        .then((pendingCardUpdates) => {
+            req.app.locals.modelChanges.emit('userCreditUpdate', req.buyer);
+
+            return res
                 .status(200)
-                .json(req.buyer)
-                .end()
-        )
+                .json({
+                    transactionIds,
+                    pendingCardUpdates,
+                    ...req.buyer
+                })
+                .end();
+        })
         .catch(err => dbCatch(module, err, next));
 });
 
