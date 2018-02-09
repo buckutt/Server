@@ -1,7 +1,8 @@
-const express  = require('express');
-const APIError = require('../../errors/APIError');
-const logger   = require('../../lib/log');
-const dbCatch  = require('../../lib/dbCatch');
+const express       = require('express');
+const APIError      = require('../../errors/APIError');
+const rightsDetails = require('../../lib/rightsDetails');
+const logger        = require('../../lib/log');
+const dbCatch       = require('../../lib/dbCatch');
 
 const log = logger(module);
 
@@ -36,7 +37,7 @@ router.post('/services/cancelTransaction', (req, res, next) => {
         return next(new APIError(module, 400, 'Invalid transaction type'));
     }
 
-    req.app.locals.models[currentModel]
+    return req.app.locals.models[currentModel]
         .where({ id: req.body.id })
         .fetch()
         .then(transaction => (transaction ? transaction.toJSON() : null))
@@ -72,13 +73,16 @@ router.post('/services/cancelTransaction', (req, res, next) => {
 
     amountPromise
         .then((amount) => {
-            req.usersToUpdate = [];
+            req.pendingCardUpdates = {};
+            req.usersToUpdate      = [];
 
             if (req.transaction.model === 'Purchase' || req.transaction.model === 'Refund') {
                 getUserInst(models.User, req.transaction.data.buyer_id)
                     .then((user) => {
                         user.set('credit', user.get('credit') + amount);
                         req.usersToUpdate.push(user);
+
+                        req.pendingCardUpdates[user.id] = amount;
 
                         next();
                     });
@@ -92,6 +96,8 @@ router.post('/services/cancelTransaction', (req, res, next) => {
                         user.set('credit', user.get('credit') - amount);
                         req.usersToUpdate.push(user);
 
+                        req.pendingCardUpdates[user.id] = -1 * amount;
+
                         next();
                     });
             } else {
@@ -99,6 +105,8 @@ router.post('/services/cancelTransaction', (req, res, next) => {
                     .then((user) => {
                         user.set('credit', user.get('credit') + amount);
                         req.usersToUpdate.push(user);
+
+                        req.pendingCardUpdates[user.id] = amount;
 
                         return getUserInst(models.User, req.transaction.data.reciever_id);
                     })
@@ -109,6 +117,8 @@ router.post('/services/cancelTransaction', (req, res, next) => {
 
                         user.set('credit', user.get('credit') - amount);
                         req.usersToUpdate.push(user);
+
+                        req.pendingCardUpdates[user.id] = amount;
 
                         next();
                     });
@@ -125,18 +135,31 @@ router.post('/services/cancelTransaction', (req, res, next) => {
         usersToUpdate.push(user.save());
     });
 
+    if (req.query.addPendingCardUpdates && rightsDetails(req.user).admin) {
+        Object.keys(req.pendingCardUpdates).forEach((user) => {
+            const pendingCardUpdate = new req.app.locals.models.PendingCardUpdate({
+                user_id: user,
+                amount : req.pendingCardUpdates[user]
+            });
+
+            usersToUpdate.push(pendingCardUpdate.save());
+        });
+    }
+
+    const Model = req.app.locals.models[req.transaction.model];
+
     Promise.all(usersToUpdate)
-        .then(() => new req.app.locals.models[req.transaction.model]({ id: req.transaction.data.id })
-            .destroy())
+        .then(() => new Model({ id: req.transaction.data.id }).destroy())
         .then(() => {
             usersToUpdate.forEach((user) => {
                 req.app.locals.modelChanges.emit('userCreditUpdate', user);
             });
         })
-        .then(() => res
-            .status(200)
-            .json({})
-            .end())
+        .then(() =>
+            res
+                .status(200)
+                .json({})
+                .end())
         .catch(err => dbCatch(module, err, next));
 });
 

@@ -28,9 +28,10 @@ const modes = {
 const dateFormat = 'DD/MM/YYYY HH:mm';
 
 module.exports = (app) => {
-    const payline     = new Payline(providerConfig.id, providerConfig.password, providerConfig.url);
-    const Transaction = app.locals.models.Transaction;
-    const Reload      = app.locals.models.Reload;
+    const payline           = new Payline(providerConfig.id, providerConfig.password, providerConfig.url);
+    const Transaction       = app.locals.models.Transaction;
+    const Reload            = app.locals.models.Reload;
+    const PendingCardUpdate = app.locals.models.PendingCardUpdate;
 
     app.locals.makePayment = (data) => {
         const transaction = new Transaction({
@@ -124,8 +125,13 @@ module.exports = (app) => {
                         seller_id: transaction.get('user_id')
                     });
 
+                    const pendingCardUpdate = new PendingCardUpdate({
+                        user_id: transaction.get('user_id'),
+                        amount : -1 * transaction.get('amount')
+                    });
+
                     return Promise
-                        .all([userCredit, newReload.save(), transaction.save()])
+                        .all([userCredit, newReload.save(), transaction.save(), pendingCardUpdate.save()])
                         .then((results) => {
                             // First [0] : userCredit promise
                             // Second [0] : returning credit column

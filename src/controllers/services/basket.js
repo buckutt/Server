@@ -120,35 +120,28 @@ router.post('/services/basket', (req, res, next) => {
         .map(item => item.credit)
         .reduce((a, b) => a + b, 0);
 
-    const now         = new Date().getTime();
-    const minus       = now - 10000;
-    const requestDate = new Date(req.body.date).getTime();
-
-    if (req.buyer.credit < totalCost && (requestDate >= minus && requestDate <= now)) {
+    if (req.buyer.credit < totalCost && !req.event.useCardData) {
         return next(new APIError(module, 400, 'Not enough credit'));
     }
 
-    if (req.event.maxPerAccount && req.buyer.credit - totalCost > req.event.maxPerAccount) {
-        const max = (req.event.config.maxPerAccount / 100).toFixed(2);
+    if (req.event.maxPerAccount && req.buyer.credit - totalCost > req.event.maxPerAccount && !req.event.useCardData) {
+        const max = (req.event.maxPerAccount / 100).toFixed(2);
         return next(new APIError(module, 400, `Maximum exceeded : ${max}€`, { user: req.user.id }));
     }
 
     if (req.event.minReload && reloadOnly < req.event.minReload && reloadOnly > 0) {
-        const min = (req.event.config.minReload / 100).toFixed(2);
+        const min = (req.event.minReload / 100).toFixed(2);
         return next(new APIError(module, 400, `Can not reload less than : ${min}€`));
     }
 
     const newCredit = req.buyer.credit - totalCost;
 
-    // TODO: standardize error response
     if (Number.isNaN(newCredit)) {
         log.error('credit is not a number');
 
         return res
             .status(400)
-            .json({
-                newCredit: req.buyer.credit
-            })
+            .json(req.buyer)
             .end();
     }
 
@@ -235,12 +228,24 @@ router.post('/services/basket', (req, res, next) => {
     Promise
         .all([updateCredit].concat(purchases).concat(reloads))
         .then(() => {
+            if (req.query.offline) {
+                return 0;
+            }
+
+            return bookshelf.knex('pendingCardUpdates')
+                .where({ user_id: req.user.id })
+                .update({ active: false, deleted_at: new Date() })
+                .returning('amount')
+                .then(amounts => (amounts || []).reduce((a, b) => a + b, 0));
+        })
+        .then((pendingCardUpdates) => {
             req.app.locals.modelChanges.emit('userCreditUpdate', req.buyer);
 
             return res
                 .status(200)
                 .json({
                     transactionIds,
+                    pendingCardUpdates,
                     ...req.buyer
                 })
                 .end();
